@@ -1,0 +1,47 @@
+.landscape {
+	width: 297mm;
+	padding: 35mm 15mm 15mm 15mm;
+}
+
+.row p {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.row_multicol {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+}
+
+.row_centered {
+	text-align: center;
+}
+
+.table table, th, td {
+	border: 1px solid #000;
+}
+
+.table {
+	table-layout: fixed;
+	border-collapse: collapse;
+	width: 100%;
+	font-size: 0.95rem;
+}
+
+.table td {
+	text-align: center;
+}
+
+.table-col-33 {
+	width: 33%;
+}
+
+.align-left {
+	text-align: left !important;
+}
+
+.used {
+	background-color: #000;
+}
