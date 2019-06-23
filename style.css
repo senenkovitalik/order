@@ -2,27 +2,40 @@ html {
 	font-size: 16px;
 }
 
-.order {
-	margin: 0 auto;
+.portrait {
 	width: 210mm;
-	border: 2px solid black;
 	padding: 15mm 15mm 15mm 35mm;
 }
 
-.order__row p {
+.landscape {
+	width: 297mm;
+	padding: 35mm 15mm 15mm 15mm;
+}
+
+.resolution {
+	display: flex;
+	flex-flow: row;
+	justify-content: flex-end;
+}
+
+.resolution__content {
+	width: 30%;
+}
+
+.row p {
 	margin-top: 0;
 	margin-bottom: 0;
 }
 
-.order__row_centered {
+.row_centered {
 	text-align: center;
 }
 
-.order__row_indent {
+.row_indent {
 	text-indent: 15mm;
 }
 
-.order__row_multicol {
+.row_multicol {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
@@ -44,8 +57,16 @@ html {
 	text-align: center;
 }
 
-.table tr th:first-child {
+.table-col-33 {
 	width: 33%;
+}
+
+.align-left {
+	text-align: left !important;
+}
+
+.used {
+	background-color: #000;
 }
 
 @media print {
