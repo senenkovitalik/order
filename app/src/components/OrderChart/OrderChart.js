@@ -43,7 +43,7 @@ class OrderChart extends React.Component {
       user.days = user.days.filter(d => d !== day);
     } else {
       // add day
-      console.log('add day', day);
+      user.days.push(day);
     }
 
     this.setState(prevState => {
