@@ -1,64 +1,92 @@
 import React from 'react';
+import Controls from '../Controls/Controls';
 import Resolution from '../Resolution/Resolution.js';
 import Sign from '../Sign/Sign.js';
 import './OrderChart.css';
 import Row from '../Row/Row';
+import ranks from '../../rank-mapping';
 
 class OrderChart extends React.Component {
   state = {
     users: [
       {
-        id: '0',
+        id: 'a43c',
         name: 'Сененко В.',
-        rank: 'м-р',
-        days: [/*4, 8, 12, 16, 20, 24, 28*/]
+        rank: 12,
+        duties: [
+          { day: 5, duty: '011' },
+          { day: 8, duty: '101' },
+          { day: 11, duty: '111' },
+        ]
       },
       {
-        id: '1',
+        id: 'g234',
         name: 'Возенков С.',
-        rank: 'к-н',
-        days: [2, 6, 10, 14, 18, 22, 26, 30]
+        rank: 11,
+        duties: []
       },
       {
-        id: '2',
+        id: 'p04r',
         name: 'Ковтун В.',
-        rank: 'ст. л-т',
-        days: [3, 7, 11, 15, 19, 23, 27]
+        rank: 10,
+        duties: [
+          { day: 1, duty: '111' },
+          { day: 4, duty: '111' },
+          { day: 7, duty: '111' },
+        ]
       },
       {
-        id: '3',
+        id: 'fgh6',
         name: 'Грушенков А.',
-        rank: 'л-т',
-        days: [1, 5, 9, 13, 17, 21, 25, 29]
+        rank: 9,
+        duties: []
       }
-    ]
+    ],
+    isFullDuty: true
   };
 
-  checkDay = (userId, day) => {
+  /*
+  Set/remove duties per day
+   */
+  checkDay = (userId, day, duty) => {
     const user = this.state.users.find(u => u.id === userId);
-    const isUsed = !!user.days.find(d => d === day);
+    const usedDuty = user.duties.find(d => d.day === day);
 
-    if (isUsed) {
-      // remove day
-      user.days = user.days.filter(d => d !== day);
-    } else {
-      // add day
-      user.days.push(day);
+    if (this.state.isFullDuty) {
+      if (!!usedDuty) {
+        user.duties = user.duties.filter(duty => duty.day !== day);
+      } else {
+        user.duties.push({ day, duty });
+      }
     }
 
-    this.setState(prevState => {
-      return {
-        users: prevState.users.filter(u => u.id !== userId).concat(user)
-      }
-    })
+    this.setState(prevState => (
+      { users: prevState.users.filter(u => u.id !== userId).concat(user) }
+    ));
+  };
+
+  handleRadioChange = () => {
+    this.setState(prevState => (
+      { isFullDuty: !prevState.isFullDuty }
+    ));
   };
 
   render() {
     const days = [...Array(30)].map((x, i) => <th key={i + 1}>{i + 1}</th>);
-    const rows = this.state.users.map((user, i) => <Row key={user.id} user={user} index={i+1} checkDay={this.checkDay} />);
+    const rows = this.state.users
+      .sort((a, b) => ranks[b.rank].index - ranks[a.rank].index)
+      .map((user, i) => <Row key={user.id}
+                             isFullDuty={this.state.isFullDuty}
+                             user={user}
+                             index={i + 1}
+                             checkDay={this.checkDay}/>
+      );
 
     return (
       <div className="order-chart landscape">
+
+        <Controls isFullDuty={this.state.isFullDuty} handleChange={this.handleRadioChange}/>
+
         <Resolution/>
 
         <br/><br/><br/><br/>

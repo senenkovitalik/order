@@ -1,0 +1,11 @@
+.cell_used-full {
+    background-color: #000;
+}
+
+.cell_used-partly {
+    background-color: #a6a7a8;
+}
+
+td {
+    cursor: pointer;
+}
