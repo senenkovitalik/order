@@ -9,3 +9,7 @@
 td {
     cursor: pointer;
 }
+
+td:hover {
+    outline: 2px solid orange;
+}

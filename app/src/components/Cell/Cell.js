@@ -44,7 +44,7 @@ function cell({ day, duties }) {
 export default cell;
 
 cell.propTypes = {
-  day: PropTypes.number,
+  day: PropTypes.number,  //todo: why we need this prop?
   duties: PropTypes.shape({
     day: PropTypes.number,
     duty: PropTypes.string

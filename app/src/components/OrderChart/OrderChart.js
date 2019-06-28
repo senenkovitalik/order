@@ -4,6 +4,7 @@ import Resolution from '../Resolution/Resolution.js';
 import Sign from '../Sign/Sign.js';
 import './OrderChart.css';
 import Row from '../Row/Row';
+import Popover from '../Popover/Popover';
 import ranks from '../../rank-mapping';
 
 class OrderChart extends React.Component {
@@ -42,7 +43,11 @@ class OrderChart extends React.Component {
         duties: []
       }
     ],
-    isFullDuty: true
+    currentUserId: null,
+    currentDay: null,
+    isFullDuty: true,
+    isPopoverShown: false,
+    popoverPosition: { x: 0, y: 0 }
   };
 
   /*
@@ -52,17 +57,53 @@ class OrderChart extends React.Component {
     const user = this.state.users.find(u => u.id === userId);
     const usedDuty = user.duties.find(d => d.day === day);
 
-    if (this.state.isFullDuty) {
-      if (!!usedDuty) {
-        user.duties = user.duties.filter(duty => duty.day !== day);
-      } else {
-        user.duties.push({ day, duty });
-      }
+    if (!!usedDuty) {
+      user.duties = user.duties.filter(duty => duty.day !== day);
+    } else {
+      user.duties.push({ day, duty });
     }
 
     this.setState(prevState => (
       { users: prevState.users.filter(u => u.id !== userId).concat(user) }
     ));
+  };
+
+  /*
+  Handle full/partially duty selection
+   */
+  handleUserDutySelection = (e, userId, day, duty) => {
+    e.preventDefault();
+
+    /*
+    handle click on cell and popover
+     */
+    if (e.type === 'click') {
+      this.checkDay(userId, day, duty);
+      if (!this.state.isFullDuty) {
+        this.togglePopover(false, e);
+      }
+    }
+
+    /*
+    handle mouse moves
+     */
+    if (!this.state.isFullDuty) {
+      if (e.type === 'mouseover') {
+        this.setCurrentUserId(userId);
+        this.setCurrentDay(e);
+        this.togglePopover(true, e);
+      } else {
+        this.togglePopover(false, e);
+      }
+    }
+  };
+
+  togglePopover = (isShown, e) => {
+    const event = e.nativeEvent;
+    this.setState({
+      isPopoverShown: isShown,
+      popoverPosition: { x: event.screenX, y: event.screenY }
+    });
   };
 
   handleRadioChange = () => {
@@ -71,12 +112,24 @@ class OrderChart extends React.Component {
     ));
   };
 
+  setCurrentUserId = userId => {
+    this.setState({
+      currentUserId: userId
+    });
+  };
+
+  setCurrentDay = e => {
+    this.setState({
+      currentDay: parseInt(e.nativeEvent.target.dataset.day, 10)
+    });
+  };
+
   render() {
     const days = [...Array(30)].map((x, i) => <th key={i + 1}>{i + 1}</th>);
     const rows = this.state.users
       .sort((a, b) => ranks[b.rank].index - ranks[a.rank].index)
       .map((user, i) => <Row key={user.id}
-                             isFullDuty={this.state.isFullDuty}
+                             handleUserDutySelection={this.handleUserDutySelection}
                              user={user}
                              index={i + 1}
                              checkDay={this.checkDay}/>
@@ -119,6 +172,12 @@ class OrderChart extends React.Component {
         <br/><br/>
 
         <Sign/>
+
+        <Popover isShown={this.state.isPopoverShown}
+                 position={this.state.popoverPosition}
+                 currentUserId={this.state.currentUserId}
+                 currentDay={this.state.currentDay}
+                 handleDutySelection={this.handleUserDutySelection}/>
       </div>
     );
   };
