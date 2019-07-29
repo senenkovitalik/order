@@ -33,7 +33,7 @@ const dutyMapping = {
   },
 };
 
-function cell({ day, duties }) {
+function cell({ day, duties, setCurrentDay, togglePopover }) {
   const content = duties ? dutyMapping[duties.duty].content : null;
   const classList = ['cell'];
 
@@ -42,16 +42,22 @@ function cell({ day, duties }) {
   }
 
   return (
-    <td data-day={day} className={classList.join(' ')}>{content}</td>
+    <td onMouseEnter={e => { setCurrentDay(day); togglePopover(true, e); }}
+        onMouseLeave={e => { togglePopover(false, e) }}
+        data-day={day}
+        className={classList.join(' ')}
+    >{content}</td>
   );
 }
 
 export default cell;
 
 cell.propTypes = {
-  day: PropTypes.number,  //todo: why we need this prop?
+  day: PropTypes.number,
   duties: PropTypes.shape({
     day: PropTypes.number,
     duty: PropTypes.string
-  }) || undefined
+  }) || undefined,
+  setCurrentDay: PropTypes.func,
+  togglePopover: PropTypes.func
 };

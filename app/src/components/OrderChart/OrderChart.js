@@ -53,7 +53,15 @@ class OrderChart extends React.Component {
   /*
   Set/remove duties per day
    */
-  checkDay = (userId, day, duty) => {
+  checkDay = duty => {
+    const { currentDay: day, currentUserId: userId } = this.state;
+
+    if (!(day || userId)) {
+      return;
+    }
+
+    console.log(day, userId, duty);
+
     const user = this.state.users.find(u => u.id === userId);
     const usedDuty = user.duties.find(d => d.day === day);
 
@@ -68,38 +76,8 @@ class OrderChart extends React.Component {
     ));
   };
 
-  /*
-  Handle full/partially duty selection
-   */
-  handleUserDutySelection = (e, userId, day, duty) => {
-    e.preventDefault();
-
-    /*
-    handle click on cell and popover
-     */
-    if (e.type === 'click') {
-      this.checkDay(userId, day, duty);
-      if (!this.state.isFullDuty) {
-        this.togglePopover(false, e);
-      }
-    }
-
-    /*
-    handle mouse moves
-     */
-    if (!this.state.isFullDuty) {
-      if (e.type === 'mouseover') {
-        this.setCurrentUserId(userId);
-        this.setCurrentDay(e);
-        this.togglePopover(true, e);
-      } else {
-        this.togglePopover(false, e);
-      }
-    }
-  };
-
   togglePopover = (isShown, e) => {
-    const {top, left, width} = e.target.getBoundingClientRect();
+    const { top, left, width } = e.target.getBoundingClientRect();
     this.setState({
       isPopoverShown: isShown,
       popoverPosition: { x: left + width + window.scrollX, y: top + window.scrollY }
@@ -107,31 +85,31 @@ class OrderChart extends React.Component {
   };
 
   handleRadioChange = () => {
-    this.setState(prevState => (
-      { isFullDuty: !prevState.isFullDuty }
-    ));
+    this.setState(prevState => ({ isFullDuty: !prevState.isFullDuty }));
   };
 
+  // event handler on tr element fire this method
   setCurrentUserId = userId => {
     this.setState({
       currentUserId: userId
     });
   };
 
-  setCurrentDay = e => {
+  // event handler on tr element fire this method
+  setCurrentDay = day => {
     this.setState({
-      currentDay: parseInt(e.nativeEvent.target.dataset.day, 10)
+      currentDay: day
     });
   };
 
-  /*
-  Clear duties for all users
-   */
+  // Clear duties for all users
   clearDuties = () => {
     this.setState(prevState => {
       const usersUpdated = [...prevState.users];
-      usersUpdated.forEach(user => {user.duties = []});
-      return {users: usersUpdated};
+      usersUpdated.forEach(user => {
+        user.duties = []
+      });
+      return { users: usersUpdated };
     });
   };
 
@@ -140,10 +118,12 @@ class OrderChart extends React.Component {
     const rows = this.state.users
       .sort((a, b) => ranks[b.rank].index - ranks[a.rank].index)
       .map((user, i) => <Row key={user.id}
-                             handleUserDutySelection={this.handleUserDutySelection}
+                             checkDay={this.checkDay}
+                             setCurrentUserId={this.setCurrentUserId}
+                             setCurrentDay={this.setCurrentDay}
                              user={user}
-                             index={i + 1}
-                             checkDay={this.checkDay}/>
+                             togglePopover={this.togglePopover}
+                             index={i + 1}/>
       );
 
     return (
@@ -151,7 +131,7 @@ class OrderChart extends React.Component {
 
         <Controls isFullDuty={this.state.isFullDuty}
                   handleChange={this.handleRadioChange}
-                  clearDuties={this.clearDuties} />
+                  clearDuties={this.clearDuties}/>
 
         <Resolution/>
 
@@ -187,10 +167,9 @@ class OrderChart extends React.Component {
         <Sign/>
 
         <Popover isShown={this.state.isPopoverShown}
+                 togglePopover={this.togglePopover}
                  position={this.state.popoverPosition}
-                 currentUserId={this.state.currentUserId}
-                 currentDay={this.state.currentDay}
-                 handleDutySelection={this.handleUserDutySelection}/>
+                 checkDay={this.checkDay}/>
       </div>
     );
   };

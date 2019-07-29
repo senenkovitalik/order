@@ -4,8 +4,14 @@ import Cell from '../Cell/Cell';
 import ranks from '../../rank-mapping';
 
 class Row extends React.Component {
-  handleUserActions = e => {
-    this.props.handleUserDutySelection(e, this.props.user.id, parseInt(e.nativeEvent.target.dataset.day, 10), '111');
+  // check duty
+  handleClick = () => {
+    this.props.checkDay('111');
+  };
+
+  // set current user id
+  handleMouseEnter = () => {
+    this.props.setCurrentUserId(this.props.user.id);
   };
 
   render() {
@@ -15,13 +21,13 @@ class Row extends React.Component {
         const duties = this.props.user.duties.find(duty => duty.day === day);
         return <Cell key={day}
                      day={day}
-                     duties={duties}/>;
+                     duties={duties}
+                     setCurrentDay={this.props.setCurrentDay}
+                     togglePopover={this.props.togglePopover} />;
       });
 
     return (
-      <tr onClick={this.handleUserActions}
-          onMouseOver={this.handleUserActions}
-          onMouseLeave={this.handleUserActions}>
+      <tr onClick={this.handleClick} onMouseEnter={this.handleMouseEnter}>
         <td>{this.props.index}</td>
         <td className="align-left">{ranks[this.props.user.rank].short}</td>
         <td className="align-left">{this.props.user.name}</td>
@@ -40,8 +46,9 @@ Row.propTypes = {
   }),
   index: PropTypes.number,
   checkDay: PropTypes.func,
-  togglePopover: PropTypes.func,
-  handleUserDutySelection: PropTypes.func
+  setCurrentUserId: PropTypes.func,
+  setCurrentDay: PropTypes.func,
+  togglePopover: PropTypes.func
 };
 
 export default Row;

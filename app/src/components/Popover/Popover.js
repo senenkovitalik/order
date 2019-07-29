@@ -21,18 +21,17 @@ class Popover extends React.Component {
     return styles.join(' ');
   };
 
+  // calc popover coordinates
   calcCoordinates = () => ({
     left: `${this.props.position.x}px`,
     top: `${this.props.position.y - 10}px`
   });
 
+  // check day, hide popover
   handleClick = e => {
-    this.props.handleDutySelection(
-      e,
-      this.props.currentUserId,
-      this.props.currentDay,
-      e.nativeEvent.target.dataset.value
-    );
+    const dutyValue = e.nativeEvent.target.dataset.value;
+    this.props.checkDay(dutyValue);
+    this.props.togglePopover(false, e);
   };
 
   render() {
@@ -67,9 +66,8 @@ Popover.propTypes = {
     x: PropTypes.number,
     y: PropTypes.number
   }),
-  handleDutySelection: PropTypes.func,
-  currentUserId: PropTypes.string || null,
-  currentDay: PropTypes.number || null
+  checkDay: PropTypes.func,
+  togglePopover: PropTypes.func
 };
 
 export default Popover;
