@@ -6,10 +6,10 @@
     background-color: #a6a7a8;
 }
 
-td {
+.cell {
     cursor: pointer;
 }
 
-td:hover {
+.cell:hover {
     outline: 2px solid orange;
 }

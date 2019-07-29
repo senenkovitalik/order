@@ -35,9 +35,14 @@ const dutyMapping = {
 
 function cell({ day, duties }) {
   const content = duties ? dutyMapping[duties.duty].content : null;
-  const style = duties ? dutyMapping[duties.duty].className : null;
+  const classList = ['cell'];
+
+  if (duties) {
+    classList.push(dutyMapping[duties.duty].className)
+  }
+
   return (
-    <td data-day={day} className={style}>{content}</td>
+    <td data-day={day} className={classList.join(' ')}>{content}</td>
   );
 }
 
