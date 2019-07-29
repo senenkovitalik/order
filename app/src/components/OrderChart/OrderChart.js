@@ -124,6 +124,17 @@ class OrderChart extends React.Component {
     });
   };
 
+  /*
+  Clear duties for all users
+   */
+  clearDuties = () => {
+    this.setState(prevState => {
+      const usersUpdated = [...prevState.users];
+      usersUpdated.forEach(user => {user.duties = []});
+      return {users: usersUpdated};
+    });
+  };
+
   render() {
     const days = [...Array(30)].map((x, i) => <th key={i + 1}>{i + 1}</th>);
     const rows = this.state.users
@@ -138,7 +149,9 @@ class OrderChart extends React.Component {
     return (
       <div className="order-chart landscape">
 
-        <Controls isFullDuty={this.state.isFullDuty} handleChange={this.handleRadioChange}/>
+        <Controls isFullDuty={this.state.isFullDuty}
+                  handleChange={this.handleRadioChange}
+                  clearDuties={this.clearDuties} />
 
         <Resolution/>
 

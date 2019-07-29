@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './Controls.css';
 
-function controls({ isFullDuty, handleChange }) {
+function controls({ isFullDuty, handleChange, clearDuties }) {
   return (
     <div className='controls'>
       <ul>
@@ -24,6 +24,9 @@ function controls({ isFullDuty, handleChange }) {
             повна
           </label>
         </li>
+        <li>
+          <button type='button' onClick={clearDuties}>Очистити</button>
+        </li>
       </ul>
     </div>
   );
@@ -31,8 +34,8 @@ function controls({ isFullDuty, handleChange }) {
 
 controls.propTypes = {
   isFullDuty: PropTypes.bool,
-  handleChange: PropTypes.func
+  handleChange: PropTypes.func,
+  clearDuties: PropTypes.func
 };
-
 
 export default controls;
