@@ -6,7 +6,7 @@ import './App.css';
 function App() {
   return (
     <div className="App">
-      <ul>
+      <ul className={'hide-on-print'}>
         <li>
           <Link to='/order'>Order</Link>
         </li>
@@ -15,7 +15,7 @@ function App() {
         </li>
       </ul>
 
-      <hr/>
+      <hr className={'hide-on-print'} />
 
       <Route path='/order' component={Order} />
       <Route path='/order_chart' component={OrderChart} />
