@@ -99,10 +99,10 @@ class OrderChart extends React.Component {
   };
 
   togglePopover = (isShown, e) => {
-    const event = e.nativeEvent;
+    const {top, left, width} = e.target.getBoundingClientRect();
     this.setState({
       isPopoverShown: isShown,
-      popoverPosition: { x: event.screenX, y: event.screenY }
+      popoverPosition: { x: left + width + window.scrollX, y: top + window.scrollY }
     });
   };
 

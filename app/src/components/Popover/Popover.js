@@ -22,12 +22,17 @@ class Popover extends React.Component {
   };
 
   calcCoordinates = () => ({
-    left: `${this.props.position.x - 10}px`,
-    top: `${this.props.position.y - 35}px`
+    left: `${this.props.position.x}px`,
+    top: `${this.props.position.y - 10}px`
   });
 
   handleClick = e => {
-    this.props.handleDutySelection(e, this.props.currentUserId, this.props.currentDay, e.nativeEvent.target.dataset.value);
+    this.props.handleDutySelection(
+      e,
+      this.props.currentUserId,
+      this.props.currentDay,
+      e.nativeEvent.target.dataset.value
+    );
   };
 
   render() {
