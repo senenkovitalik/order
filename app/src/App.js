@@ -1,6 +1,7 @@
 import React from 'react';
-import { Route, Link } from 'react-router-dom';
+import { Link, Route } from 'react-router-dom';
 import OrderChart from './components/OrderChart/OrderChart.js';
+import Order from './components/Order/Order';
 import './App.css';
 
 function App() {
@@ -21,10 +22,6 @@ function App() {
       <Route path='/order_chart' component={OrderChart} />
     </div>
   );
-}
-
-function Order() {
-  return 'Order';
 }
 
 export default App;
