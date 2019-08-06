@@ -60,8 +60,6 @@ class OrderChart extends React.Component {
       return;
     }
 
-    console.log(day, userId, duty);
-
     const user = this.state.users.find(u => u.id === userId);
     const usedDuty = user.duties.find(d => d.day === day);
 
@@ -166,10 +164,13 @@ class OrderChart extends React.Component {
 
         <Sign/>
 
-        <Popover isShown={this.state.isPopoverShown}
-                 togglePopover={this.togglePopover}
-                 position={this.state.popoverPosition}
-                 checkDay={this.checkDay}/>
+        {
+          !this.state.isFullDuty &&
+          <Popover isShown={this.state.isPopoverShown}
+                   togglePopover={this.togglePopover}
+                   position={this.state.popoverPosition}
+                   checkDay={this.checkDay}/>
+        }
       </div>
     );
   };
