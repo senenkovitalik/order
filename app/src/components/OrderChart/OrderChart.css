@@ -3,6 +3,11 @@
 	padding: 35mm 15mm 15mm 15mm;
 }
 
+.portrait {
+	width: 210mm;
+	padding: 15mm 15mm 15mm 35mm;
+}
+
 .row p {
 	margin-top: 0;
 	margin-bottom: 0;
@@ -17,6 +22,10 @@
 
 .row_centered {
 	text-align: center;
+}
+
+.row_indent {
+	text-indent: 15mm;
 }
 
 .table table, th, td {
@@ -44,4 +53,14 @@
 
 .used {
 	background-color: #000;
+}
+
+.resolution {
+	display: flex;
+	flex-flow: row;
+	justify-content: flex-end;
+}
+
+.resolution__content {
+	width: 30%;
 }

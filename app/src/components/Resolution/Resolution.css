@@ -1,9 +1,0 @@
-.resolution {
-	display: flex;
-	flex-flow: row;
-	justify-content: flex-end;
-}
-
-.resolution__content {
-	width: 30%;
-}

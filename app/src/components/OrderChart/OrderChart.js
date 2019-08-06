@@ -1,7 +1,5 @@
 import React from 'react';
 import Controls from '../Controls/Controls';
-import Resolution from '../Resolution/Resolution.js';
-import Sign from '../Sign/Sign.js';
 import './OrderChart.css';
 import Row from '../Row/Row';
 import Popover from '../Popover/Popover';
@@ -131,7 +129,17 @@ class OrderChart extends React.Component {
                   handleChange={this.handleRadioChange}
                   clearDuties={this.clearDuties}/>
 
-        <Resolution/>
+        <div className="resolution">
+          <div className="resolution__content row">
+            <p>ЗАТВЕРДЖУЮ</p>
+            <p>Командир військової частини А1799</p>
+            <div className="row_multicol">
+              <span>підполковник</span>
+              <span>С.КИСИЛЕНКО</span>
+            </div>
+            <p>"___" _____________ 2019 року</p>
+          </div>
+        </div>
 
         <br/><br/><br/><br/>
 
@@ -162,7 +170,13 @@ class OrderChart extends React.Component {
 
         <br/><br/>
 
-        <Sign/>
+        <div className="row">
+          <p>Заступник командира частини - начальник пункту управління системою зв`язку</p>
+          <div className="row_multicol">
+            <span>майор</span>
+            <span>О.МОДЛІНСЬКИЙ</span>
+          </div>
+        </div>
 
         {
           !this.state.isFullDuty &&
