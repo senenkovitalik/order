@@ -7,40 +7,6 @@ import ranks from '../../rank-mapping';
 
 class OrderChart extends React.Component {
   state = {
-    users: [
-      {
-        id: 'a43c',
-        name: 'Сененко В.',
-        rank: 12,
-        duties: [
-          { day: 5, duty: '011' },
-          { day: 8, duty: '101' },
-          { day: 11, duty: '111' },
-        ]
-      },
-      {
-        id: 'g234',
-        name: 'Возенков С.',
-        rank: 11,
-        duties: []
-      },
-      {
-        id: 'p04r',
-        name: 'Ковтун В.',
-        rank: 10,
-        duties: [
-          { day: 1, duty: '111' },
-          { day: 4, duty: '111' },
-          { day: 7, duty: '111' },
-        ]
-      },
-      {
-        id: 'fgh6',
-        name: 'Грушенков А.',
-        rank: 9,
-        duties: []
-      }
-    ],
     currentUserId: null,
     currentDay: null,
     isFullDuty: true,
@@ -110,8 +76,9 @@ class OrderChart extends React.Component {
   };
 
   render() {
+    const users = this.props.location.state.users || [];
     const days = [...Array(30)].map((x, i) => <th key={i + 1}>{i + 1}</th>);
-    const rows = this.state.users
+    const rows = users
       .sort((a, b) => ranks[b.rank].index - ranks[a.rank].index)
       .map((user, i) => <Row key={user.id}
                              checkDay={this.checkDay}
