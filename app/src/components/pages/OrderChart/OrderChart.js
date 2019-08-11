@@ -1,9 +1,9 @@
 import React from 'react';
-import Controls from '../Controls/Controls';
+import Controls from '../../Controls/Controls';
 import './OrderChart.css';
-import Row from '../Row/Row';
-import Popover from '../Popover/Popover';
-import ranks from '../../rank-mapping';
+import Row from '../../Row/Row';
+import Popover from '../../Popover/Popover';
+import ranks from '../../../rank-mapping';
 
 class OrderChart extends React.Component {
   state = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import ranks from '../../rank-mapping';
+import ranks from '../../../rank-mapping';
 import { Link } from 'react-router-dom';
 
 export default function unit({users, unitName}) {
