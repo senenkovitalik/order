@@ -23,4 +23,4 @@ const unitSchema = new Schema({
   }]
 });
 
-module.export = mongoose.model('Unit', unitSchema);
+module.exports = mongoose.model('Unit', unitSchema);

@@ -12,4 +12,4 @@ const addressSchema = new Schema({
   apartmentNumber: {type: String }
 });
 
-module.export = mongoose.model('Address', addressSchema);
+module.exports = mongoose.model('Address', addressSchema);
