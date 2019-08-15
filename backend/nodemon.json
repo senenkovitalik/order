@@ -1,0 +1,8 @@
+{
+  "env": {
+    "MONGO_USER": "order",
+    "MONGO_PASSWORD": "jS7TRZPIpFlYulCu",
+    "MONGO_DB": "order-dev",
+    "JWT_PASSWORD": "veryVerySecretPa$$"
+  }
+}
