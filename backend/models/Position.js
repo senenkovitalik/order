@@ -7,11 +7,15 @@ const positionSchema = new Schema({
   seniorPosition: {
     type: Schema.Types.ObjectId,
     ref: 'Position',
+    autopopulate: true
   },
   juniorPositions: [{
     type: Schema.Types.ObjectId,
     ref: 'Position',
+    autopopulate: true
   }]
 });
+
+positionSchema.plugin(require('mongoose-autopopulate'))
 
 module.exports = mongoose.model('Position', positionSchema);
