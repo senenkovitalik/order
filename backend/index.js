@@ -1,8 +1,18 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const expressGraphql = require('express-graphql');
+
+const schema = require('./graphql/schema/index');
+const resolvers = require('./graphql/resolvers/index');
 
 const app = express();
+
+app.use('/graphiql', expressGraphql({
+  schema,
+  rootValue: resolvers,
+  graphiql: true
+}));
 
 const { MONGO_USER, MONGO_PASSWORD, MONGO_DB } = process.env;
 
