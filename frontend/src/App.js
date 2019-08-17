@@ -5,63 +5,52 @@ import Order from './components/pages/Order/Order';
 import Unit from './components/pages/Unit/Unit';
 import Login from './components/pages/Login/Login';
 import Navbar from './components/Navbar/Navbar';
-import { login } from './fake-backend';
+import axios from 'axios';
+
 import './App.css';
 
 class App extends React.Component {
   state = {
-    isLogged: window.localStorage.getItem('userToken'),
-    users: [
-      {
-        id: 'a43c',
-        name: 'Сененко В.',
-        rank: 12,
-        duties: [
-          { day: 5, duty: '011' },
-          // { day: 8, duty: '101' },
-          // { day: 11, duty: '111' },
-        ]
-      },
-      {
-        id: 'g234',
-        name: 'Возенков С.',
-        rank: 11,
-        duties: []
-      },
-      {
-        id: 'p04r',
-        name: 'Ковтун В.',
-        rank: 10,
-        duties: [
-          // { day: 1, duty: '111' },
-          { day: 4, duty: '111' },
-          { day: 7, duty: '111' },
-        ]
-      },
-      {
-        id: 'fgh6',
-        name: 'Грушенков А.',
-        rank: 9,
-        duties: []
-      }
-    ],
-    unitName: 'Відділ автоматизованої системи передачі даних'
+    userId: null,
+    isLogged: window.localStorage.getItem('userToken')
   };
 
-  handleLogin = (username, password) => {
-    if (login(username, password)) {
-      window.localStorage.setItem('userToken', '9fj48ho3ufhf233f8fh32f');
-      this.setState({
-        isLogged: true
-      });
-      this.props.history.push('/');
-    }
+  handleLogin = (login, password) => {
+    const requestBody = {
+      query: `
+        query Login($login: String!, $password: String!) {
+          login(login: $login, password: $password) {
+            userId
+            token
+          }
+        }
+      `,
+      variables: {login, password}
+    };
+
+    axios.get('/graphql', {
+      baseURL: 'http://localhost:3001/',
+      params: requestBody
+    })
+    .then(res => {
+      const {userId, token} = res.data.data.login;
+      window.localStorage.setItem('token', token);
+        this.setState({
+          userId,
+          isLogged: true
+        });
+        this.props.history.push('/');
+    })
+    .catch(err => {
+      console.log(err);
+    });
   };
 
   handleLogout = () => {
-    window.localStorage.removeItem('userToken');
+    window.localStorage.removeItem('token');
     this.setState({
-      isLogged: false
+      isLogged: false,
+      userId: null
     });
     this.props.history.push('/login');
   };
