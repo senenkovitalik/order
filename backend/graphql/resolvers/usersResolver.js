@@ -3,6 +3,18 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
+  user: async ({userId}) => {
+    try {
+      return await User.findById(userId)
+        .populate({
+          path: 'employee',
+          populate: { path: 'position' }
+        })
+        .exec();
+    } catch (err) {
+      throw err;
+    }
+  },
   users: async () => {
     try {
       return await User.find()

@@ -1,6 +1,15 @@
 const Employee = require('../../models/Employee');
 
 module.exports = {
+  employee: async ({id}) => {
+    try {
+      return await Employee.findById(id)
+        .populate('position')
+        .exec();
+    } catch (err) {
+      throw err;
+    }
+  },
   employees: async () => {
     try {
       const employees = await Employee.find().populate('position');
