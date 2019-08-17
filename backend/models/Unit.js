@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const Employee = require('./Employee');
 
 const unitSchema = new Schema({
   name: { type: String, required: true },
@@ -14,12 +15,12 @@ const unitSchema = new Schema({
   }],
   head: {
     type: Schema.Types.ObjectId,
-    ref: 'Person',
+    ref: 'Employee',
     required: true
   },
   employees: [{
     type: Schema.Types.ObjectId,
-    ref: 'Person'
+    ref: 'Employee'
   }]
 });
 
