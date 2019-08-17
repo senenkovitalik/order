@@ -10,6 +10,7 @@ module.exports = buildSchema(`
   }
   
   type Employee {
+    _id: ID!
     name: String!
     surname: String! 
     patronymic: String!
@@ -17,10 +18,24 @@ module.exports = buildSchema(`
     position: Position!
   }
   
+  type User {
+    _id: ID!
+    login: String!
+    password: String!
+    employee: Employee!
+  }
+  
+  type AuthData {
+    userId: ID!
+    token: String!
+  }
+  
   type RootQuery {
     position(name: String!): Position
     positions: [Position!]!
     employees: [Employee!]!
+    users: [User!]!
+    login(login: String!, password: String!): AuthData
   }
   
   schema {
