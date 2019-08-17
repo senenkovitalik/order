@@ -4,11 +4,18 @@ const mongoose = require('mongoose');
 const expressGraphql = require('express-graphql');
 
 const schema = require('./graphql/schema/index');
-const resolvers = require('./graphql/resolvers/index');
+const resolvers = require('./graphql/resolvers/rootResolver');
+
+const cors = require('./middleware/cors');
 
 const app = express();
 
-app.use('/graphiql', expressGraphql({
+app.use(bodyParser.json());
+
+// only for development needs
+app.use(cors);
+
+app.use('/graphql', expressGraphql({
   schema,
   rootValue: resolvers,
   graphiql: true
