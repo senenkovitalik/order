@@ -4,7 +4,7 @@ module.exports = {
   employee: async ({id}) => {
     try {
       return await Employee.findById(id)
-        .populate('position')
+        .populate('position rank')
         .exec();
     } catch (err) {
       throw err;
@@ -12,7 +12,7 @@ module.exports = {
   },
   employees: async () => {
     try {
-      const employees = await Employee.find().populate('position');
+      const employees = await Employee.find().populate('position rank');
       return employees.map(employee => {
         const {dateOfBirth, ...rest} = employee._doc;
         return {

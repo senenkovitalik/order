@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Cell from '../Cell/Cell';
-import ranks from '../../rank-mapping';
 
 class Row extends React.Component {
   // check duty
@@ -11,14 +10,14 @@ class Row extends React.Component {
 
   // set current user id
   handleMouseEnter = () => {
-    this.props.setCurrentUserId(this.props.user.id);
+    this.props.setCurrentUserId(this.props.employee.id);
   };
 
   render() {
     const cells = [...Array(30)]
       .map((x, i) => {
         const day = i + 1;
-        const duties = this.props.user.duties.find(duty => duty.day === day);
+        const duties = undefined; /*this.props.employee.duties.find(duty => duty.day === day);*/
         return <Cell key={day}
                      day={day}
                      duties={duties}
@@ -26,11 +25,13 @@ class Row extends React.Component {
                      togglePopover={this.props.togglePopover} />;
       });
 
+    const {name, surname, patronymic} = this.props.employee;
+    const empName = `${surname} ${name.charAt(0).toUpperCase()}.${patronymic.charAt(0).toUpperCase()}.`;
     return (
       <tr onClick={this.handleClick} onMouseEnter={this.handleMouseEnter}>
         <td>{this.props.index}</td>
-        <td className="align-left">{ranks[this.props.user.rank].short}</td>
-        <td className="align-left">{this.props.user.name}</td>
+        <td className="align-left">{this.props.employee.rank.shortName}</td>
+        <td className="align-left">{empName}</td>
         {cells}
       </tr>
     );
@@ -38,11 +39,17 @@ class Row extends React.Component {
 }
 
 Row.propTypes = {
-  user: PropTypes.shape({
-    id: PropTypes.string,
+  employee: PropTypes.shape({
+    _id: PropTypes.string,
+    rank: PropTypes.shape({
+      index: PropTypes.number,
+      shortName: PropTypes.string
+    }),
+    index: PropTypes.number,
+    shortName: PropTypes.string,
     name: PropTypes.string,
-    rank: PropTypes.number,
-    duties: PropTypes.arrayOf(PropTypes.object)
+    surname: PropTypes.string,
+    patronymic: PropTypes.string
   }),
   index: PropTypes.number,
   checkDay: PropTypes.func,

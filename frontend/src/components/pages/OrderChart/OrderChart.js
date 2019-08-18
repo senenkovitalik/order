@@ -3,10 +3,11 @@ import Controls from '../../Controls/Controls';
 import './OrderChart.css';
 import Row from '../../Row/Row';
 import Popover from '../../Popover/Popover';
-import ranks from '../../../rank-mapping';
+import axios from 'axios';
 
 class OrderChart extends React.Component {
   state = {
+    unit: null,
     currentUserId: null,
     currentDay: null,
     isFullDuty: true,
@@ -76,17 +77,18 @@ class OrderChart extends React.Component {
   };
 
   render() {
-    const users = this.props.location.state.users || [];
+    const head = this.state.unit ? this.state.unit.head : null;
+    const employees = this.state.unit ? this.state.unit.employees : [];
     const days = [...Array(30)].map((x, i) => <th key={i + 1}>{i + 1}</th>);
-    const rows = users
-      .sort((a, b) => ranks[b.rank].index - ranks[a.rank].index)
-      .map((user, i) => <Row key={user.id}
-                             checkDay={this.checkDay}
-                             setCurrentUserId={this.setCurrentUserId}
-                             setCurrentDay={this.setCurrentDay}
-                             user={user}
-                             togglePopover={this.togglePopover}
-                             index={i + 1}/>
+    const rows = employees.sort((a, b) => b.rank.index - a.rank.index)
+      .map((employee, i) =>
+        <Row key={employee._id}
+             checkDay={this.checkDay}
+             setCurrentUserId={this.setCurrentUserId}
+             setCurrentDay={this.setCurrentDay}
+             employee={employee}
+             togglePopover={this.togglePopover}
+             index={i + 1}/>
       );
 
     return (
@@ -138,10 +140,10 @@ class OrderChart extends React.Component {
         <br/><br/>
 
         <div className="row">
-          <p>Заступник командира частини - начальник пункту управління системою зв`язку</p>
+          <p>{head && head.position.name}</p>
           <div className="row_multicol">
-            <span>майор</span>
-            <span>О.МОДЛІНСЬКИЙ</span>
+            <span>{head && head.rank.name}</span>
+            <span>{head && `${head.name.charAt(0).toUpperCase()}.${head.surname.toUpperCase()}`}</span>
           </div>
         </div>
 
@@ -155,6 +157,52 @@ class OrderChart extends React.Component {
       </div>
     );
   };
+
+  componentDidMount() {
+    const unitId = this.props.match.params.id;
+    if (unitId) {
+      const requestBody = {
+        query: `query Unit($id: String!) {
+          unit(id: $id) {
+            _id
+            name
+            head {
+              _id
+              name
+              surname
+              patronymic
+              rank {
+                name
+              }
+              position {
+                name
+              }
+            }
+            employees {
+              _id
+              rank {
+                index
+                shortName
+              }
+              name
+              surname
+              patronymic
+            }
+          }
+        }`,
+        variables: { id: unitId }
+      };
+      axios.get('/graphql', {
+        baseURL: 'http://localhost:3001/',
+        params: requestBody
+      })
+        .then(res => {
+          const { unit } = res.data.data;
+          this.setState({ unit });
+        })
+        .catch(err => console.error(err));
+    }
+  }
 }
 
 export default OrderChart;
