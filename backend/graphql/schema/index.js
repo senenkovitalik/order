@@ -1,12 +1,19 @@
 const {buildSchema} = require('graphql');
 
 module.exports = buildSchema(`
+  type Rank {
+    _id: ID!
+    index: Int!
+    name: String!
+    shortName: String!
+  }
+   
   type Position {
     _id: ID!
     name: String!
     shortName: String!
     seniorPosition: Position
-    juniorPositions: [Position]
+    juniorPositions: [Position]!
   }
   
   type Employee {
@@ -15,7 +22,10 @@ module.exports = buildSchema(`
     surname: String! 
     patronymic: String!
     dateOfBirth: String
+    rank: Rank!
     position: Position!
+    type: String!
+    unit: Unit
   }
   
   type Unit {
@@ -37,9 +47,12 @@ module.exports = buildSchema(`
   type AuthData {
     userId: ID!
     token: String!
+    employee: Employee!
   }
   
   type RootQuery {
+    ranks: [Rank!]!
+    rank(id: String!): Rank
     position(name: String!): Position
     positions: [Position!]!
     employees: [Employee!]!

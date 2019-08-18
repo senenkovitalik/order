@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const Unit = require('../models/Unit');
+const Rank = require('../models/Rank');
 
 const employeeSchema = new Schema({
   name: { type: String, required: true },
@@ -14,10 +16,24 @@ const employeeSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Address'
   },
+  rank: {
+    type: Schema.Types.ObjectId,
+    ref: 'Rank',
+    required: true
+  },
   position: {
     type: Schema.Types.ObjectId,
-    ref: 'Position'
-  }
+    ref: 'Position',
+    required: true
+  },
+  unit: {
+    type: Schema.Types.ObjectId,
+    ref: 'Unit'
+  },
+  type: {
+    type: String,
+    required: true,
+    enum: ['HEAD', 'WORKER'] }
 });
 
 module.exports = mongoose.model('Employee', employeeSchema);
