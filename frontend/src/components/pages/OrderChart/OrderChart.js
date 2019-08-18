@@ -3,6 +3,8 @@ import Controls from '../../Controls/Controls';
 import './OrderChart.css';
 import Row from '../../Row/Row';
 import Popover from '../../Popover/Popover';
+import UpperResolution from '../OrderChart/UpperResolution/UpperResolution';
+import BottomResolution from '../OrderChart/BottomResolution/BottomResolution';
 import axios from 'axios';
 
 class OrderChart extends React.Component {
@@ -91,6 +93,7 @@ class OrderChart extends React.Component {
              index={i + 1}/>
       );
 
+    const parentUnit = this.state.unit ? this.state.unit.parentUnit : null;
     return (
       <div className="order-chart landscape">
 
@@ -98,17 +101,7 @@ class OrderChart extends React.Component {
                   handleChange={this.handleRadioChange}
                   clearDuties={this.clearDuties}/>
 
-        <div className="resolution">
-          <div className="resolution__content row">
-            <p>ЗАТВЕРДЖУЮ</p>
-            <p>Командир військової частини А1799</p>
-            <div className="row_multicol">
-              <span>підполковник</span>
-              <span>С.КИСИЛЕНКО</span>
-            </div>
-            <p>"___" _____________ 2019 року</p>
-          </div>
-        </div>
+        {parentUnit && <UpperResolution head={parentUnit.head} />}
 
         <br/><br/><br/><br/>
 
@@ -139,13 +132,7 @@ class OrderChart extends React.Component {
 
         <br/><br/>
 
-        <div className="row">
-          <p>{head && head.position.name}</p>
-          <div className="row_multicol">
-            <span>{head && head.rank.name}</span>
-            <span>{head && `${head.name.charAt(0).toUpperCase()}.${head.surname.toUpperCase()}`}</span>
-          </div>
-        </div>
+        <BottomResolution head={head} />
 
         {
           !this.state.isFullDuty &&
@@ -187,6 +174,19 @@ class OrderChart extends React.Component {
               name
               surname
               patronymic
+            }
+            parentUnit {
+              _id
+              head {
+                name
+                surname
+                rank {
+                  name
+                }
+                position {
+                  name
+                }
+              }
             }
           }
         }`,

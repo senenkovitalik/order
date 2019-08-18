@@ -19,12 +19,14 @@ const employeeSchema = new Schema({
   rank: {
     type: Schema.Types.ObjectId,
     ref: 'Rank',
-    required: true
+    required: true,
+    autopopulate: true
   },
   position: {
     type: Schema.Types.ObjectId,
     ref: 'Position',
-    required: true
+    required: true,
+    autopopulate: true
   },
   unit: {
     type: Schema.Types.ObjectId,
@@ -35,5 +37,7 @@ const employeeSchema = new Schema({
     required: true,
     enum: ['HEAD', 'WORKER'] }
 });
+
+employeeSchema.plugin(require('mongoose-autopopulate'));
 
 module.exports = mongoose.model('Employee', employeeSchema);
