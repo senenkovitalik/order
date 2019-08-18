@@ -6,7 +6,7 @@ module.exports = {
       return await Unit.findById(id)
         .populate({
           path: 'head employees',
-          populate: {path: 'position'}
+          populate: {path: 'position rank'}
         })
         .exec();
     } catch (err) {

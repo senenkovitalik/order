@@ -16,6 +16,6 @@ const positionSchema = new Schema({
   }]
 });
 
-positionSchema.plugin(require('mongoose-autopopulate'))
+positionSchema.plugin(require('mongoose-autopopulate'));
 
 module.exports = mongoose.model('Position', positionSchema);

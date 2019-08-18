@@ -27,7 +27,10 @@ module.exports = {
     }
   },
   login: async ({login, password}) => {
-    const user = await User.findOne({ login });
+    const user = await User.findOne({ login }).populate({
+      path: 'employee',
+      populate: { path: 'unit' }
+    }).exec();
     if (!user) {
       throw new Error('User doesn\'t exist!');
     }
@@ -44,7 +47,8 @@ module.exports = {
 
     return {
       userId: user._id,
-      token
+      token,
+      employee: user.employee
     }
   }
 };

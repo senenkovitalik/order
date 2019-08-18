@@ -12,7 +12,7 @@ import './App.css';
 class App extends React.Component {
   state = {
     userId: null,
-    isLogged: window.localStorage.getItem('userToken')
+    isLogged: window.localStorage.getItem('token')
   };
 
   handleLogin = (login, password) => {
@@ -22,6 +22,12 @@ class App extends React.Component {
           login(login: $login, password: $password) {
             userId
             token
+            employee {
+              _id
+              unit {
+                _id
+              }
+            }
           }
         }
       `,
@@ -33,13 +39,13 @@ class App extends React.Component {
       params: requestBody
     })
     .then(res => {
-      const {userId, token} = res.data.data.login;
+      const {userId, token, employee: { unit: { _id: unitId }}} = res.data.data.login;
       window.localStorage.setItem('token', token);
         this.setState({
           userId,
           isLogged: true
         });
-        this.props.history.push('/');
+        this.props.history.push(`/unit/${unitId}`);
     })
     .catch(err => {
       console.log(err);
@@ -60,11 +66,11 @@ class App extends React.Component {
       <div className="App">
         <Navbar isLogged={this.state.isLogged} logout={this.handleLogout}/>
         <Switch>
-          {this.state.isLogged &&
-            <React.Fragment>
-              <Route exact path='/' render={() => <Unit unitName={this.state.unitName} users={this.state.users}/>}/>
+          {
+            this.state.isLogged && <React.Fragment>
+              <Route exact path='/unit/:id' component={Unit}/>
               <Route path='/order' component={Order}/>
-              <Route path='/order_chart' component={OrderChart}/>
+              <Route path='/unit/:id/order_chart' component={OrderChart}/>
             </React.Fragment>
           }
           <Route path='/login' render={() => <Login login={this.handleLogin}/>}/>
