@@ -6,7 +6,12 @@ import './Unit.css';
 
 export default class Unit extends React.Component {
   state = {
-    unit: null
+    unit: null,
+    shortPositionName: true
+  };
+
+  triggerPositionView = () => {
+    this.setState(prevState => ({shortPositionName: !prevState.shortPositionName}))
   };
 
   render() {
@@ -20,10 +25,13 @@ export default class Unit extends React.Component {
           this.state.unit && <table>
           <thead>
           <tr>
-            <td>#</td>
-            <td>Вій. звання</td>
-            <td>ПІБ</td>
-            <td>Посада</td>
+            <th>#</th>
+            <th>Вій. звання</th>
+            <th>ПІБ</th>
+            <th>Посада <input type='button'
+                              onClick={this.triggerPositionView}
+                              value={this.state.shortPositionName ? 'Повна' : 'Скорочена'} />
+            </th>
           </tr>
           </thead>
           <tbody>
@@ -33,7 +41,11 @@ export default class Unit extends React.Component {
               <td>{index + 1}</td>
               <td>{employee.rank.shortName}</td>
               <td>{employee.surname} {employee.name} {employee.patronymic}</td>
-              <td>{employee.position.name}</td>
+                {
+                  this.state.shortPositionName
+                    ? <td>{employee.position.shortName}</td>
+                    : <td>{employee.position.name}</td>
+                }
             </tr>)
           }
           </tbody>
@@ -60,12 +72,8 @@ export default class Unit extends React.Component {
               name
               surname
               patronymic
-              rank {
-                name
-              }
-              position {
-                name
-              }
+              rank { name }
+              position { name }
             }
             employees {
               _id
@@ -75,6 +83,7 @@ export default class Unit extends React.Component {
               }
               position {
                 name
+                shortName
               }
               name
               surname
