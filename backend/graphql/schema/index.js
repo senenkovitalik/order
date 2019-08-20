@@ -16,12 +16,24 @@ module.exports = buildSchema(`
     juniorPositions: [Position]!
   }
   
+  type Address {
+    region: String
+    district: String
+    city: String
+    village: String
+    urbanVillage: String
+    street: String
+    houseNumber: String
+    apartmentNumber: String
+  }
+  
   type Employee {
     _id: ID!
     name: String!
     surname: String! 
     patronymic: String!
-    dateOfBirth: String
+    dateOfBirth: String!
+    addressOfResidence: Address
     rank: Rank!
     position: Position!
     type: String!

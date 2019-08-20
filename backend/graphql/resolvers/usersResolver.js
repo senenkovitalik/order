@@ -3,7 +3,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
-  user: async ({userId}) => {
+  user: async ({userId}, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthorized');
+    }
     try {
       return await User.findById(userId)
         .populate({
@@ -15,7 +18,10 @@ module.exports = {
       throw err;
     }
   },
-  users: async () => {
+  users: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthorized');
+    }
     try {
       return await User.find()
         .populate({

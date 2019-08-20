@@ -1,18 +1,23 @@
 const Employee = require('../../models/Employee');
 
 module.exports = {
-  employee: async ({id}) => {
+  employee: async ({id}, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthorized');
+    }
     try {
-      return await Employee.findById(id)
-        .populate('position rank')
-        .exec();
+      const employee = await Employee.findById(id).populate('position rank addressOfResidence').exec();
+      return Object.assign({}, employee._doc, { dateOfBirth: new Date(employee._doc.dateOfBirth).toLocaleDateString()})
     } catch (err) {
       throw err;
     }
   },
-  employees: async () => {
+  employees: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthorized');
+    }
     try {
-      const employees = await Employee.find().populate('position rank');
+      const employees = await Employee.find().populate('position rank addressOfResidence');
       return employees.map(employee => {
         const {dateOfBirth, ...rest} = employee._doc;
         return {

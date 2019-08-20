@@ -7,6 +7,7 @@ const schema = require('./graphql/schema/index');
 const resolvers = require('./graphql/resolvers/rootResolver');
 
 const cors = require('./middleware/cors');
+const isAuth = require('./middleware/is-auth');
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(bodyParser.json());
 
 // only for development needs
 app.use(cors);
+app.use(isAuth);
 
 app.use('/graphql', expressGraphql({
   schema,
