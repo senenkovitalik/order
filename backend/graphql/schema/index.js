@@ -34,6 +34,7 @@ module.exports = buildSchema(`
     patronymic: String!
     dateOfBirth: String!
     addressOfResidence: Address
+    registrationAddress: Address
     rank: Rank!
     position: Position!
     type: String!

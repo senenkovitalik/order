@@ -5,6 +5,7 @@ import Order from './components/pages/Order/Order';
 import Unit from './components/pages/Unit/Unit';
 import Login from './components/pages/Login/Login';
 import Navbar from './components/Navbar/Navbar';
+import Employee from './components/pages/Employee/Employee';
 import axios from 'axios';
 
 import './App.css';
@@ -12,6 +13,7 @@ import './App.css';
 class App extends React.Component {
   state = {
     userId: null,
+    employee: null,
     isLogged: window.localStorage.getItem('token')
   };
 
@@ -39,13 +41,14 @@ class App extends React.Component {
       params: requestBody
     })
     .then(res => {
-      const {userId, token, employee: { unit: { _id: unitId }}} = res.data.data.login;
+      const {userId, token, employee} = res.data.data.login;
       window.localStorage.setItem('token', token);
         this.setState({
           userId,
+          employee,
           isLogged: true
         });
-        this.props.history.push(`/unit/${unitId}`);
+        this.props.history.push(`/unit/${employee.unit._id}`);
     })
     .catch(err => {
       console.log(err);
@@ -56,7 +59,8 @@ class App extends React.Component {
     window.localStorage.removeItem('token');
     this.setState({
       isLogged: false,
-      userId: null
+      userId: null,
+      employee: null
     });
     this.props.history.push('/login');
   };
@@ -69,8 +73,9 @@ class App extends React.Component {
           {
             this.state.isLogged && <React.Fragment>
               <Route exact path='/unit/:id' component={Unit}/>
-              <Route path='/order' component={Order}/>
               <Route path='/unit/:id/order_chart' component={OrderChart}/>
+              <Route path='/employee/:id' component={Employee}/>
+              <Route path='/order' component={Order}/>
             </React.Fragment>
           }
           <Route path='/login' render={() => <Login login={this.handleLogin}/>}/>
@@ -79,6 +84,7 @@ class App extends React.Component {
       </div>
     );
   }
+
 }
 
 export default withRouter(App);

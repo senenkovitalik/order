@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Unit = require('../models/Unit');
 const Rank = require('../models/Rank');
+const Address = require('../models/Address');
 
 const employeeSchema = new Schema({
   name: { type: String, required: true },

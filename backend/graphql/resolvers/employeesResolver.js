@@ -6,7 +6,7 @@ module.exports = {
       throw new Error('Unauthorized');
     }
     try {
-      const employee = await Employee.findById(id).populate('position rank addressOfResidence').exec();
+      const employee = await Employee.findById(id).populate('position rank addressOfResidence registrationAddress').exec();
       return Object.assign({}, employee._doc, { dateOfBirth: new Date(employee._doc.dateOfBirth).toLocaleDateString()})
     } catch (err) {
       throw err;
@@ -17,7 +17,7 @@ module.exports = {
       throw new Error('Unauthorized');
     }
     try {
-      const employees = await Employee.find().populate('position rank addressOfResidence');
+      const employees = await Employee.find().populate('position rank addressOfResidence registrationAddress');
       return employees.map(employee => {
         const {dateOfBirth, ...rest} = employee._doc;
         return {
