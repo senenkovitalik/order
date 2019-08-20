@@ -72,6 +72,7 @@ module.exports = buildSchema(`
     employee(id: String!): Employee
     users: [User!]!
     user(userId: String!): User
+    userByToken: User!
     units: [Unit!]!
     unit(id: String!): Unit
     login(login: String!, password: String!): AuthData

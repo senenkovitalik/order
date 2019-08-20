@@ -14,6 +14,7 @@ class App extends React.Component {
   state = {
     userId: null,
     employee: null,
+    unitId: null,
     isLogged: window.localStorage.getItem('token')
   };
 
@@ -33,26 +34,27 @@ class App extends React.Component {
           }
         }
       `,
-      variables: {login, password}
+      variables: { login, password }
     };
 
     axios.get('/graphql', {
       baseURL: 'http://localhost:3001/',
       params: requestBody
     })
-    .then(res => {
-      const {userId, token, employee} = res.data.data.login;
-      window.localStorage.setItem('token', token);
+      .then(res => {
+        const { userId, token, employee } = res.data.data.login;
+        window.localStorage.setItem('token', token);
         this.setState({
           userId,
           employee,
+          unitId: employee.unit._id,
           isLogged: true
         });
         this.props.history.push(`/unit/${employee.unit._id}`);
-    })
-    .catch(err => {
-      console.log(err);
-    });
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   handleLogout = () => {
@@ -60,7 +62,8 @@ class App extends React.Component {
     this.setState({
       isLogged: false,
       userId: null,
-      employee: null
+      employee: null,
+      unitId: null
     });
     this.props.history.push('/login');
   };
@@ -68,7 +71,10 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <Navbar isLogged={this.state.isLogged} logout={this.handleLogout}/>
+        <Navbar isLogged={this.state.isLogged}
+                unitId={this.state.unitId}
+                logout={this.handleLogout}
+        />
         <Switch>
           {
             this.state.isLogged && <React.Fragment>
@@ -85,6 +91,43 @@ class App extends React.Component {
     );
   }
 
+  componentDidMount() {
+    if (!this.state.userId) {
+      const requestBody = {
+        query: `
+          query UserByToken {
+            userByToken {
+              _id
+              employee {
+                _id
+                unit {
+                  _id
+                }
+              }
+            }
+          }
+        `
+      };
+
+      axios.get('/graphql', {
+        baseURL: 'http://localhost:3001/',
+        params: requestBody,
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+        .then(res => {
+          const { _id, employee } = res.data.data.userByToken;
+          this.setState({
+            userId: _id,
+            employee,
+            unitId: employee.unit._id,
+          });
+          this.props.history.push(`/unit/${employee.unit._id}`);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
+  }
 }
 
 export default withRouter(App);

@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
-  user: async ({userId}, req) => {
+  user: async ({ userId }, req) => {
     if (!req.isAuth) {
       throw new Error('Unauthorized');
     }
@@ -12,6 +12,21 @@ module.exports = {
         .populate({
           path: 'employee',
           populate: { path: 'position' }
+        })
+        .exec();
+    } catch (err) {
+      throw err;
+    }
+  },
+  userByToken: async (args, req) => {
+    if (!req.isAuth && !req.userId) {
+      throw new Error('Unauthorized');
+    }
+    try {
+      return await User.findById(req.userId)
+        .populate({
+          path: 'employee',
+          populate: { path: 'unit' }
         })
         .exec();
     } catch (err) {
@@ -32,7 +47,7 @@ module.exports = {
       throw err;
     }
   },
-  login: async ({login, password}) => {
+  login: async ({ login, password }) => {
     const user = await User.findOne({ login }).populate({
       path: 'employee',
       populate: { path: 'unit' }
@@ -47,7 +62,7 @@ module.exports = {
     }
 
     const token = jwt.sign(
-      {userId: user._id, login: user.login},
+      { userId: user._id, login: user.login },
       process.env.JWT_PASSWORD
     );
 
@@ -55,6 +70,6 @@ module.exports = {
       userId: user._id,
       token,
       employee: user.employee
-    }
+    };
   }
 };
