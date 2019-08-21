@@ -2,3 +2,19 @@ table, th, td {
     border: 1px solid black;
     border-collapse: collapse;
 }
+
+.employee-update-form label {
+    display: block;
+}
+
+.employee-update-form label > span {
+    width: 200px;
+    font-weight: bold;
+    float: left;
+    padding-right: 5px;
+}
+
+.employee-update-form label > input,
+.employee-update-form label > select {
+    width: 250px;
+}

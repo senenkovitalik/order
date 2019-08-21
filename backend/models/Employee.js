@@ -11,11 +11,13 @@ const employeeSchema = new Schema({
   dateOfBirth: Date,
   addressOfResidence: {
     type: Schema.Types.ObjectId,
-    ref: 'Address'
+    ref: 'Address',
+    autopopulate: true
   },
   registrationAddress: {
     type: Schema.Types.ObjectId,
-    ref: 'Address'
+    ref: 'Address',
+    autopopulate: true
   },
   rank: {
     type: Schema.Types.ObjectId,
