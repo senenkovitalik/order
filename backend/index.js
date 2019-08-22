@@ -25,6 +25,7 @@ app.use('/graphql', expressGraphql({
 
 const { MONGO_USER, MONGO_PASSWORD, MONGO_DB } = process.env;
 
+mongoose.set('useFindAndModify', false);
 mongoose.connect(`mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@cluster0-wgttx.mongodb.net/${MONGO_DB}?retryWrites=true&w=majority`, {useNewUrlParser: true})
 .then(() => {
   const port = 3001;
