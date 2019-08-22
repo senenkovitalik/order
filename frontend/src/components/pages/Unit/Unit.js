@@ -19,11 +19,17 @@ export default class Unit extends React.Component {
     this.setState(prevState => ({ shortPositionName: !prevState.shortPositionName }));
   };
 
-  updateEmployee = employeeId => {
+  setEmployeeToUpdate = employeeId => {
     this.setState({
       employeeToUpdate: this.state.unit.employees.find(e => e._id === employeeId),
       isModalShown: true
     });
+  };
+
+  updateEmployee = async data => {
+    // check if there address entities
+    // update them first
+    // then update employee
   };
 
   deleteEmployee = employeeId => {
@@ -49,8 +55,7 @@ export default class Unit extends React.Component {
             <Modal>
               <FormUpdateEmployee employee={this.state.employeeToUpdate}
                                   positions={this.state.unit.head.position.juniorPositions}
-                                  handleUpdate={() => {
-                                  }}
+                                  updateEmployee={this.updateEmployee}
                                   closeModal={this.triggerModal}/>
             </Modal>
           </React.Fragment>
@@ -88,7 +93,7 @@ export default class Unit extends React.Component {
                       : <td>{employee.position.name}</td>
                   }
                   <td>
-                    <button onClick={() => this.updateEmployee(employee._id)}>Update</button>
+                    <button onClick={() => this.setEmployeeToUpdate(employee._id)}>Update</button>
                     <button onClick={() => this.deleteEmployee(employee._id)}>Delete</button>
                   </td>
                 </tr>
