@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Modal from '../../Modal/Modal';
 import Backdrop from '../../Backdrop/Backdrop';
+import Alert from '../../Alert/Alert';
 import axios from 'axios';
 
 import './Unit.css';
@@ -12,6 +13,8 @@ export default class Unit extends React.Component {
     unit: null,
     shortPositionName: true,
     isModalShown: false,
+    isAlertShown: false,
+    isAlertSuccess: false,
     employeeToUpdate: null
   };
 
@@ -96,16 +99,20 @@ export default class Unit extends React.Component {
 
           this.setState({
             unit: Object.assign({}, unit, { employees: updatedEmployees }),
-            isModalShown: false
+            isModalShown: false,
+            isAlertShown: true,
+            isAlertSuccess: true,
           });
         })
         .catch(err => {
-          this.triggerModal();
+          this.setState({
+            isModalShown: false,
+            isAlertShown: true,
+            isAlertSuccess: false,
+          });
           console.error(err)
         });
     }
-    // if ok - hide modal, change state, show success alert
-    // if false - hide modal, show error alert
   };
 
   deleteEmployee = employeeId => {
@@ -113,6 +120,8 @@ export default class Unit extends React.Component {
   };
 
   triggerModal = () => this.setState(prevState => ({ isModalShown: !prevState.isModalShown }));
+
+  triggerAlert = () => this.setState(prevState => ({ isAlertShown: !prevState.isAlertShown }));
 
   render() {
     if (!this.state.unit) {
@@ -136,6 +145,11 @@ export default class Unit extends React.Component {
             </Modal>
           </React.Fragment>
         }
+
+        { this.state.isAlertShown &&
+          <Alert success={this.state.isAlertSuccess} close={this.triggerAlert}>
+            {this.state.isAlertSuccess ? 'Дані успішно оновлено)' : 'Трапилася помилка( Зверніться до адміністратора'}
+          </Alert>}
 
         <h2>Особовий склад підрозділу: {unitName}</h2>
         <table>
