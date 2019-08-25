@@ -65,6 +65,7 @@ module.exports = buildSchema(`
   }
   
   input AddressInput {
+    _id: ID
     region: String
     district: String
     city: String
@@ -84,7 +85,6 @@ module.exports = buildSchema(`
     registrationAddress: ID
     rank: ID
     position: ID
-    type: String
     unit: ID
   }
   
@@ -104,7 +104,7 @@ module.exports = buildSchema(`
   }
   
   type RootMutation {
-    updateEmployee(id: ID!, data: EmployeeInput!): Employee!
+    updateEmployee(id: ID!, data: EmployeeInput, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
     updateAddress(id: ID!, data: AddressInput!): Address!
   }
   

@@ -29,7 +29,17 @@ export default class FormUpdateEmployee extends React.Component {
         return;
       }
 
-      const srcOne = Object.assign({}, this.state[stateField], { [fieldName]: value });
+      // Address _id need to insert only once fix later
+      // But if address not exist - insert null
+      const addressId = this.props.employee[stateField]
+        ? this.props.employee[stateField]._id
+        : null;
+
+      const srcOne = Object.assign(
+        {},
+        this.state[stateField],
+        {_id: addressId},
+        { [fieldName]: value });
       newState = Object.assign({}, { [stateField]: srcOne });
     } else {
       const srcOne = Object.assign({}, this.state.data, { [name]: value });
@@ -41,7 +51,8 @@ export default class FormUpdateEmployee extends React.Component {
 
   updateEmployee = e => {
     e.preventDefault();
-
+    const { ranks, ...rest } = this.state;
+    this.props.updateEmployee(rest);
   };
 
   render() {
@@ -80,7 +91,7 @@ export default class FormUpdateEmployee extends React.Component {
 
         <label>
           <span>Військове звання</span>
-          <select defaultValue={this.props.employee.rank._id} name='rank' onChange={this.handleChange}>
+          <select value={this.props.employee.rank._id} name='rank' onChange={this.handleChange}>
             {
               this.state.ranks
                 .sort((a, b) => a.index - b.index)

@@ -1,6 +1,8 @@
 const Employee = require('../../models/Employee');
+const Address = require('../../models/Address');
 
 module.exports = {
+  /* GET */
   employee: async ({id}, req) => {
     if (!req.isAuth) {
       throw new Error('Unauthorized');
@@ -29,9 +31,49 @@ module.exports = {
       throw err;
     }
   },
-  updateEmployee: async ({id: _id, data}) => {
+
+  /* UPDATE */
+  updateEmployee: async ({id: _id, data, addressOfResidence, registrationAddress}, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthorized');
+    }
+
+    const saveData = data ? data : {};
+    const opts = {
+      new: true,
+      runValidators: true
+    };
+
     try {
-      return await Employee.findOneAndUpdate({_id}, data, {runValidators: true}, () => {});
+      if (addressOfResidence) {
+        const {_id, ...rest} = addressOfResidence;
+        let residence;
+
+        if (_id) {
+          residence = await Address.findByIdAndUpdate(_id, rest, opts).exec();
+        } else {
+          const address = new Address(rest);
+          residence = await address.save();
+        }
+
+        saveData.addressOfResidence = residence._id;
+      }
+
+      if (registrationAddress) {
+        const {_id, ...rest} = registrationAddress;
+        let registration;
+
+        if (_id) {
+          registration = await Address.findByIdAndUpdate(_id, rest, opts).exec();
+        } else {
+          const address = new Address(rest);
+          registration = await address.save();
+        }
+
+        saveData.registrationAddress = registration._id;
+      }
+
+      return await Employee.findByIdAndUpdate(_id, saveData, opts).exec();
     } catch (err) {
       throw err;
     }

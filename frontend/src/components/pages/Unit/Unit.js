@@ -26,10 +26,86 @@ export default class Unit extends React.Component {
     });
   };
 
-  updateEmployee = async data => {
-    // check if there address entities
-    // update them first
-    // then update employee
+  updateEmployee = async employeeData => {
+    const { data, addressOfResidence, registrationAddress } = employeeData;
+    const token = localStorage.getItem('token');
+    if (data || addressOfResidence || registrationAddress) {
+      const requestBody = {
+        query: `
+          mutation UpdateEmployee(
+            $id: ID!,
+            $data: EmployeeInput,
+            $addressOfResidence: AddressInput,
+            $registrationAddress: AddressInput
+          ) {
+            updateEmployee(
+              id: $id,
+              data: $data,
+              addressOfResidence: $addressOfResidence,
+              registrationAddress: $registrationAddress
+            ) {
+              _id
+              rank {
+                _id
+                index
+                name
+                shortName
+              }
+              position {
+                name
+                shortName
+              }
+              name
+              surname
+              patronymic
+              dateOfBirth
+              addressOfResidence {
+                region
+                district
+                city
+                village
+                urbanVillage
+                street
+                houseNumber
+                apartmentNumber
+              }
+              registrationAddress {
+                region
+                district
+                city
+                village
+                urbanVillage
+                street
+                houseNumber
+                apartmentNumber
+              }
+            }
+        }`,
+        variables: { id: this.state.employeeToUpdate._id, data, addressOfResidence, registrationAddress }
+      };
+      axios.post('/graphql', {}, {
+        baseURL: 'http://localhost:3001/',
+        params: requestBody,
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => {
+          const { updateEmployee } = res.data.data;
+          const unit = Object.assign({}, this.state.unit);
+          const updatedEmployees = unit.employees.filter(employee => employee._id !== updateEmployee._id);
+          updatedEmployees.push(updateEmployee);
+
+          this.setState({
+            unit: Object.assign({}, unit, { employees: updatedEmployees }),
+            isModalShown: false
+          });
+        })
+        .catch(err => {
+          this.triggerModal();
+          console.error(err)
+        });
+    }
+    // if ok - hide modal, change state, show success alert
+    // if false - hide modal, show error alert
   };
 
   deleteEmployee = employeeId => {
@@ -146,6 +222,7 @@ export default class Unit extends React.Component {
               patronymic
               dateOfBirth
               addressOfResidence {
+                _id
                 region
                 district
                 city
@@ -156,6 +233,7 @@ export default class Unit extends React.Component {
                 apartmentNumber
               }
               registrationAddress {
+                _id
                 region
                 district
                 city
