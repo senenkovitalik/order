@@ -41,6 +41,33 @@ const employeeSchema = new Schema({
     enum: ['HEAD', 'WORKER'] }
 });
 
+employeeSchema.post('remove', async ({_id, addressOfResidence, registrationAddress}) => {
+  // delete Employee from Unit.Employees
+  const unit = await Unit.find({employees: _id});
+  unit.employees = unit.employees.filter(employee => employee._id !== _id);
+  try {
+    await unit.save();
+  } catch (err) {
+    throw err;
+  }
+
+  // delete Addresses
+  const addressesToDelete = [];
+
+  if (addressOfResidence) {
+    addressesToDelete.push(addressOfResidence._id)
+  }
+  if (registrationAddress) {
+    addressesToDelete.push(registrationAddress._id)
+  }
+
+  try {
+    await Address.deleteMany({_id: {$in: addressesToDelete}}).exec();
+  } catch (err) {
+    throw err;
+  }
+});
+
 employeeSchema.plugin(require('mongoose-autopopulate'));
 
 module.exports = mongoose.model('Employee', employeeSchema);

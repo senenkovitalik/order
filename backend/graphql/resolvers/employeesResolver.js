@@ -77,5 +77,19 @@ module.exports = {
     } catch (err) {
       throw err;
     }
+  },
+
+  /* DELETE */
+  deleteEmployee: async ({id: _id}, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthorized');
+    }
+
+    try {
+      const employee = await Employee.findById(_id).exec();
+      return await employee.remove();
+    } catch (err) {
+      throw err;
+    }
   }
 };

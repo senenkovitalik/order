@@ -29,7 +29,7 @@ export default class Unit extends React.Component {
     });
   };
 
-  updateEmployee = async employeeData => {
+  updateEmployee = employeeData => {
     const { data, addressOfResidence, registrationAddress } = employeeData;
     const token = localStorage.getItem('token');
     if (data || addressOfResidence || registrationAddress) {
@@ -116,7 +116,32 @@ export default class Unit extends React.Component {
   };
 
   deleteEmployee = employeeId => {
-    console.log(`Delete Employee ${employeeId}`);
+    if (employeeId) {
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    const requestBody = {
+      query: `mutation DeleteEmployee($id: ID!) {
+          deleteEmployee(id: $id) {
+            _id
+          }
+        }`,
+      variables: { id: employeeId }
+    };
+
+    axios.post('/graphql', {}, {
+      baseURL: 'http://localhost:3001/',
+      params: requestBody,
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => {
+        const { deleteEmployee } = res.data.data;
+        // update Unit
+        // show Alert
+        // this.setState({ unit });
+      })
+      .catch(err => console.error(err));
   };
 
   triggerModal = () => this.setState(prevState => ({ isModalShown: !prevState.isModalShown }));
@@ -146,10 +171,10 @@ export default class Unit extends React.Component {
           </React.Fragment>
         }
 
-        { this.state.isAlertShown &&
-          <Alert success={this.state.isAlertSuccess} close={this.triggerAlert}>
-            {this.state.isAlertSuccess ? 'Дані успішно оновлено)' : 'Трапилася помилка( Зверніться до адміністратора'}
-          </Alert>}
+        {this.state.isAlertShown &&
+        <Alert success={this.state.isAlertSuccess} close={this.triggerAlert}>
+          {this.state.isAlertSuccess ? 'Дані успішно оновлено)' : 'Трапилася помилка( Зверніться до адміністратора'}
+        </Alert>}
 
         <h2>Особовий склад підрозділу: {unitName}</h2>
         <table>

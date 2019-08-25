@@ -106,6 +106,7 @@ module.exports = buildSchema(`
   type RootMutation {
     updateEmployee(id: ID!, data: EmployeeInput, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
     updateAddress(id: ID!, data: AddressInput!): Address!
+    deleteEmployee(id: ID!): Employee!
   }
   
   schema {
