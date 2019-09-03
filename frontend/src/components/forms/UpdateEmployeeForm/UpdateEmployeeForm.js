@@ -2,7 +2,7 @@ import React from 'react';
 import convertDate from '../../../utils';
 import axios from 'axios';
 
-export default class FormUpdateEmployee extends React.Component {
+export default class UpdateEmployeeForm extends React.Component {
   state = {
     ranks: []
   };

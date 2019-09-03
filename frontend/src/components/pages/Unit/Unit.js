@@ -1,36 +1,41 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import Modal from '../../Modal/Modal';
 import Backdrop from '../../Backdrop/Backdrop';
+import CreateEmployeeForm from "../../forms/CreateEmployeeForm/CreateEmployeeForm";
+import UpdateEmployeeForm from '../../forms/UpdateEmployeeForm/UpdateEmployeeForm';
 import Alert from '../../Alert/Alert';
 import axios from 'axios';
-
 import './Unit.css';
-import FormUpdateEmployee from '../../forms/FormUpdateEmployee/FormUpdateEmployee';
 
 export default class Unit extends React.Component {
   state = {
     unit: null,
     shortPositionName: true,
-    isModalShown: false,
+    isUpdateModalShown: false,
+    isCreateModalShown: false,
     isAlertShown: false,
     isAlertSuccess: false,
     employeeToUpdate: null
   };
 
   triggerPositionView = () => {
-    this.setState(prevState => ({ shortPositionName: !prevState.shortPositionName }));
+    this.setState(prevState => ({shortPositionName: !prevState.shortPositionName}));
   };
 
   setEmployeeToUpdate = employeeId => {
     this.setState({
       employeeToUpdate: this.state.unit.employees.find(e => e._id === employeeId),
-      isModalShown: true
+      isUpdateModalShown: true
     });
   };
 
+  createEmployee = employeeData => {
+    console.log(employeeData);
+  };
+
   updateEmployee = employeeData => {
-    const { data, addressOfResidence, registrationAddress } = employeeData;
+    const {data, addressOfResidence, registrationAddress} = employeeData;
     const token = localStorage.getItem('token');
     if (data || addressOfResidence || registrationAddress) {
       const requestBody = {
@@ -84,29 +89,29 @@ export default class Unit extends React.Component {
               }
             }
         }`,
-        variables: { id: this.state.employeeToUpdate._id, data, addressOfResidence, registrationAddress }
+        variables: {id: this.state.employeeToUpdate._id, data, addressOfResidence, registrationAddress}
       };
       axios.post('/graphql', {}, {
         baseURL: 'http://localhost:3001/',
         params: requestBody,
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: {'Authorization': `Bearer ${token}`}
       })
         .then(res => {
-          const { updateEmployee } = res.data.data;
+          const {updateEmployee} = res.data.data;
           const unit = Object.assign({}, this.state.unit);
           const updatedEmployees = unit.employees.filter(employee => employee._id !== updateEmployee._id);
           updatedEmployees.push(updateEmployee);
 
           this.setState({
-            unit: Object.assign({}, unit, { employees: updatedEmployees }),
-            isModalShown: false,
+            unit: Object.assign({}, unit, {employees: updatedEmployees}),
+            isUpdateModalShown: false,
             isAlertShown: true,
             isAlertSuccess: true,
           });
         })
         .catch(err => {
           this.setState({
-            isModalShown: false,
+            isUpdateModalShown: false,
             isAlertShown: true,
             isAlertSuccess: false,
           });
@@ -127,16 +132,16 @@ export default class Unit extends React.Component {
             _id
           }
         }`,
-      variables: { id: employeeId }
+      variables: {id: employeeId}
     };
 
     axios.post('/graphql', {}, {
       baseURL: 'http://localhost:3001/',
       params: requestBody,
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: {'Authorization': `Bearer ${token}`}
     })
       .then(res => {
-        const { deleteEmployee } = res.data.data;
+        const {deleteEmployee} = res.data.data; // todo: fix this
         // update Unit
         // show Alert
         // this.setState({ unit });
@@ -144,9 +149,15 @@ export default class Unit extends React.Component {
       .catch(err => console.error(err));
   };
 
-  triggerModal = () => this.setState(prevState => ({ isModalShown: !prevState.isModalShown }));
+  triggerCreateModal = () => this.setState(prevState => ({
+    isCreateModalShown: !prevState.isCreateModalShown
+  }));
 
-  triggerAlert = () => this.setState(prevState => ({ isAlertShown: !prevState.isAlertShown }));
+  triggerUpdateModal = () => this.setState(prevState => ({
+    isUpdateModalShown: !prevState.isUpdateModalShown,
+  }));
+
+  triggerAlert = () => this.setState(prevState => ({isAlertShown: !prevState.isAlertShown}));
 
   render() {
     if (!this.state.unit) {
@@ -157,16 +168,23 @@ export default class Unit extends React.Component {
     const employees = this.state.unit ? this.state.unit.employees : [];
 
     return (
-      <div className='unit' style={{ padding: '2rem' }}>
+      <div className='unit' style={{padding: '2rem'}}>
         {
-          this.state.isModalShown &&
+          (this.state.isUpdateModalShown || this.state.isCreateModalShown) &&
           <React.Fragment>
             <Backdrop/>
             <Modal>
-              <FormUpdateEmployee employee={this.state.employeeToUpdate}
+              {this.state.isUpdateModalShown &&
+              <UpdateEmployeeForm employee={this.state.employeeToUpdate}
                                   positions={this.state.unit.head.position.juniorPositions}
                                   updateEmployee={this.updateEmployee}
-                                  closeModal={this.triggerModal}/>
+                                  closeModal={this.triggerUpdateModal}/>
+              }
+              {this.state.isCreateModalShown &&
+                <CreateEmployeeForm positions={this.state.unit.head.position.juniorPositions}
+                                    createEmployee={this.createEmployee}
+                                    closeModal={this.triggerCreateModal} />
+              }
             </Modal>
           </React.Fragment>
         }
@@ -217,6 +235,8 @@ export default class Unit extends React.Component {
           </tbody>
         </table>
 
+        <button onClick={this.triggerCreateModal}>Add Employee</button>
+        <br/>
         <Link to={`${this.props.location.pathname}/order_chart`}>Графік чергування</Link>
       </div>
     );
@@ -285,16 +305,16 @@ export default class Unit extends React.Component {
             }
           }
         }`,
-        variables: { id: this.props.match.params.id }
+        variables: {id: this.props.match.params.id}
       };
       axios.get('/graphql', {
         baseURL: 'http://localhost:3001/',
         params: requestBody,
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: {'Authorization': `Bearer ${token}`}
       })
         .then(res => {
-          const { unit } = res.data.data;
-          this.setState({ unit });
+          const {unit} = res.data.data;
+          this.setState({unit});
         })
         .catch(err => console.error(err));
     }
