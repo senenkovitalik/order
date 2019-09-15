@@ -31,7 +31,88 @@ export default class Unit extends React.Component {
   };
 
   createEmployee = employeeData => {
-    console.log(employeeData);
+    const {employee, addressOfResidence, registrationAddress} = employeeData;
+    const token = localStorage.getItem('token');
+    if (employee || addressOfResidence || registrationAddress) {
+      const requestBody = {
+        query: `
+          mutation CreateEmployee(
+            $employee: EmployeeInput!,
+            $addressOfResidence: AddressInput,
+            $registrationAddress: AddressInput
+          ) {
+            createEmployee(
+              employee: $employee,
+              addressOfResidence: $addressOfResidence,
+              registrationAddress: $registrationAddress
+            ) {
+              _id
+              rank {
+                _id
+                index
+                name
+                shortName
+              }
+              position {
+                name
+                shortName
+              }
+              name
+              surname
+              patronymic
+              dateOfBirth
+              addressOfResidence {
+                region
+                district
+                city
+                village
+                urbanVillage
+                street
+                houseNumber
+                apartmentNumber
+              }
+              registrationAddress {
+                region
+                district
+                city
+                village
+                urbanVillage
+                street
+                houseNumber
+                apartmentNumber
+              }
+            }
+        }`,
+        variables: {employee, addressOfResidence, registrationAddress}
+      };
+      axios.post('/graphql', {}, {
+        baseURL: 'http://localhost:3001/',
+        params: requestBody,
+        headers: {'Authorization': `Bearer ${token}`}
+      })
+        .then(res => {
+          const {createEmployee} = res.data.data;
+          console.log(createEmployee);
+          // const unit = Object.assign({}, this.state.unit);
+          // const updatedEmployees = unit.employees.filter(employee => employee._id !== updateEmployee._id);
+          // updatedEmployees.push(updateEmployee);
+          //
+          // this.setState({
+          //   unit: Object.assign({}, unit, {employees: updatedEmployees}),
+          //   isUpdateModalShown: false,
+          //   isAlertShown: true,
+          //   isAlertSuccess: true,
+          // });
+        })
+        .catch(err => {
+          // this.setState({
+          //   isUpdateModalShown: false,
+          //   isAlertShown: true,
+          //   isAlertSuccess: false,
+          // });
+          console.error(err)
+        });
+    }
   };
 
   updateEmployee = employeeData => {

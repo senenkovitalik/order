@@ -2,6 +2,27 @@ const Employee = require('../../models/Employee');
 const Address = require('../../models/Address');
 
 module.exports = {
+  /* CREATE */
+  createEmployee: async (args, req) => {
+    const {employee, addressOfResidence, registrationAddress} = args;
+
+    try {
+      const residenceAddr = new Address(addressOfResidence);
+      const residenceAddrDoc = await residenceAddr.save();
+      employee.addressOfResidence = residenceAddrDoc._id;
+
+      const registrationAddr = new Address(registrationAddress);
+      const registrationAddrDoc = await registrationAddr.save();
+      employee.registrationAddress = registrationAddrDoc._id;
+
+      const newEmployee = new Employee(employee);
+      const employee = await newEmployee.save();
+      return await Employee.findById(employee._id);
+    } catch (err) {
+      console.log(err);
+    }
+  },
+
   /* GET */
   employee: async ({id}, req) => {
     if (!req.isAuth) {

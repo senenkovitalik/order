@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Unit = require('../models/Unit');
 const Rank = require('../models/Rank');
+const Position = require('../models/Position');
 const Address = require('../models/Address');
 
 const employeeSchema = new Schema({
@@ -33,11 +34,14 @@ const employeeSchema = new Schema({
   },
   unit: {
     type: Schema.Types.ObjectId,
-    ref: 'Unit'
+    ref: 'Unit',
+    required: true,
+    autopopulate: true
   },
   type: {
     type: String,
-    required: true,
+    default: 'WORKER',
+    required: false,
     enum: ['HEAD', 'WORKER'] }
 });
 

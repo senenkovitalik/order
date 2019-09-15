@@ -38,7 +38,7 @@ module.exports = buildSchema(`
     registrationAddress: Address
     rank: Rank!
     position: Position!
-    type: String!
+    type: String
     unit: Unit!
   }
   
@@ -83,9 +83,9 @@ module.exports = buildSchema(`
     dateOfBirth: String
     addressOfResidence: ID
     registrationAddress: ID
-    rank: ID
-    position: ID
-    unit: ID
+    rank: ID!
+    position: ID!
+    unit: ID!
   }
   
   type RootQuery {
@@ -104,6 +104,7 @@ module.exports = buildSchema(`
   }
   
   type RootMutation {
+    createEmployee(employee: EmployeeInput!, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
     updateEmployee(id: ID!, data: EmployeeInput, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
     updateAddress(id: ID!, data: AddressInput!): Address!
     deleteEmployee(id: ID!): Employee!
