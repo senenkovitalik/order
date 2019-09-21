@@ -32,6 +32,7 @@ export default class Unit extends React.Component {
 
   createEmployee = employeeData => {
     const {employee, addressOfResidence, registrationAddress} = employeeData;
+    employee.unit = this.state.unit._id;
     const token = localStorage.getItem('token');
     if (employee || addressOfResidence || registrationAddress) {
       const requestBody = {
@@ -92,24 +93,23 @@ export default class Unit extends React.Component {
       })
         .then(res => {
           const {createEmployee} = res.data.data;
-          console.log(createEmployee);
-          // const unit = Object.assign({}, this.state.unit);
-          // const updatedEmployees = unit.employees.filter(employee => employee._id !== updateEmployee._id);
-          // updatedEmployees.push(updateEmployee);
-          //
-          // this.setState({
-          //   unit: Object.assign({}, unit, {employees: updatedEmployees}),
-          //   isUpdateModalShown: false,
-          //   isAlertShown: true,
-          //   isAlertSuccess: true,
-          // });
+          const unit = Object.assign({}, this.state.unit);
+          const updatedEmployees = unit.employees.filter(employee => employee._id !== createEmployee._id);
+          updatedEmployees.push(createEmployee);
+
+          this.setState({
+            unit: Object.assign({}, unit, {employees: updatedEmployees}),
+            isCreateModalShown: false,
+            isAlertShown: true,
+            isAlertSuccess: true,
+          });
         })
         .catch(err => {
-          // this.setState({
-          //   isUpdateModalShown: false,
-          //   isAlertShown: true,
-          //   isAlertSuccess: false,
-          // });
+          this.setState({
+            isCreateModalShown: false,
+            isAlertShown: true,
+            isAlertSuccess: false,
+          });
           console.error(err)
         });
     }

@@ -4,6 +4,10 @@ const Address = require('../../models/Address');
 module.exports = {
   /* CREATE */
   createEmployee: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthorized');
+    }
+
     const {employee, addressOfResidence, registrationAddress} = args;
 
     try {
@@ -16,8 +20,8 @@ module.exports = {
       employee.registrationAddress = registrationAddrDoc._id;
 
       const newEmployee = new Employee(employee);
-      const employee = await newEmployee.save();
-      return await Employee.findById(employee._id);
+      const newEmployeeDoc = await newEmployee.save();
+      return await Employee.findById(newEmployeeDoc._id);
     } catch (err) {
       console.log(err);
     }

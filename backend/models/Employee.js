@@ -45,6 +45,18 @@ const employeeSchema = new Schema({
     enum: ['HEAD', 'WORKER'] }
 });
 
+employeeSchema.post('save', async (doc) => {
+  // add employee _id into Unit employees array
+  try {
+    const unit = await Unit.findById(doc.unit);
+    unit.employees.push(doc._id);
+    await unit.save();
+  } catch (err) {
+    console.log(err);
+  }
+
+});
+
 employeeSchema.post('remove', async ({_id, addressOfResidence, registrationAddress}) => {
   // delete Employee from Unit.Employees
   const unit = await Unit.find({employees: _id});
