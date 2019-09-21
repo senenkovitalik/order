@@ -105,13 +105,13 @@ module.exports = {
   },
 
   /* DELETE */
-  deleteEmployee: async ({id: _id}, req) => {
+  deleteEmployee: async ({id}, req) => {
     if (!req.isAuth) {
       throw new Error('Unauthorized');
     }
 
     try {
-      const employee = await Employee.findById(_id).exec();
+      const employee = await Employee.findById(id).exec();
       return await employee.remove();
     } catch (err) {
       throw err;

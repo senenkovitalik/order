@@ -202,10 +202,6 @@ export default class Unit extends React.Component {
   };
 
   deleteEmployee = employeeId => {
-    if (employeeId) {
-      return;
-    }
-
     const token = localStorage.getItem('token');
     const requestBody = {
       query: `mutation DeleteEmployee($id: ID!) {
@@ -222,12 +218,24 @@ export default class Unit extends React.Component {
       headers: {'Authorization': `Bearer ${token}`}
     })
       .then(res => {
-        const {deleteEmployee} = res.data.data; // todo: fix this
+        const {deleteEmployee} = res.data.data;
         // update Unit
+        const unit = Object.assign({}, this.state.unit);
+        unit.employees = unit.employees.filter(e => e._id !== deleteEmployee._id);
         // show Alert
-        // this.setState({ unit });
+        this.setState({
+          unit,
+          isAlertShown: true,
+          isAlertSuccess: true
+        });
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        this.setState({
+          isAlertShown: true,
+          isAlertSuccess: false
+        });
+        console.error(err);
+      });
   };
 
   triggerCreateModal = () => this.setState(prevState => ({

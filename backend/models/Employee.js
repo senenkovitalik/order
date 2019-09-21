@@ -57,12 +57,12 @@ employeeSchema.post('save', async (doc) => {
 
 });
 
-employeeSchema.post('remove', async ({_id, addressOfResidence, registrationAddress}) => {
+employeeSchema.post('remove', async ({_id, unit, addressOfResidence, registrationAddress}) => {
   // delete Employee from Unit.Employees
-  const unit = await Unit.find({employees: _id});
-  unit.employees = unit.employees.filter(employee => employee._id !== _id);
   try {
-    await unit.save();
+    const updatedUnit = await Unit.findById(unit._id);
+    updatedUnit.employees = updatedUnit.employees.filter(employee => employee._id !== _id);
+    await updatedUnit.save();
   } catch (err) {
     throw err;
   }
