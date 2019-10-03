@@ -61,7 +61,7 @@ employeeSchema.post('remove', async ({_id, unit, addressOfResidence, registratio
   // delete Employee from Unit.Employees
   try {
     const updatedUnit = await Unit.findById(unit._id);
-    updatedUnit.employees = updatedUnit.employees.filter(employee => employee._id !== _id);
+    updatedUnit.employees = updatedUnit.employees.filter(employee => employee._id.toString() !== _id.toString());
     await updatedUnit.save();
   } catch (err) {
     throw err;
