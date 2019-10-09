@@ -72,7 +72,7 @@ class OrderChart extends React.Component {
     this.setState(prevState => {
       const usersUpdated = [...prevState.users];
       usersUpdated.forEach(user => {
-        user.duties = []
+        user.duties = [];
       });
       return { users: usersUpdated };
     });
@@ -101,7 +101,7 @@ class OrderChart extends React.Component {
                   handleChange={this.handleRadioChange}
                   clearDuties={this.clearDuties}/>
 
-        {parentUnit && <UpperResolution head={parentUnit.head} />}
+        {parentUnit && <UpperResolution head={parentUnit.head}/>}
 
         <br/><br/><br/><br/>
 
@@ -132,7 +132,7 @@ class OrderChart extends React.Component {
 
         <br/><br/>
 
-        <BottomResolution head={head} />
+        <BottomResolution head={head}/>
 
         {
           !this.state.isFullDuty &&
@@ -194,7 +194,10 @@ class OrderChart extends React.Component {
       };
       axios.get('/graphql', {
         baseURL: 'http://localhost:3001/',
-        params: requestBody
+        params: requestBody,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       })
         .then(res => {
           const { unit } = res.data.data;
