@@ -17,6 +17,7 @@ module.exports = buildSchema(`
   }
   
   type Address {
+    _id: ID!
     region: String
     district: String
     city: String
@@ -37,8 +38,8 @@ module.exports = buildSchema(`
     registrationAddress: Address
     rank: Rank!
     position: Position!
-    type: String!
-    unit: Unit
+    type: String
+    unit: Unit!
   }
   
   type Unit {
@@ -63,6 +64,30 @@ module.exports = buildSchema(`
     employee: Employee!
   }
   
+  input AddressInput {
+    _id: ID
+    region: String
+    district: String
+    city: String
+    village: String
+    urbanVillage: String
+    street: String
+    houseNumber: String
+    apartmentNumber: String
+  }
+  
+  input EmployeeInput {
+    name: String
+    surname: String 
+    patronymic: String
+    dateOfBirth: String
+    addressOfResidence: ID
+    registrationAddress: ID
+    rank: ID!
+    position: ID!
+    unit: ID!
+  }
+  
   type RootQuery {
     ranks: [Rank!]!
     rank(id: String!): Rank
@@ -78,7 +103,15 @@ module.exports = buildSchema(`
     login(login: String!, password: String!): AuthData
   }
   
+  type RootMutation {
+    createEmployee(employee: EmployeeInput!, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
+    updateEmployee(id: ID!, data: EmployeeInput, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
+    updateAddress(id: ID!, data: AddressInput!): Address!
+    deleteEmployee(id: ID!): Employee!
+  }
+  
   schema {
     query: RootQuery
+    mutation: RootMutation
   }
 `);

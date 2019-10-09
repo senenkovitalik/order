@@ -1,0 +1,7 @@
+.require {
+    color: red;
+}
+
+.require:after {
+    content: '*'
+}
