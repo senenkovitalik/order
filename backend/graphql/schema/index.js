@@ -50,6 +50,12 @@ module.exports = buildSchema(`
     childUnits: [Unit!]!
     head: Employee!
     employees: [Employee!]!
+    posts: [Post!]!
+  }
+  
+  type Post {
+    _id: ID!
+    name: String!
   }
   
   type User {
@@ -108,6 +114,8 @@ module.exports = buildSchema(`
     updateEmployee(id: ID!, data: EmployeeInput, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
     updateAddress(id: ID!, data: AddressInput!): Address!
     deleteEmployee(id: ID!): Employee!
+    createPost(unitId: ID!, postName: String!): Post!
+    deletePost(id: ID!): Post!
   }
   
   schema {

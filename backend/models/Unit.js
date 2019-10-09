@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Employee = require('./Employee');
+const Post = require('./Post');
 
 const unitSchema = new Schema({
   name: { type: String, required: true },
@@ -21,7 +22,14 @@ const unitSchema = new Schema({
   employees: [{
     type: Schema.Types.ObjectId,
     ref: 'Employee'
+  }],
+  posts: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Post',
+    autopopulate: true
   }]
 });
 
-module.exports = mongoose.model('Unit', unitSchema);
+unitSchema.plugin(require('mongoose-autopopulate'));
+
+module.exports = mongoose.models.Unit || mongoose.model('Unit', unitSchema);

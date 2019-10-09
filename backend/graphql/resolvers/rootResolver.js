@@ -4,6 +4,7 @@ const userResolver = require('./usersResolver');
 const unitResolver = require('./unitResolver');
 const rankResolver = require('./rankResolver');
 const addressResolver = require('./addressResolver');
+const postResolver = require('./postResolver');
 
 module.exports = {
   ...positionResolver,
@@ -11,5 +12,6 @@ module.exports = {
   ...userResolver,
   ...unitResolver,
   ...rankResolver,
-  ...addressResolver
+  ...addressResolver,
+  ...postResolver
 };
