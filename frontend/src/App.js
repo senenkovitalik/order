@@ -9,6 +9,7 @@ import Employee from './components/pages/Employee/Employee';
 import axios from 'axios';
 
 import './App.css';
+import Posts from './components/pages/Posts/Posts';
 
 class App extends React.Component {
   state = {
@@ -78,8 +79,9 @@ class App extends React.Component {
         <Switch>
           {
             this.state.isLogged && <React.Fragment>
+              <Route exact path='/unit/:unitId/posts/:postId' component={OrderChart}/>
+              <Route exact path='/unit/:unitId/posts' component={Posts}/>
               <Route exact path='/unit/:id' component={Unit}/>
-              <Route path='/unit/:id/order_chart' component={OrderChart}/>
               <Route path='/employee/:id' component={Employee}/>
               <Route path='/order' component={Order}/>
             </React.Fragment>
@@ -121,7 +123,7 @@ class App extends React.Component {
             employee,
             unitId: employee.unit._id,
           });
-          this.props.history.push(`/unit/${employee.unit._id}`);
+          // this.props.history.push(`/unit/${employee.unit._id}`);
         })
         .catch(err => {
           console.log(err);
