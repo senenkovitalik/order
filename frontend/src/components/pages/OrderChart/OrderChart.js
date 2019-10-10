@@ -86,7 +86,18 @@ class OrderChart extends React.Component {
   };
 
   saveDuties = () => {
-    console.log(this.state.unit.employees);
+    const duties = this.state.unit.employees.map(e =>
+      e.duties.map(({ day, duty }) => (
+          {
+            date: new Date(new Date().getFullYear(), new Date().getMonth(), day),
+            type: duty,
+            employee: e._id,
+            post: this.props.match.params.postId
+          }
+        )
+      )
+    );
+    console.log(duties);
   };
 
   render() {
