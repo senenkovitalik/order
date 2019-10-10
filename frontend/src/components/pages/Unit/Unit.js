@@ -1,8 +1,8 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Modal from '../../Modal/Modal';
 import Backdrop from '../../Backdrop/Backdrop';
-import CreateEmployeeForm from "../../forms/CreateEmployeeForm/CreateEmployeeForm";
+import CreateEmployeeForm from '../../forms/CreateEmployeeForm/CreateEmployeeForm';
 import UpdateEmployeeForm from '../../forms/UpdateEmployeeForm/UpdateEmployeeForm';
 import Alert from '../../Alert/Alert';
 import axios from 'axios';
@@ -326,7 +326,7 @@ export default class Unit extends React.Component {
 
         <button onClick={this.triggerCreateModal}>Add Employee</button>
         <br/>
-        <Link to={`${this.props.location.pathname}/order_chart`}>Графік чергування</Link>
+        <Link to={`${this.props.location.pathname}/posts`}>Чергування</Link>
       </div>
     );
   }
@@ -335,7 +335,7 @@ export default class Unit extends React.Component {
     const token = localStorage.getItem('token');
     if (this.props.match.params.id && token) {
       const requestBody = {
-        query: `query Unit($id: String!) {
+        query: `query Unit($id: ID!) {
           unit(id: $id) {
             _id
             name
