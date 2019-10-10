@@ -10,14 +10,14 @@ class Row extends React.Component {
 
   // set current user id
   handleMouseEnter = () => {
-    this.props.setCurrentUserId(this.props.employee.id);
+    this.props.setCurrentEmployeeId(this.props.employee._id);
   };
 
   render() {
-    const cells = [...Array(30)]
+    const cells = [...Array(this.props.days)]
       .map((x, i) => {
         const day = i + 1;
-        const duties = undefined; /*this.props.employee.duties.find(duty => duty.day === day);*/
+        const duties = this.props.employee.duties.find(duty => duty.day === day);
         return <Cell key={day}
                      day={day}
                      duties={duties}
@@ -53,7 +53,7 @@ Row.propTypes = {
   }),
   index: PropTypes.number,
   checkDay: PropTypes.func,
-  setCurrentUserId: PropTypes.func,
+  setCurrentEmployeeId: PropTypes.func,
   setCurrentDay: PropTypes.func,
   togglePopover: PropTypes.func
 };

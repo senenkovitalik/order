@@ -5,12 +5,13 @@ import Row from '../../Row/Row';
 import Popover from '../../Popover/Popover';
 import UpperResolution from '../OrderChart/UpperResolution/UpperResolution';
 import BottomResolution from '../OrderChart/BottomResolution/BottomResolution';
+import { monthes } from '../../data';
 import axios from 'axios';
 
 class OrderChart extends React.Component {
   state = {
     unit: null,
-    currentUserId: null,
+    currentEmployeeId: null,
     currentDay: null,
     isFullDuty: true,
     isPopoverShown: false,
@@ -21,24 +22,27 @@ class OrderChart extends React.Component {
   Set/remove duties per day
    */
   checkDay = duty => {
-    const { currentDay: day, currentUserId: userId } = this.state;
+    const { currentDay: day, currentEmployeeId: employeeId } = this.state;
 
-    if (!(day || userId)) {
+    if (!(day || employeeId)) {
       return;
     }
 
-    const user = this.state.users.find(u => u.id === userId);
-    const usedDuty = user.duties.find(d => d.day === day);
+    const employee = this.state.unit.employees.find(e => e._id === employeeId);
+    const usedDuty = employee.duties.find(d => d.day === day);
 
     if (!!usedDuty) {
-      user.duties = user.duties.filter(duty => duty.day !== day);
+      employee.duties = employee.duties.filter(duty => duty.day !== day);
     } else {
-      user.duties.push({ day, duty });
+      employee.duties.push({ day, duty });
     }
 
-    this.setState(prevState => (
-      { users: prevState.users.filter(u => u.id !== userId).concat(user) }
-    ));
+    this.setState(prevState => ({
+      unit: {
+        ...prevState.unit,
+        employees: prevState.unit.employees.filter(e => e._id !== employeeId).concat(employee)
+      }
+    }));
   };
 
   togglePopover = (isShown, e) => {
@@ -54,9 +58,9 @@ class OrderChart extends React.Component {
   };
 
   // event handler on tr element fire this method
-  setCurrentUserId = userId => {
+  setCurrentEmployeeId = userId => {
     this.setState({
-      currentUserId: userId
+      currentEmployeeId: userId
     });
   };
 
@@ -74,25 +78,30 @@ class OrderChart extends React.Component {
       usersUpdated.forEach(user => {
         user.duties = [];
       });
-      return { users: usersUpdated };
+      return {
+        users: usersUpdated
+      };
     });
   };
 
   render() {
+    const d = new Date();
+    const currentMonth = monthes[d.getMonth()];
+    const year = d.getFullYear();
     const head = this.state.unit ? this.state.unit.head : null;
     const employees = this.state.unit ? this.state.unit.employees : [];
-    const days = [...Array(30)].map((x, i) => <th key={i + 1}>{i + 1}</th>);
+    const days = [...Array(currentMonth.days)].map((x, i) => <th key={i + 1}>{i + 1}</th>);
     const rows = employees.sort((a, b) => b.rank.index - a.rank.index)
       .map((employee, i) =>
         <Row key={employee._id}
+             days={currentMonth.days}
              checkDay={this.checkDay}
-             setCurrentUserId={this.setCurrentUserId}
+             setCurrentEmployeeId={this.setCurrentEmployeeId}
              setCurrentDay={this.setCurrentDay}
              employee={employee}
              togglePopover={this.togglePopover}
              index={i + 1}/>
       );
-
     const parentUnit = this.state.unit ? this.state.unit.parentUnit : null;
     return (
       <div className="order-chart landscape">
@@ -107,8 +116,8 @@ class OrderChart extends React.Component {
 
         <div className="row row_centered">
           <p>ГРАФІК ЧЕРГУВАННЯ</p>
-          <p>старших помічників начальника пункту управління системою зв'язку</p>
-          <p>на червень 2019 року</p>
+          <p>особового складу {this.state.unit ? this.state.unit.name : ''}</p>
+          <p>на {currentMonth.name} {year} року</p>
         </div>
 
         <br/>
@@ -119,7 +128,7 @@ class OrderChart extends React.Component {
             <th rowSpan="2" style={{ width: 3 + '%' }}>#</th>
             <th rowSpan="2" style={{ width: 7 + '%' }}>Військове звання</th>
             <th rowSpan="2" style={{ width: 10 + '%' }}>ПІБ</th>
-            <th colSpan="30">Дата</th>
+            <th colSpan={currentMonth.days}>Дата</th>
           </tr>
           <tr>
             {days}
@@ -146,10 +155,10 @@ class OrderChart extends React.Component {
   };
 
   componentDidMount() {
-    const unitId = this.props.match.params.id;
+    const { unitId } = this.props.match.params;
     if (unitId) {
       const requestBody = {
-        query: `query Unit($id: String!) {
+        query: `query Unit($id: ID!) {
           unit(id: $id) {
             _id
             name
@@ -201,6 +210,7 @@ class OrderChart extends React.Component {
       })
         .then(res => {
           const { unit } = res.data.data;
+          unit.employees = unit.employees.map(e => ({ ...e, duties: [] }));
           this.setState({ unit });
         })
         .catch(err => console.error(err));
