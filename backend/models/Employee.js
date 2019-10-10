@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const Unit = require('../models/Unit');
+const Unit = require('./Unit');
 const Rank = require('../models/Rank');
 const Position = require('../models/Position');
 const Address = require('../models/Address');
