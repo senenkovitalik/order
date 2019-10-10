@@ -105,7 +105,7 @@ module.exports = buildSchema(`
     user(userId: String!): User
     userByToken: User!
     units: [Unit!]!
-    unit(id: String!): Unit
+    unit(id: ID!): Unit
     login(login: String!, password: String!): AuthData
   }
   
