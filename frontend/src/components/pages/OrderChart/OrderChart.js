@@ -74,14 +74,19 @@ class OrderChart extends React.Component {
   // Clear duties for all users
   clearDuties = () => {
     this.setState(prevState => {
-      const usersUpdated = [...prevState.users];
-      usersUpdated.forEach(user => {
-        user.duties = [];
-      });
+      const updatedEmployees = [...prevState.unit.employees];
+      updatedEmployees.forEach(employee => employee.duties = []);
       return {
-        users: usersUpdated
+        unit: {
+          ...prevState.unit,
+          employees: updatedEmployees
+        }
       };
     });
+  };
+
+  saveDuties = () => {
+    console.log(this.state.unit.employees);
   };
 
   render() {
@@ -108,7 +113,8 @@ class OrderChart extends React.Component {
 
         <Controls isFullDuty={this.state.isFullDuty}
                   handleChange={this.handleRadioChange}
-                  clearDuties={this.clearDuties}/>
+                  clearDuties={this.clearDuties}
+                  saveDuties={this.saveDuties}/>
 
         {parentUnit && <UpperResolution head={parentUnit.head}/>}
 
