@@ -5,24 +5,25 @@ import Row from '../../Row/Row';
 import Popover from '../../Popover/Popover';
 import UpperResolution from '../OrderChart/UpperResolution/UpperResolution';
 import BottomResolution from '../OrderChart/BottomResolution/BottomResolution';
-import { monthes } from '../../data';
+import {monthes} from '../../data';
 import axios from 'axios';
 
 class OrderChart extends React.Component {
   state = {
     unit: null,
+    duties: [],
     currentEmployeeId: null,
     currentDay: null,
     isFullDuty: true,
     isPopoverShown: false,
-    popoverPosition: { x: 0, y: 0 }
+    popoverPosition: {x: 0, y: 0}
   };
 
   /*
   Set/remove duties per day
    */
   checkDay = duty => {
-    const { currentDay: day, currentEmployeeId: employeeId } = this.state;
+    const {currentDay: day, currentEmployeeId: employeeId} = this.state;
 
     if (!(day || employeeId)) {
       return;
@@ -34,7 +35,7 @@ class OrderChart extends React.Component {
     if (!!usedDuty) {
       employee.duties = employee.duties.filter(duty => duty.day !== day);
     } else {
-      employee.duties.push({ day, duty });
+      employee.duties.push({day, duty});
     }
 
     this.setState(prevState => ({
@@ -46,15 +47,15 @@ class OrderChart extends React.Component {
   };
 
   togglePopover = (isShown, e) => {
-    const { top, left, width } = e.target.getBoundingClientRect();
+    const {top, left, width} = e.target.getBoundingClientRect();
     this.setState({
       isPopoverShown: isShown,
-      popoverPosition: { x: left + width + window.scrollX, y: top + window.scrollY }
+      popoverPosition: {x: left + width + window.scrollX, y: top + window.scrollY}
     });
   };
 
   handleRadioChange = () => {
-    this.setState(prevState => ({ isFullDuty: !prevState.isFullDuty }));
+    this.setState(prevState => ({isFullDuty: !prevState.isFullDuty}));
   };
 
   // event handler on tr element fire this method
@@ -87,23 +88,59 @@ class OrderChart extends React.Component {
 
   saveDuties = () => {
     const duties = this.state.unit.employees.map(e =>
-      e.duties.map(({ day, duty }) => (
-          {
-            date: new Date(new Date().getFullYear(), new Date().getMonth(), day),
-            type: duty,
-            employee: e._id,
-            post: this.props.match.params.postId
-          }
-        )
+      e.duties.map(({day, duty}) => ({
+          day,
+          type: duty,
+          employee: e._id
+        })
       )
     );
-    console.log(duties);
+    const [year, month] = search.match(/\d+/g).map(v => parseInt(v, 10));
+    const payload = {
+      year,
+      month,
+      unit: this.props.match.params.unitId,
+      post: this.props.match.params.postId,
+      duties
+    };
+
+    const requestBody = {
+      query: `
+          mutation SaveMonthDuties($monthDutiesInput: MonthDutiesInput!) {
+            saveMonthDuties(monthDutiesInput: $monthDutiesInput) {
+              _id
+            }
+          }
+        `,
+      variables: {
+        monthDutiesInput: payload
+      }
+    };
+
+    axios.post('/graphql',
+      {},
+      {
+        baseURL: 'http://localhost:3001/',
+        params: requestBody,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then(res => {
+        // todo
+        this.setState({
+          monthDuties: res.data.data.saveMonthDuties
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   render() {
     const d = new Date();
-    const currentMonth = monthes[d.getMonth()];
-    const year = d.getFullYear();
+    const currentMonth = monthes[d.getMonth()]; // todo
+    const year = d.getFullYear();  // todo
     const head = this.state.unit ? this.state.unit.head : null;
     const employees = this.state.unit ? this.state.unit.employees : [];
     const days = [...Array(currentMonth.days)].map((x, i) => <th key={i + 1}>{i + 1}</th>);
@@ -142,9 +179,9 @@ class OrderChart extends React.Component {
         <table className="table">
           <thead>
           <tr>
-            <th rowSpan="2" style={{ width: 3 + '%' }}>#</th>
-            <th rowSpan="2" style={{ width: 7 + '%' }}>Військове звання</th>
-            <th rowSpan="2" style={{ width: 10 + '%' }}>ПІБ</th>
+            <th rowSpan="2" style={{width: 3 + '%'}}>#</th>
+            <th rowSpan="2" style={{width: 7 + '%'}}>Військове звання</th>
+            <th rowSpan="2" style={{width: 10 + '%'}}>ПІБ</th>
             <th colSpan={currentMonth.days}>Дата</th>
           </tr>
           <tr>
@@ -172,40 +209,21 @@ class OrderChart extends React.Component {
   };
 
   componentDidMount() {
-    const { unitId } = this.props.match.params;
-    if (unitId) {
-      const requestBody = {
-        query: `query Unit($id: ID!) {
-          unit(id: $id) {
+    const {search} = this.props.location;
+    const [year, month] = search.match(/\d+/g).map(v => parseInt(v, 10));
+    const requestBody = {
+      query: `
+        query MonthDuties($year: Int!, $month: Int!, $post: ID!) {
+          monthDuties(year: $year, month: $month, post: $post) {
             _id
-            name
-            head {
+            unit {
               _id
               name
-              surname
-              patronymic
-              rank {
-                name
-              }
-              position {
-                name
-              }
-            }
-            employees {
-              _id
-              rank {
-                index
-                shortName
-              }
-              name
-              surname
-              patronymic
-            }
-            parentUnit {
-              _id
               head {
+                _id
                 name
                 surname
+                patronymic
                 rank {
                   name
                 }
@@ -213,25 +231,59 @@ class OrderChart extends React.Component {
                   name
                 }
               }
+              employees {
+                _id
+                rank {
+                  index
+                  shortName
+                }
+                name
+                surname
+                patronymic
+              }
+              parentUnit {
+                _id
+                head {
+                  name
+                  surname
+                  rank {
+                    name
+                  }
+                  position {
+                    name
+                  }
+                }
+              }
+            }
+            duties {
+              day
+              employee {
+                _id
+              }
             }
           }
         }`,
-        variables: { id: unitId }
-      };
-      axios.get('/graphql', {
-        baseURL: 'http://localhost:3001/',
-        params: requestBody,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      variables: {
+        year,
+        month,
+        post: this.props.match.params.postId
+      }
+    };
+    axios.get('/graphql', {
+      baseURL: 'http://localhost:3001/',
+      params: requestBody,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(res => {
+        const {unit, duties} = res.data.data.monthDuties;
+        this.setState({
+          unit,
+          duties
+        });
       })
-        .then(res => {
-          const { unit } = res.data.data;
-          unit.employees = unit.employees.map(e => ({ ...e, duties: [] }));
-          this.setState({ unit });
-        })
-        .catch(err => console.error(err));
-    }
+      .catch(err => console.error(err));
   }
 }
 
