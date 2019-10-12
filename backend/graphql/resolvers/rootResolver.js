@@ -5,6 +5,7 @@ const unitResolver = require('./unitResolver');
 const rankResolver = require('./rankResolver');
 const addressResolver = require('./addressResolver');
 const postResolver = require('./postResolver');
+const dutyResolver = require('./dutyResolver');
 
 module.exports = {
   ...positionResolver,
@@ -13,5 +14,6 @@ module.exports = {
   ...unitResolver,
   ...rankResolver,
   ...addressResolver,
-  ...postResolver
+  ...postResolver,
+  ...dutyResolver
 };

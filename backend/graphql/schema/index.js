@@ -70,6 +70,22 @@ module.exports = buildSchema(`
     employee: Employee!
   }
   
+  type Duty {
+    _id: ID!
+    day: Int!
+    employee: Employee!
+    type: String!
+  }
+  
+  type MonthDuties {
+    _id: ID!
+    year: Int!
+    month: Int!
+    unit: Unit!
+    post: Post!
+    duties: [Duty!]!
+  }
+  
   input AddressInput {
     _id: ID
     region: String
@@ -94,6 +110,20 @@ module.exports = buildSchema(`
     unit: ID!
   }
   
+  input DutyInput {
+    day: Int!
+    employee: ID!
+    type: String!
+  }
+  
+  input MonthDutiesInput {
+    year: Int!
+    month: Int!
+    post: ID!
+    unit: ID!
+    duties: [DutyInput!]!
+  }
+  
   type RootQuery {
     ranks: [Rank!]!
     rank(id: String!): Rank
@@ -107,6 +137,7 @@ module.exports = buildSchema(`
     units: [Unit!]!
     unit(id: ID!): Unit
     login(login: String!, password: String!): AuthData
+    monthDuties(year: Int!, month: Int!, post: ID!): MonthDuties
   }
   
   type RootMutation {
@@ -116,6 +147,7 @@ module.exports = buildSchema(`
     deleteEmployee(id: ID!): Employee!
     createPost(unitId: ID!, postName: String!): Post!
     deletePost(id: ID!): Post!
+    saveMonthDuties(monthDutiesInput: MonthDutiesInput!): MonthDuties!
   }
   
   schema {
