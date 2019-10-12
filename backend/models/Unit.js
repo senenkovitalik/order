@@ -9,6 +9,7 @@ const unitSchema = new Schema({
   parentUnit: {
     type: Schema.Types.ObjectId,
     ref: 'Unit',
+    autopopulate: true
   },
   childUnits: [{
     type: Schema.Types.ObjectId,
@@ -17,11 +18,13 @@ const unitSchema = new Schema({
   head: {
     type: Schema.Types.ObjectId,
     ref: 'Employee',
-    required: true
+    required: true,
+    autopopulate: true
   },
   employees: [{
     type: Schema.Types.ObjectId,
-    ref: 'Employee'
+    ref: 'Employee',
+    autopopulate: true
   }],
   posts: [{
     type: Schema.Types.ObjectId,
