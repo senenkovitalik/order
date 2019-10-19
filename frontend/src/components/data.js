@@ -23,3 +23,34 @@ export const monthes = [
   {name: "листопад", days: 30},
   {name: "грудень", days: 31}
 ];
+
+export const dutyMapping = {
+  '111': {
+    className: 'cell_used-full',
+    content: ''
+  },
+  '110': {
+    className: 'cell_used-partly',
+    content: '1/2'
+  },
+  '100': {
+    className: 'cell_used-partly',
+    content: '1'
+  },
+  '101': {
+    className: 'cell_used-partly',
+    content: '1/3'
+  },
+  '011': {
+    className: 'cell_used-partly',
+    content: '2/3'
+  },
+  '001': {
+    className: 'cell_used-partly',
+    content: '3'
+  },
+  '010': {
+    className: 'cell_used-partly',
+    content: '2'
+  },
+};

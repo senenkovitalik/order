@@ -1,40 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './Cell.css';
+import {dutyMapping} from "../data";
 
-const dutyMapping = {
-  '111': {
-    className: 'cell_used-full',
-    content: ''
-  },
-  '110': {
-    className: 'cell_used-partly',
-    content: '1/2'
-  },
-  '100': {
-    className: 'cell_used-partly',
-    content: '1'
-  },
-  '101': {
-    className: 'cell_used-partly',
-    content: '1/3'
-  },
-  '011': {
-    className: 'cell_used-partly',
-    content: '2/3'
-  },
-  '001': {
-    className: 'cell_used-partly',
-    content: '3'
-  },
-  '010': {
-    className: 'cell_used-partly',
-    content: '2'
-  },
-};
-
-function cell({ day, duties, setCurrentDay, togglePopover }) {
-  const content = duties ? dutyMapping[duties.duty].content : null;
+function cell({ day, duty, setCurrentDay, togglePopover }) {
+  const content = duty ? dutyMapping[duty.type].content : null;
   const classList = ['cell'];
 
   if (duties) {
@@ -53,11 +23,11 @@ function cell({ day, duties, setCurrentDay, togglePopover }) {
 export default cell;
 
 cell.propTypes = {
-  day: PropTypes.number,
-  duties: PropTypes.shape({
-    day: PropTypes.number,
-    duty: PropTypes.string
-  }) || undefined,
-  setCurrentDay: PropTypes.func,
-  togglePopover: PropTypes.func
+  day: PropTypes.number.isRequired,
+  duty: PropTypes.shape({
+    day: PropTypes.number.isRequired,
+    type: PropTypes.string.isRequired
+  }),
+  setCurrentDay: PropTypes.func.isRequired,
+  togglePopover: PropTypes.func.isRequired
 };
