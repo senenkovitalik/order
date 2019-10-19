@@ -7,8 +7,8 @@ function cell({ day, duty, setCurrentDay, togglePopover }) {
   const content = duty ? dutyMapping[duty.type].content : null;
   const classList = ['cell'];
 
-  if (duties) {
-    classList.push(dutyMapping[duties.duty].className)
+  if (duty) {
+    classList.push(dutyMapping[duty.type].className)
   }
 
   return (

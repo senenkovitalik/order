@@ -22,7 +22,7 @@ class OrderChart extends React.Component {
   /*
   Set/remove duties per day
    */
-  checkDay = duty => {
+  checkDay = dutyType => {
     const {currentDay: day, currentEmployeeId: employeeId} = this.state;
 
     if (!(day || employeeId)) {
@@ -35,7 +35,7 @@ class OrderChart extends React.Component {
     if (!!usedDuty) {
       employee.duties = employee.duties.filter(duty => duty.day !== day);
     } else {
-      employee.duties.push({day, duty});
+      employee.duties.push({day, type: dutyType});
     }
 
     this.setState(prevState => ({
@@ -95,7 +95,7 @@ class OrderChart extends React.Component {
         })
       )
     );
-    const [year, month] = search.match(/\d+/g).map(v => parseInt(v, 10));
+    const [year, month] = this.props.location.search.match(/\d+/g).map(v => parseInt(v, 10));
     const payload = {
       year,
       month,
@@ -138,9 +138,8 @@ class OrderChart extends React.Component {
   };
 
   render() {
-    const d = new Date();
-    const currentMonth = monthes[d.getMonth()]; // todo
-    const year = d.getFullYear();  // todo
+    const [year, month] = this.props.location.search.match(/\d+/g).map(v => parseInt(v, 10));
+    const currentMonth = monthes[month];
     const head = this.state.unit ? this.state.unit.head : null;
     const employees = this.state.unit ? this.state.unit.employees : [];
     const days = [...Array(currentMonth.days)].map((x, i) => <th key={i + 1}>{i + 1}</th>);
@@ -209,8 +208,7 @@ class OrderChart extends React.Component {
   };
 
   componentDidMount() {
-    const {search} = this.props.location;
-    const [year, month] = search.match(/\d+/g).map(v => parseInt(v, 10));
+    const [year, month] = this.props.location.search.match(/\d+/g).map(v => parseInt(v, 10));
     const requestBody = {
       query: `
         query MonthDuties($year: Int!, $month: Int!, $post: ID!) {
@@ -257,6 +255,7 @@ class OrderChart extends React.Component {
             }
             duties {
               day
+              type
               employee {
                 _id
               }
@@ -278,9 +277,15 @@ class OrderChart extends React.Component {
     })
       .then(res => {
         const {unit, duties} = res.data.data.monthDuties;
+        const unitWithDuties = Object.assign({}, unit);
+        unitWithDuties.employees = unit.employees.map(employee => (
+          {
+            ...employee,
+            duties: duties.filter(({employee: {_id}}) => _id === employee._id)
+          }
+        ));
         this.setState({
-          unit,
-          duties
+          unit: unitWithDuties
         });
       })
       .catch(err => console.error(err));

@@ -17,10 +17,10 @@ class Row extends React.Component {
     const cells = [...Array(this.props.days)]
       .map((x, i) => {
         const day = i + 1;
-        const duties = this.props.employee.duties.find(duty => duty.day === day);
+        const duty = this.props.employee.duties.find(duty => duty.day === day);
         return <Cell key={day}
                      day={day}
-                     duties={duties}
+                     duty={duty}
                      setCurrentDay={this.props.setCurrentDay}
                      togglePopover={this.props.togglePopover} />;
       });
@@ -50,12 +50,12 @@ Row.propTypes = {
     name: PropTypes.string,
     surname: PropTypes.string,
     patronymic: PropTypes.string
-  }),
-  index: PropTypes.number,
-  checkDay: PropTypes.func,
-  setCurrentEmployeeId: PropTypes.func,
-  setCurrentDay: PropTypes.func,
-  togglePopover: PropTypes.func
+  }).isRequired,
+  index: PropTypes.number.isRequired,
+  checkDay: PropTypes.func.isRequired,
+  setCurrentEmployeeId: PropTypes.func.isRequired,
+  setCurrentDay: PropTypes.func.isRequired,
+  togglePopover: PropTypes.func.isRequired
 };
 
 export default Row;
