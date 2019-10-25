@@ -1,6 +1,5 @@
 import React from 'react';
 import { Redirect, Route, Switch, withRouter } from 'react-router-dom';
-import OrderChart from './components/pages/OrderChart/OrderChart.js';
 import Order from './components/pages/Order/Order';
 import Unit from './components/pages/Unit/Unit';
 import Login from './components/pages/Login/Login';
@@ -10,6 +9,8 @@ import axios from 'axios';
 
 import './App.css';
 import Posts from './components/pages/Posts/Posts';
+import PostInfo from './components/pages/Posts/PostInfo';
+import OrderChart from './components/pages/OrderChart/OrderChart';
 
 class App extends React.Component {
   state = {
@@ -79,7 +80,8 @@ class App extends React.Component {
         <Switch>
           {
             this.state.isLogged && <React.Fragment>
-              <Route exact path='/unit/:unitId/posts/:postId' component={OrderChart}/>
+              <Route exact path='/unit/:unitId/posts/:postId/orderChart' component={OrderChart}/>
+              <Route exact path='/unit/:unitId/posts/:postId' component={PostInfo}/>
               <Route exact path='/unit/:unitId/posts' component={Posts}/>
               <Route exact path='/unit/:id' component={Unit}/>
               <Route path='/employee/:id' component={Employee}/>
