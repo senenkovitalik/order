@@ -137,7 +137,7 @@ module.exports = buildSchema(`
     units: [Unit!]!
     unit(id: ID!): Unit
     login(login: String!, password: String!): AuthData
-    monthDuties(year: Int!, month: Int!, post: ID!): MonthDuties
+    monthDuties(year: Int!, month: Int, post: ID!): [MonthDuties!]!
   }
   
   type RootMutation {

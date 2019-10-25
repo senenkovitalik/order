@@ -21,7 +21,7 @@ module.exports = {
       throw new Error('Unauthorized');
     }
     try {
-      return await MonthDuties.findOne(args).exec();
+      return await MonthDuties.find(args).exec();
     } catch (err) {
       console.log(err);
     }
