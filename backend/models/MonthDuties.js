@@ -1,11 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-/*
-  Attention!!!
-  Months starts from 0.
-  Days starts by 1.
- */
 const monthDutiesSchema = new Schema({
   year: {
     type: Number,
@@ -13,8 +8,8 @@ const monthDutiesSchema = new Schema({
   },
   month: {
     type: Number,
-    min: 0,
-    max: 11,
+    min: 1,
+    max: 12,
     required: true
   },
   unit: {
