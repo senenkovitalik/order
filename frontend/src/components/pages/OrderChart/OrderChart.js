@@ -161,10 +161,16 @@ class OrderChart extends React.Component {
     const currentMonth = monthes[month - 1];
     const head = this.state.unit ? this.state.unit.head : null;
     const employees = this.state.unit ? this.state.unit.employees : [];
-    const days = [...Array(currentMonth.days)].map((x, i) => <th key={i + 1}>{i + 1}</th>);
+    const days = [...Array(currentMonth.days)].map((x, i) => {
+      const d = new Date(year, month - 1, i + 1);
+      const isHoliday = d.getDay() === 0 || d.getDay() === 6;
+      return <th key={i + 1} style={{backgroundColor: isHoliday ? 'grey' : 'white'}}>{i + 1}</th>;
+    });
     const rows = employees.sort((a, b) => b.rank.index - a.rank.index)
       .map((employee, i) =>
         <Row key={employee._id}
+             year={year}
+             month={month}
              days={currentMonth.days}
              checkDay={this.checkDay}
              setCurrentEmployeeId={this.setCurrentEmployeeId}
@@ -180,8 +186,8 @@ class OrderChart extends React.Component {
 
         {this.state.loading
           ? <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <Spinner/>
-            </div>
+            <Spinner/>
+          </div>
           : <React.Fragment>
             <div style={{ padding: '0.5rem' }}>{''}</div>
 

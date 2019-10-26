@@ -17,9 +17,12 @@ class Row extends React.Component {
     const cells = [...Array(this.props.days)]
       .map((x, i) => {
         const day = i + 1;
+        const d = new Date(this.props.year, this.props.month - 1, day);
+        const isHoliday = d.getDay() === 0 || d.getDay() === 6;
         const duty = this.props.employee.duties.find(duty => duty.day === day);
         return <Cell key={day}
                      day={day}
+                     isHoliday={isHoliday}
                      duty={duty}
                      setCurrentDay={this.props.setCurrentDay}
                      togglePopover={this.props.togglePopover} />;
@@ -51,6 +54,8 @@ Row.propTypes = {
     surname: PropTypes.string,
     patronymic: PropTypes.string
   }).isRequired,
+  year: PropTypes.number.isRequired,
+  month: PropTypes.number.isRequired,
   index: PropTypes.number.isRequired,
   checkDay: PropTypes.func.isRequired,
   setCurrentEmployeeId: PropTypes.func.isRequired,

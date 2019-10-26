@@ -1,9 +1,13 @@
 .cell_used-full {
-    background-color: #000;
+    background-color: #000 !important;
 }
 
 .cell_used-partly {
     background-color: #a6a7a8;
+}
+
+.cell_holiday {
+    background-color: grey;
 }
 
 .cell {
