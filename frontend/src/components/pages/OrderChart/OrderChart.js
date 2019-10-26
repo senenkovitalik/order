@@ -7,18 +7,24 @@ import UpperResolution from '../OrderChart/UpperResolution/UpperResolution';
 import BottomResolution from '../OrderChart/BottomResolution/BottomResolution';
 import { monthes } from '../../data';
 import axios from 'axios';
+import Alert from '../../Alert/Alert';
+import Spinner from '../../Spiner/Spinner';
 
 const CancelToken = axios.CancelToken;
 let cancelUnit, cancelMonthDuties;
 
 class OrderChart extends React.Component {
   state = {
+    loading: false,
     unit: null,
     duties: [],
     currentEmployeeId: null,
     currentDay: null,
     isFullDuty: true,
     isPopoverShown: false,
+    isAlertShown: false,
+    isAlertSuccess: true,
+    alertContent: '',
     popoverPosition: { x: 0, y: 0 }
   };
 
@@ -99,7 +105,7 @@ class OrderChart extends React.Component {
       )
     );
     const duties = dutiesByEmployee.reduce((total, current) => total.concat(current), []);
-    const {year, month} = this.getSearchParams();
+    const { year, month } = this.getSearchParams();
     const payload = {
       year,
       month,
@@ -131,10 +137,19 @@ class OrderChart extends React.Component {
         }
       })
       .then(res => {
-        // todo: show alert
+        this.setState({
+          isAlertShown: true,
+          isAlertSuccess: true,
+          alertContent: 'Зміни збережено успішно'
+        });
       })
       .catch(err => {
         console.log(err);
+        this.setState({
+          isAlertShown: true,
+          isAlertSuccess: false,
+          alertContent: 'Щось трапилося. Зверніться до адміністратора за допомогою.'
+        });
       });
   };
 
@@ -160,53 +175,65 @@ class OrderChart extends React.Component {
       );
     const parentUnit = this.state.unit ? this.state.unit.parentUnit : null;
     return (
-      <div className="order-chart landscape">
+      <div style={{ padding: '2rem' }}>
+        {this.state.isAlertShown && <Alert success={this.state.isAlertSuccess}>{this.state.alertContent}</Alert>}
 
-        <Controls isFullDuty={this.state.isFullDuty}
-                  handleChange={this.handleRadioChange}
-                  clearDuties={this.clearDuties}
-                  saveDuties={this.saveDuties}/>
+        {this.state.loading
+          ? <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <Spinner/>
+            </div>
+          : <React.Fragment>
+            <div style={{ padding: '0.5rem' }}>{''}</div>
 
-        {parentUnit && <UpperResolution head={parentUnit.head}/>}
+            <div className="order-chart landscape" style={{ border: '1px solid black' }}>
 
-        <br/><br/><br/><br/>
+              <Controls isFullDuty={this.state.isFullDuty}
+                        handleChange={this.handleRadioChange}
+                        clearDuties={this.clearDuties}
+                        saveDuties={this.saveDuties}/>
 
-        <div className="row row_centered">
-          <p>ГРАФІК ЧЕРГУВАННЯ</p>
-          <p>особового складу {this.state.unit ? this.state.unit.name : ''}</p>
-          <p>на {currentMonth.name} {year} року</p>
-        </div>
+              {parentUnit && <UpperResolution head={parentUnit.head}/>}
 
-        <br/>
+              <br/><br/><br/><br/>
 
-        <table className="table">
-          <thead>
-          <tr>
-            <th rowSpan="2" style={{ width: 3 + '%' }}>#</th>
-            <th rowSpan="2" style={{ width: 7 + '%' }}>Військове звання</th>
-            <th rowSpan="2" style={{ width: 10 + '%' }}>ПІБ</th>
-            <th colSpan={currentMonth.days}>Дата</th>
-          </tr>
-          <tr>
-            {days}
-          </tr>
-          </thead>
-          <tbody>
-          {rows}
-          </tbody>
-        </table>
+              <div className="row row_centered">
+                <p>ГРАФІК ЧЕРГУВАННЯ</p>
+                <p>особового складу {this.state.unit ? this.state.unit.name : ''}</p>
+                <p>на {currentMonth.name} {year} року</p>
+              </div>
 
-        <br/><br/>
+              <br/>
 
-        <BottomResolution head={head}/>
+              <table className="table">
+                <thead>
+                <tr>
+                  <th rowSpan="2" style={{ width: 3 + '%' }}>#</th>
+                  <th rowSpan="2" style={{ width: 7 + '%' }}>Військове звання</th>
+                  <th rowSpan="2" style={{ width: 10 + '%' }}>ПІБ</th>
+                  <th colSpan={currentMonth.days}>Дата</th>
+                </tr>
+                <tr>
+                  {days}
+                </tr>
+                </thead>
+                <tbody>
+                {rows}
+                </tbody>
+              </table>
 
-        {
-          !this.state.isFullDuty &&
-          <Popover isShown={this.state.isPopoverShown}
-                   togglePopover={this.togglePopover}
-                   position={this.state.popoverPosition}
-                   checkDay={this.checkDay}/>
-        }
+              <br/><br/>
+
+              <BottomResolution head={head}/>
+
+              {
+                !this.state.isFullDuty &&
+                <Popover isShown={this.state.isPopoverShown}
+                         togglePopover={this.togglePopover}
+                         position={this.state.popoverPosition}
+                         checkDay={this.checkDay}/>
+              }
+            </div>
+          </React.Fragment>}
       </div>
     );
   };
@@ -219,6 +246,11 @@ class OrderChart extends React.Component {
     if (!year && !month) {
       return null;
     }
+
+    this.setState({
+      loading: true
+    });
+
     axios.all([this.getUnitData(), this.getMonthDuties()])
       .then(axios.spread((unitData, monthDutiesData) => {
         const { unit } = unitData.data.data;
@@ -236,7 +268,8 @@ class OrderChart extends React.Component {
           }
         );
         this.setState({
-          unit: unitWithDuties
+          unit: unitWithDuties,
+          loading: false
         });
       }))
       .catch(err => console.error(err));
