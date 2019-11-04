@@ -8,8 +8,8 @@ module.exports = {
       throw new Error('Unauthorized');
     }
     try {
-      const model = new MonthDuties({...monthDutiesInput});
-      return await model.save();
+      const {duties, ...filter} = monthDutiesInput;
+      return await MonthDuties.findOneAndUpdate(filter, monthDutiesInput, {new: true, upsert: true, lean: true}).exec();
     } catch (err) {
       console.log(err);
     }
