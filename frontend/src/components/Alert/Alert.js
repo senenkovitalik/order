@@ -2,28 +2,16 @@ import React from 'react';
 import './Alert.css';
 import PropTypes from 'prop-types';
 
-export default class Alert extends React.Component {
-  state = {
-    isShown: true
-  };
+export default function alert({success, children, dismiss}) {
+  const styleClass = success ? 'alert-success' : 'alert-error';
+  return (
+    <div className={`alert ${styleClass}`}>
+      {children}
+      <span className='close' onClick={dismiss}>{}</span>
+    </div>
+  );
+}
 
-  handleClick = () => {
-    this.setState({
-      isShown: false
-    });
-  };
-
-  render() {
-    const styleClass = this.props.success ? 'alert-success' : 'alert-error';
-    return this.state.isShown ? (
-      <div className={`alert ${styleClass}`}>
-        {this.props.children}
-        <span className='close' onClick={this.handleClick}>{}</span>
-      </div>
-    ) : null;
-  }
-};
-
-Alert.propTypes = {
+alert.propTypes = {
   success: PropTypes.bool
 };

@@ -5,7 +5,7 @@ import Row from '../../Row/Row';
 import Popover from '../../Popover/Popover';
 import UpperResolution from '../OrderChart/UpperResolution/UpperResolution';
 import BottomResolution from '../OrderChart/BottomResolution/BottomResolution';
-import { monthes } from '../../data';
+import {monthes} from '../../data';
 import axios from 'axios';
 import Alert from '../../Alert/Alert';
 import Spinner from '../../Spiner/Spinner';
@@ -25,14 +25,14 @@ class OrderChart extends React.Component {
     isAlertShown: false,
     isAlertSuccess: true,
     alertContent: '',
-    popoverPosition: { x: 0, y: 0 }
+    popoverPosition: {x: 0, y: 0}
   };
 
   /*
   Set/remove duties per day
    */
   checkDay = dutyType => {
-    const { currentDay: day, currentEmployeeId: employeeId } = this.state;
+    const {currentDay: day, currentEmployeeId: employeeId} = this.state;
 
     if (!(day || employeeId)) {
       return;
@@ -44,7 +44,7 @@ class OrderChart extends React.Component {
     if (!!usedDuty) {
       employee.duties = employee.duties.filter(duty => duty.day !== day);
     } else {
-      employee.duties.push({ day, type: dutyType });
+      employee.duties.push({day, type: dutyType});
     }
 
     this.setState(prevState => ({
@@ -56,15 +56,15 @@ class OrderChart extends React.Component {
   };
 
   togglePopover = (isShown, e) => {
-    const { top, left, width } = e.target.getBoundingClientRect();
+    const {top, left, width} = e.target.getBoundingClientRect();
     this.setState({
       isPopoverShown: isShown,
-      popoverPosition: { x: left + width + window.scrollX, y: top + window.scrollY }
+      popoverPosition: {x: left + width + window.scrollX, y: top + window.scrollY}
     });
   };
 
   handleRadioChange = () => {
-    this.setState(prevState => ({ isFullDuty: !prevState.isFullDuty }));
+    this.setState(prevState => ({isFullDuty: !prevState.isFullDuty}));
   };
 
   // event handler on tr element fire this method
@@ -97,7 +97,7 @@ class OrderChart extends React.Component {
 
   saveDuties = () => {
     const dutiesByEmployee = this.state.unit.employees.map(e =>
-      e.duties.map(({ day, type }) => ({
+      e.duties.map(({day, type}) => ({
           day,
           type,
           employee: e._id
@@ -105,8 +105,8 @@ class OrderChart extends React.Component {
       )
     );
     const duties = dutiesByEmployee.reduce((total, current) => total.concat(current), []);
-    const { year, month } = this.getSearchParams();
-    const payload = {
+    const {year, month} = this.getSearchParams();
+    const monthDutiesInput = {
       year,
       month,
       unit: this.props.match.params.unitId,
@@ -123,7 +123,7 @@ class OrderChart extends React.Component {
           }
         `,
       variables: {
-        monthDutiesInput: payload
+        monthDutiesInput
       }
     };
 
@@ -153,8 +153,14 @@ class OrderChart extends React.Component {
       });
   };
 
+  dismissAlert = () => {
+    this.setState({
+      isAlertShown: false
+    });
+  };
+
   render() {
-    const { year, month } = this.getSearchParams();
+    const {year, month} = this.getSearchParams();
     if (!year && !month) {
       return null;
     }
@@ -181,17 +187,18 @@ class OrderChart extends React.Component {
       );
     const parentUnit = this.state.unit ? this.state.unit.parentUnit : null;
     return (
-      <div style={{ padding: '2rem' }}>
-        {this.state.isAlertShown && <Alert success={this.state.isAlertSuccess}>{this.state.alertContent}</Alert>}
+      <div style={{padding: '2rem'}}>
+        {this.state.isAlertShown && <Alert success={this.state.isAlertSuccess}
+                                           dismiss={this.dismissAlert}>{this.state.alertContent}</Alert>}
 
         {this.state.loading
-          ? <div style={{ display: 'flex', justifyContent: 'center' }}>
+          ? <div style={{display: 'flex', justifyContent: 'center'}}>
             <Spinner/>
           </div>
           : <React.Fragment>
-            <div style={{ padding: '0.5rem' }}>{''}</div>
+            <div style={{padding: '0.5rem'}}>{''}</div>
 
-            <div className="order-chart landscape" style={{ border: '1px solid black' }}>
+            <div className="order-chart landscape" style={{border: '1px solid black'}}>
 
               <Controls isFullDuty={this.state.isFullDuty}
                         handleChange={this.handleRadioChange}
@@ -213,9 +220,9 @@ class OrderChart extends React.Component {
               <table className="table">
                 <thead>
                 <tr>
-                  <th rowSpan="2" style={{ width: 3 + '%' }}>#</th>
-                  <th rowSpan="2" style={{ width: 7 + '%' }}>Військове звання</th>
-                  <th rowSpan="2" style={{ width: 10 + '%' }}>ПІБ</th>
+                  <th rowSpan="2" style={{width: 3 + '%'}}>#</th>
+                  <th rowSpan="2" style={{width: 7 + '%'}}>Військове звання</th>
+                  <th rowSpan="2" style={{width: 10 + '%'}}>ПІБ</th>
                   <th colSpan={currentMonth.days}>Дата</th>
                 </tr>
                 <tr>
@@ -246,7 +253,7 @@ class OrderChart extends React.Component {
 
   // Fetch unit & duties data
   componentDidMount() {
-    const { year, month } = this.getSearchParams()
+    const {year, month} = this.getSearchParams()
       ? this.getSearchParams()
       : null;
     if (!year && !month) {
@@ -259,8 +266,8 @@ class OrderChart extends React.Component {
 
     axios.all([this.getUnitData(), this.getMonthDuties()])
       .then(axios.spread((unitData, monthDutiesData) => {
-        const { unit } = unitData.data.data;
-        const { monthDuties } = monthDutiesData.data.data;
+        const {unit} = unitData.data.data;
+        const {monthDuties} = monthDutiesData.data.data;
         const unitWithDuties = Object.assign(
           {},
           unit,
@@ -340,7 +347,7 @@ class OrderChart extends React.Component {
   }
 
   getMonthDuties() {
-    const { year, month } = this.getSearchParams()
+    const {year, month} = this.getSearchParams()
       ? this.getSearchParams()
       : null;
     const requestBody = {
