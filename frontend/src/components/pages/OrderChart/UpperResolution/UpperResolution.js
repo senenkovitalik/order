@@ -1,15 +1,14 @@
 import React from 'react';
 
-export default function upperResolution({head}) {
-  const { position, rank, name, surname } = head;
+export default function upperResolution({head: {position, rank, name, surname}}) {
   return (
     <div className="resolution">
       <div className="resolution__content row">
         <p>ЗАТВЕРДЖУЮ</p>
-        <p>{position && position.name}</p>
+        <p>{position.name}</p>
         <div className="row_multicol">
-          <span>{rank && rank.name}</span>
-          <span>{name && surname && `${name.charAt(0)}.${surname.toUpperCase()}`}</span>
+          <span>{rank.name}</span>
+          <span>{`${name} ${surname.toUpperCase()}`}</span>
         </div>
         <p>"___" _____________ 2019 року</p>
       </div>
