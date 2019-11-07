@@ -1,10 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import Modal from '../../Modal/Modal';
 import Backdrop from '../../Backdrop/Backdrop';
 import CreateEmployeeForm from '../../forms/CreateEmployeeForm/CreateEmployeeForm';
 import UpdateEmployeeForm from '../../forms/UpdateEmployeeForm/UpdateEmployeeForm';
-import Alert from '../../Alert/Alert';
 import axios from 'axios';
 import './Unit.css';
 
@@ -246,18 +245,45 @@ export default class Unit extends React.Component {
     isUpdateModalShown: !prevState.isUpdateModalShown,
   }));
 
-  triggerAlert = () => this.setState(prevState => ({isAlertShown: !prevState.isAlertShown}));
-
   render() {
-    if (!this.state.unit) {
-      return null;
-    }
+    return this.props.unit ? (
+      <div className='unit'>
+        <h2>Особовий склад</h2>
+        <table>
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Вій. звання</th>
+            <th>ПІБ</th>
+            <th>Посада</th>
+            <th>Operation</th>
+          </tr>
+          </thead>
+          <tbody>
+          {
+            this.props.unit.employees.sort((a, b) => b.rank.index - a.rank.index)
+              .map((employee, index) =>
+                <tr key={employee._id}>
+                  <td>{index + 1}</td>
+                  <td>{employee.rank.shortName}</td>
+                  <td>
+                    <Link to={`/employee/${employee._id}`}>
+                      {employee.surname} {employee.name} {employee.patronymic}
+                    </Link>
+                  </td>
+                  <td>{employee.position.name}</td>
+                  <td>
+                    <button onClick={() => this.setEmployeeToUpdate(employee._id)}>Update</button>
+                    <button onClick={() => this.deleteEmployee(employee._id)}>Delete</button>
+                  </td>
+                </tr>
+              )
+          }
+          </tbody>
+        </table>
 
-    const unitName = this.state.unit ? this.state.unit.name : '';
-    const employees = this.state.unit ? this.state.unit.employees : [];
+        <button onClick={this.triggerCreateModal}>Add Employee</button>
 
-    return (
-      <div className='unit' style={{padding: '2rem'}}>
         {
           (this.state.isUpdateModalShown || this.state.isCreateModalShown) &&
           <React.Fragment>
@@ -270,142 +296,14 @@ export default class Unit extends React.Component {
                                   closeModal={this.triggerUpdateModal}/>
               }
               {this.state.isCreateModalShown &&
-                <CreateEmployeeForm positions={this.state.unit.head.position.juniorPositions}
-                                    createEmployee={this.createEmployee}
-                                    closeModal={this.triggerCreateModal} />
+              <CreateEmployeeForm positions={this.state.unit.head.position.juniorPositions}
+                                  createEmployee={this.createEmployee}
+                                  closeModal={this.triggerCreateModal} />
               }
             </Modal>
           </React.Fragment>
         }
-
-        {this.state.isAlertShown &&
-        <Alert success={this.state.isAlertSuccess} close={this.triggerAlert}>
-          {this.state.isAlertSuccess ? 'Дані успішно оновлено)' : 'Трапилася помилка( Зверніться до адміністратора'}
-        </Alert>}
-
-        <h2>Особовий склад підрозділу: {unitName}</h2>
-        <table>
-          <thead>
-          <tr>
-            <th>#</th>
-            <th>Вій. звання</th>
-            <th>ПІБ</th>
-            <th>Посада <input type='button'
-                              onClick={this.triggerPositionView}
-                              value={this.state.shortPositionName ? 'Повна' : 'Скорочена'}/>
-            </th>
-            <th>Operation</th>
-          </tr>
-          </thead>
-          <tbody>
-          {
-            employees.sort((a, b) => b.rank.index - a.rank.index)
-              .map((employee, index) =>
-                <tr key={employee._id}>
-                  <td>{index + 1}</td>
-                  <td>{employee.rank.shortName}</td>
-                  <td>
-                    <Link to={`/employee/${employee._id}`}>
-                      {employee.surname} {employee.name} {employee.patronymic}
-                    </Link>
-                  </td>
-                  {
-                    this.state.shortPositionName
-                      ? <td>{employee.position.shortName}</td>
-                      : <td>{employee.position.name}</td>
-                  }
-                  <td>
-                    <button onClick={() => this.setEmployeeToUpdate(employee._id)}>Update</button>
-                    <button onClick={() => this.deleteEmployee(employee._id)}>Delete</button>
-                  </td>
-                </tr>
-              )
-          }
-          </tbody>
-        </table>
-
-        <button onClick={this.triggerCreateModal}>Add Employee</button>
-        <br/>
-        <Link to={`${this.props.location.pathname}/posts`}>Чергування</Link>
       </div>
-    );
-  }
-
-  componentDidMount() {
-    const token = localStorage.getItem('token');
-    if (this.props.match.params.id && token) {
-      const requestBody = {
-        query: `query Unit($id: ID!) {
-          unit(id: $id) {
-            _id
-            name
-            head {
-              _id
-              name
-              surname
-              patronymic
-              rank { name }
-              position { 
-                name
-                juniorPositions {
-                  _id
-                  name
-                }
-              }
-            }
-            employees {
-              _id
-              rank {
-                _id
-                index
-                name
-                shortName
-              }
-              position {
-                name
-                shortName
-              }
-              name
-              surname
-              patronymic
-              dateOfBirth
-              addressOfResidence {
-                _id
-                region
-                district
-                city
-                village
-                urbanVillage
-                street
-                houseNumber
-                apartmentNumber
-              }
-              registrationAddress {
-                _id
-                region
-                district
-                city
-                village
-                urbanVillage
-                street
-                houseNumber
-                apartmentNumber
-              }
-            }
-          }
-        }`,
-        variables: {id: this.props.match.params.id}
-      };
-      axios.get('/graphql', {
-        baseURL: 'http://localhost:3001/',
-        params: requestBody,
-        headers: {'Authorization': `Bearer ${token}`}
-      })
-        .then(res => {
-          const {unit} = res.data.data;
-          this.setState({unit});
-        })
-        .catch(err => console.error(err));
-    }
+    ) : null;
   }
 }
