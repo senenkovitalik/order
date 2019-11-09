@@ -1,5 +1,6 @@
 import React from 'react';
 import convertDate from '../../../utils';
+import { addressData } from '../../data';
 import axios from 'axios';
 
 export default class UpdateEmployeeForm extends React.Component {
@@ -56,19 +57,6 @@ export default class UpdateEmployeeForm extends React.Component {
   };
 
   render() {
-    if (!this.props.employee) {
-      return null;
-    }
-    const addressData = [
-      { field: 'region', title: 'Область' },
-      { field: 'city', title: 'Місто' },
-      { field: 'district', title: 'Район' },
-      { field: 'urbanVillage', title: 'Селище міського типу' },
-      { field: 'village', title: 'Село' },
-      { field: 'street', title: 'Вулиця' },
-      { field: 'houseNumber', title: 'Будинок №' },
-      { field: 'apartmentNumber', title: 'Квартира №' }
-    ];
     return (
       <form className='employee-update-form'>
         <h3>Оновити дані про
