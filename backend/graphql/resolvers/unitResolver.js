@@ -6,12 +6,7 @@ module.exports = {
       throw new Error('Unauthorized');
     }
     try {
-      return await Unit.findById(id)
-        .populate({
-          path: 'head employees parentUnit',
-          populate: {path: 'position rank head'}
-        })
-        .exec();
+      return await Unit.findById(id).exec();
     } catch (err) {
       throw err;
     }

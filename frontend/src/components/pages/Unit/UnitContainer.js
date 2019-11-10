@@ -280,7 +280,7 @@ class UnitContainer extends React.Component {
       .then(res => {
         const post = res.data.data.createPost;
         this.setState(prevState => ({
-          posts: [...prevState.posts, post],
+          unit: Object.assign({}, prevState.unit, {posts: [...prevState.unit.posts, post]}),
           isAlertShown: true,
           isAlertSuccess: true,
           alertContent: 'Пост вдало додано'
@@ -297,18 +297,16 @@ class UnitContainer extends React.Component {
   };
 
   deletePost = postId => {
-    const {_id: unitId} = this.state.unit;
     const requestBody = {
       query: `
-          mutation CreatePost($unitId: ID!, $postId: ID!) {
-            deletePost(unitId: $unitId, postId: $postId) {
+          mutation DeletePost($id: ID!) {
+            deletePost(id: $id) {
               _id
             }
           }
         `,
       variables: {
-        unitId,
-        postId
+        id: postId
       }
     };
 
@@ -323,8 +321,9 @@ class UnitContainer extends React.Component {
       })
       .then(res => {
         const {_id} = res.data.data.deletePost;
+        const postsUpdated = this.state.unit.posts.filter(post => post._id !== _id);
         this.setState(prevState => ({
-          posts: [...prevState.posts.filter(e => e._id !== _id)],
+          unit: Object.assign({}, prevState.unit, {posts: postsUpdated}),
           isAlertShown: true,
           isAlertSuccess: true,
           alertContent: 'Пост вдало видалено'
@@ -335,7 +334,7 @@ class UnitContainer extends React.Component {
         this.setState({
           isAlertShown: true,
           isAlertSuccess: false,
-          alertContent: 'Щось трапилося. Звернуться до адміністратора.'
+          alertContent: 'Щось трапилося. Зверніться до адміністратора.'
         });
       });
   };
