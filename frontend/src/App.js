@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import Order from './components/pages/Order/Order';
-import Login from './components/pages/Login/Login';
+import LoginForm from './components/pages/Login/LoginForm';
 import Navbar from './components/Navbar/Navbar';
 import Employee from './components/pages/Employee/Employee';
 import './App.css';
@@ -41,6 +41,15 @@ function App() {
 
   const [getLogin, { loading, data }] = useLazyQuery(LOGIN);
 
+  const getLoginHandler = (login, password) => {
+    getLogin({
+      variables: {
+        login,
+        password
+      }
+    })
+  };
+
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
       <Spinner/>
@@ -59,7 +68,7 @@ function App() {
       <Navbar user={user} logout={handleLogout}/>
       <Switch>
         <Route exact path='/' render={() => <div>Please, login</div>}/>
-        <Route path='/login' render={() => <Login login={getLogin}/>}/>
+        <Route path='/login' render={() => <LoginForm getLogin={getLoginHandler}/>}/>
         {user && <React.Fragment>
           <Route path='/unit/:unitId' component={UnitContainer}/>
           <Route path='/unit/:unitId/posts' component={Posts}/>
