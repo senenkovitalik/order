@@ -65,9 +65,8 @@ module.exports = buildSchema(`
   }
   
   type AuthData {
-    userId: ID!
+    user: User!
     token: String!
-    employee: Employee!
   }
   
   type Duty {

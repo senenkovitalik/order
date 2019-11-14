@@ -67,9 +67,8 @@ module.exports = {
     );
 
     return {
-      userId: user._id,
-      token,
-      employee: user.employee
+      user,
+      token
     };
   }
 };

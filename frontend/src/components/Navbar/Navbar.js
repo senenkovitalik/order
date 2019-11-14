@@ -13,18 +13,19 @@ function FakeLink({title, logout}) {
   );
 }
 
-export default function navbar({isLogged, logout, unitId}) {
+export default function navbar({user, logout}) {
   return (
     <ul className={'nav hide-on-print'}>
       {
-        isLogged && <React.Fragment>
-          <li className='nav__item'><Link to={`/unit/${unitId}`}>Підрозіл</Link></li>
+        user && <React.Fragment>
+          <li className='nav__item'><Link to='/'>Home</Link></li>
+          <li className='nav__item'><Link to={`/unit/${user.employee.unit._id}`}>Підрозіл</Link></li>
           <li className='nav__item'><Link to='/order'>Витяг чергової зміни</Link></li>
           <li className='nav__item'><FakeLink title='Logout' logout={logout}/></li>
         </React.Fragment>
       }
       {
-        !isLogged && <li className='nav__item'>
+        !user && <li className='nav__item'>
           <Link to='/login'>Login</Link>
         </li>
       }
