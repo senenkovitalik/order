@@ -6,6 +6,11 @@ function LoginForm({ getLogin }) {
   const [password, setPassword] = useState('');
   const buttonEl = useRef(null);
 
+  const handleSubmit = e => {
+    e.preventDefault();
+    getLogin(login, password);
+  };
+
   useEffect(() => {
     if (buttonEl && buttonEl.current) {
       buttonEl.current.disabled = !(login && password);
@@ -13,7 +18,7 @@ function LoginForm({ getLogin }) {
   });
 
   return (
-    <form className='login-form' style={{ border: '1px solid black' }}>
+    <form className='login-form' onSubmit={handleSubmit}>
       <h2>Login</h2>
       <label>Username<br/>
         <input type='text' onChange={e => setLogin(e.target.value)}/>
@@ -23,7 +28,7 @@ function LoginForm({ getLogin }) {
         <input type='password' onChange={e => setPassword(e.target.value)}/>
       </label>
       <br/>
-      <input type='button' value='Login' ref={buttonEl} onClick={() => getLogin(login, password)}/>
+      <input type='submit' value='Login' ref={buttonEl}/>
     </form>
   );
 }
