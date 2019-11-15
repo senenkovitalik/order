@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import Order from './components/pages/Order/Order';
 import LoginForm from './components/pages/Login/LoginForm';
@@ -31,15 +31,8 @@ const LOGIN = gql`
 `;
 
 function App() {
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-  };
-
-  const [getLogin, { loading, data }] = useLazyQuery(LOGIN);
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+  const [getLogin, { loading, data, client }] = useLazyQuery(LOGIN);
 
   const getLoginHandler = (login, password) => {
     getLogin({
@@ -50,17 +43,28 @@ function App() {
     })
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    client.clearStore();
+    setUser(null);
+  };
+
+  // todo: bad approach, must use onCompleted
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+    const { user, token } = data.login;
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('token', token);
+    setUser(user);
+  }, [data]);
+
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
       <Spinner/>
     </div>;
-  }
-
-  if (!user && data && data.login) {
-    const { user, token } = data.login;
-    setUser(user);
-    localStorage.setItem('user', JSON.stringify(user));
-    localStorage.setItem('token', token);
   }
 
   return (
@@ -80,7 +84,7 @@ function App() {
       </Switch>
       {user
         ? <Redirect from='/login' to={`/unit/${user.employee.unit._id}`}/>
-        : <Redirect to='/login'/>}
+        : <Redirect from='*' to='/login'/>}
     </div>
   );
 }
