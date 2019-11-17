@@ -10,7 +10,7 @@ import PostInfo from './components/pages/Posts/PostInfo';
 import OrderChart from './components/pages/OrderChart/OrderChart';
 import UnitContainer from './components/pages/Unit/UnitContainer';
 import { gql } from 'apollo-boost';
-import { useLazyQuery } from '@apollo/react-hooks';
+import { useApolloClient, useLazyQuery } from '@apollo/react-hooks';
 import Spinner from './components/Spiner/Spinner';
 
 const LOGIN = gql`
@@ -32,7 +32,9 @@ const LOGIN = gql`
 
 function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
-  const [getLogin, { loading, data, client }] = useLazyQuery(LOGIN);
+  const [getLogin, { loading, data }] = useLazyQuery(LOGIN);
+
+  const client = useApolloClient();
 
   const getLoginHandler = (login, password) => {
     getLogin({
@@ -46,7 +48,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    client.clearStore();
+    client.clearStore().then();
     setUser(null);
   };
 
