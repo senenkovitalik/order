@@ -1,6 +1,6 @@
 import React from 'react';
 import convertDate from '../../../utils';
-import {addressData} from '../../data';
+import { addressData } from '../../data';
 import axios from 'axios';
 
 import './CreateEmployeeForm.css';
@@ -177,7 +177,7 @@ export default class CreateEmployeeForm extends React.Component {
         )}
 
         <button onClick={this.createEmployee}>Create</button>
-        <button onClick={this.props.closeModal}>Cancel</button>
+        <button onClick={() => this.props.closeModal(false)}>Cancel</button>
       </form>
     );
   }

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Posts from '../Posts/Posts';
 import Unit from './Unit';
-import {withRouter} from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import axios from 'axios';
+import { useMutation, useQuery } from '@apollo/react-hooks';
+import { gql } from 'apollo-boost';
 import Spinner from '../../Spiner/Spinner';
 import Alert from '../../Alert/Alert';
 import Backdrop from '../../Backdrop/Backdrop';
@@ -10,123 +12,181 @@ import Modal from '../../Modal/Modal';
 import UpdateEmployeeForm from '../../forms/UpdateEmployeeForm/UpdateEmployeeForm';
 import CreateEmployeeForm from '../../forms/CreateEmployeeForm/CreateEmployeeForm';
 
-class UnitContainer extends React.Component {
-  state = {
-    loading: false,
-    unit: null,
-    employeeToUpdate: null,
-    isCreateModalShown: false,
-    isAlertShown: false,
-    isAlertSuccess: true,
-    alertContent: ''
-  };
+const UNIT = gql`
+  query Unit($id: ID!) {
+    unit(id: $id) {
+      _id
+      name
+      head {
+        _id
+        name
+        surname
+        patronymic
+        rank { name }
+        position { 
+          name
+          juniorPositions {
+            _id
+            name
+          }
+        }
+      }
+      employees {
+        _id
+        rank {
+          _id
+          index
+          name
+          shortName
+        }
+        position {
+          name
+          shortName
+        }
+        name
+        surname
+        patronymic
+        dateOfBirth
+        addressOfResidence {
+          _id
+          region
+          district
+          city
+          village
+          urbanVillage
+          street
+          houseNumber
+          apartmentNumber
+        }
+        registrationAddress {
+          _id
+          region
+          district
+          city
+          village
+          urbanVillage
+          street
+          houseNumber
+          apartmentNumber
+        }
+      }
+      posts {
+        _id
+        name
+      }
+    }
+  }`;
+
+const CREATE_EMPLOYEE = gql`
+  mutation CreateEmployee(
+    $employee: EmployeeInput!,
+    $addressOfResidence: AddressInput,
+    $registrationAddress: AddressInput
+  ) {
+    createEmployee(
+      employee: $employee,
+      addressOfResidence: $addressOfResidence,
+      registrationAddress: $registrationAddress
+    ) {
+      _id
+      rank {
+        _id
+        index
+        name
+        shortName
+      }
+      position {
+        name
+        shortName
+      }
+      name
+      surname
+      patronymic
+      dateOfBirth
+      addressOfResidence {
+        region
+        district
+        city
+        village
+        urbanVillage
+        street
+        houseNumber
+        apartmentNumber
+      }
+      registrationAddress {
+        region
+        district
+        city
+        village
+        urbanVillage
+        street
+        houseNumber
+        apartmentNumber
+      }
+    }
+  }`;
+
+function UnitContainer(props) {
+  const [isAlertShown, setAlertVisibility] = useState(false);
+  const [isAlertSuccess, setSuccessAlertState] = useState(true);
+  const [alertContent, setAlertContent] = useState('Something happens');
+  const [employeeToUpdate, setEmployee] = useState(null);
+  const [isCreateModalShown, setCreatModalVisibility] = useState(null);
+
+  const { loading, data } = useQuery(UNIT, {
+    variables: {
+      id: props.match.params.unitId
+    },
+    onError: error => {
+      console.error(error);
+      setAlertVisibility(true);
+      setSuccessAlertState(false);
+    }
+  });
+  const [createEmployeeMutation] = useMutation(CREATE_EMPLOYEE);
 
   // unit
-  setEmployeeToUpdate = employeeId => {
-    this.setState({
-      employeeToUpdate: this.state.unit.employees.find(e => e._id === employeeId),
-    });
-  };
-
-  closeUpdateEmployeeModal = () => {
-    this.setState({
-      employeeToUpdate: null
-    });
-  };
-
-  createEmployee = employeeData => {
-    const {employee, addressOfResidence, registrationAddress} = employeeData;
-    employee.unit = this.state.unit._id;
-    const token = localStorage.getItem('token');
-    if (employee || addressOfResidence || registrationAddress) {
-      const requestBody = {
-        query: `
-          mutation CreateEmployee(
-            $employee: EmployeeInput!,
-            $addressOfResidence: AddressInput,
-            $registrationAddress: AddressInput
-          ) {
-            createEmployee(
-              employee: $employee,
-              addressOfResidence: $addressOfResidence,
-              registrationAddress: $registrationAddress
-            ) {
-              _id
-              rank {
-                _id
-                index
-                name
-                shortName
-              }
-              position {
-                name
-                shortName
-              }
-              name
-              surname
-              patronymic
-              dateOfBirth
-              addressOfResidence {
-                region
-                district
-                city
-                village
-                urbanVillage
-                street
-                houseNumber
-                apartmentNumber
-              }
-              registrationAddress {
-                region
-                district
-                city
-                village
-                urbanVillage
-                street
-                houseNumber
-                apartmentNumber
-              }
-            }
-        }`,
-        variables: {employee, addressOfResidence, registrationAddress}
-      };
-      axios.post('/graphql', {}, {
-        baseURL: 'http://localhost:3001/',
-        params: requestBody,
-        headers: {'Authorization': `Bearer ${token}`}
-      })
-        .then(res => {
-          const {createEmployee} = res.data.data;
-          const unit = Object.assign({}, this.state.unit);
-          const updatedEmployees = unit.employees.filter(employee => employee._id !== createEmployee._id);
-          updatedEmployees.push(createEmployee);
-
-          this.setState({
-            unit: Object.assign({}, unit, {employees: updatedEmployees}),
-            isCreateModalShown: false,
-            isAlertShown: true,
-            isAlertSuccess: true,
-          });
-        })
-        .catch(err => {
-          this.setState({
-            isCreateModalShown: false,
-            isAlertShown: true,
-            isAlertSuccess: false,
-          });
-          console.error(err);
+  const createEmployee = employeeData => {
+    const { employee, addressOfResidence, registrationAddress } = employeeData;
+    employee.unit = data.unit._id;
+    createEmployeeMutation({
+      variables: {
+        employee,
+        addressOfResidence,
+        registrationAddress
+      },
+      update: (cache, { data: { createEmployee } }) => {
+        const { unit } = cache.readQuery({
+          query: UNIT,
+          variables: {
+            id: data.unit._id
+          }
         });
-    }
+        cache.writeQuery({
+          query: UNIT,
+          variables: {
+            id: data.unit._id
+          },
+          data: {
+            unit: Object.assign({}, unit, {employees: unit.employees.concat(createEmployee)})
+          }
+        });
+
+        // code below this must be called in onCompleted handler
+        // try to refactor at 3.1.0 release
+        setCreatModalVisibility(false);
+        showAlert(true, 'Працівника додано успішно.');
+      },
+      onError: error => {
+        console.error(error);
+        setCreatModalVisibility(false);
+        showAlert(false);
+      }
+    });
   };
 
-  triggerCreateEmployeeModal = () => {
-    this.setState(prevState => ({
-      isCreateModalShown: prevState.isCreateModalShown
-    }))
-  };
-
-  updateEmployee = employeeData => {
-    const {data, addressOfResidence, registrationAddress} = employeeData;
+  const updateEmployee = employeeData => {
+    const { data, addressOfResidence, registrationAddress } = employeeData;
     const token = localStorage.getItem('token');
     if (data || addressOfResidence || registrationAddress) {
       const requestBody = {
@@ -180,21 +240,21 @@ class UnitContainer extends React.Component {
               }
             }
         }`,
-        variables: {id: this.state.employeeToUpdate._id, data, addressOfResidence, registrationAddress}
+        variables: { id: this.state.employeeToUpdate._id, data, addressOfResidence, registrationAddress }
       };
       axios.post('/graphql', {}, {
         baseURL: 'http://localhost:3001/',
         params: requestBody,
-        headers: {'Authorization': `Bearer ${token}`}
+        headers: { 'Authorization': `Bearer ${token}` }
       })
         .then(res => {
-          const {updateEmployee} = res.data.data;
+          const { updateEmployee } = res.data.data;
           const unit = Object.assign({}, this.state.unit);
           const updatedEmployees = unit.employees.filter(employee => employee._id !== updateEmployee._id);
           updatedEmployees.push(updateEmployee);
 
           this.setState({
-            unit: Object.assign({}, unit, {employees: updatedEmployees}),
+            unit: Object.assign({}, unit, { employees: updatedEmployees }),
             employeeToUpdate: null,
             isAlertShown: true,
             isAlertSuccess: true,
@@ -213,7 +273,7 @@ class UnitContainer extends React.Component {
     }
   };
 
-  deleteEmployee = employeeId => {
+  const deleteEmployee = employeeId => {
     const token = localStorage.getItem('token');
     const requestBody = {
       query: `mutation DeleteEmployee($id: ID!) {
@@ -221,16 +281,16 @@ class UnitContainer extends React.Component {
             _id
           }
         }`,
-      variables: {id: employeeId}
+      variables: { id: employeeId }
     };
 
     axios.post('/graphql', {}, {
       baseURL: 'http://localhost:3001/',
       params: requestBody,
-      headers: {'Authorization': `Bearer ${token}`}
+      headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => {
-        const {deleteEmployee} = res.data.data;
+        const { deleteEmployee } = res.data.data;
         // update Unit
         const unit = Object.assign({}, this.state.unit);
         unit.employees = unit.employees.filter(e => e._id !== deleteEmployee._id);
@@ -251,8 +311,8 @@ class UnitContainer extends React.Component {
   };
 
   // post
-  addPost = postName => {
-    const {_id: unitId} = this.state.unit;
+  const addPost = postName => {
+    const { _id: unitId } = this.state.unit;
     const requestBody = {
       query: `
           mutation CreatePost($unitId: ID!, $postName:String!) {
@@ -280,7 +340,7 @@ class UnitContainer extends React.Component {
       .then(res => {
         const post = res.data.data.createPost;
         this.setState(prevState => ({
-          unit: Object.assign({}, prevState.unit, {posts: [...prevState.unit.posts, post]}),
+          unit: Object.assign({}, prevState.unit, { posts: [...prevState.unit.posts, post] }),
           isAlertShown: true,
           isAlertSuccess: true,
           alertContent: 'Пост вдало додано'
@@ -296,7 +356,7 @@ class UnitContainer extends React.Component {
       });
   };
 
-  deletePost = postId => {
+  const deletePost = postId => {
     const requestBody = {
       query: `
           mutation DeletePost($id: ID!) {
@@ -320,10 +380,10 @@ class UnitContainer extends React.Component {
         }
       })
       .then(res => {
-        const {_id} = res.data.data.deletePost;
+        const { _id } = res.data.data.deletePost;
         const postsUpdated = this.state.unit.posts.filter(post => post._id !== _id);
         this.setState(prevState => ({
-          unit: Object.assign({}, prevState.unit, {posts: postsUpdated}),
+          unit: Object.assign({}, prevState.unit, { posts: postsUpdated }),
           isAlertShown: true,
           isAlertSuccess: true,
           alertContent: 'Пост вдало видалено'
@@ -339,157 +399,64 @@ class UnitContainer extends React.Component {
       });
   };
 
-  triggerAlert = () => this.setState(prevState => ({isAlertShown: !prevState.isAlertShown}));
+  const showAlert = (success, content = 'Something happens') => {
+    setAlertVisibility(true);
+    setSuccessAlertState(success);
+    setAlertContent(content);
+  };
 
-  render() {
-    return (
-      <React.Fragment>
-        {
-          this.state.isAlertShown &&
-          <div style={{paddingTop: '1rem'}}>
-            <Alert success={this.state.isAlertSuccess}
-                   dismiss={this.triggerAlert}>
-              {this.state.alertContent}
-            </Alert>
-          </div>
-        }
-        {
-          this.state.loading && <div style={{display: 'flex', justifyContent: 'center', padding: '3rem'}}>
-            <Spinner/>
-          </div>
-        }
-        {
-          this.state.unit && <React.Fragment>
-            <h1>{this.state.unit.name}</h1>
-            <Unit unit={this.state.unit}
-                  setEmployeeToUpdate={this.setEmployeeToUpdate}
-                  showCreateEmployeeModal={this.triggerCreateEmployeeModal}
-                  updateEmployee={this.updateEmployee}
-                  deleteEmployee={this.deleteEmployee}/>
-            <Posts posts={this.state.unit.posts}
-                   addPost={this.addPost}
-                   deletePost={this.deletePost}/>
-            {
-              (this.state.employeeToUpdate || this.state.isCreateModalShown) &&
-              <React.Fragment>
-                <Backdrop/>
-                <Modal>
-                  {this.state.employeeToUpdate &&
-                  <UpdateEmployeeForm employee={this.state.employeeToUpdate}
-                                      positions={this.state.unit.head.position.juniorPositions}
-                                      updateEmployee={this.updateEmployee}
-                                      closeModal={this.closeUpdateEmployeeModal}/>
-                  }
-                  {this.state.isCreateModalShown &&
-                  <CreateEmployeeForm positions={this.state.unit.head.position.juniorPositions}
-                                      createEmployee={this.createEmployee}
-                                      closeModal={this.triggerCreateEmployeeModal}/>
-                  }
-                </Modal>
-              </React.Fragment>
-            }
-          </React.Fragment>
-        }
-      </React.Fragment>
-    );
-  }
+  const closeAlert = () => setAlertVisibility(false);
 
-  componentDidMount() {
-    const token = localStorage.getItem('token');
-    const {unitId} = this.props.match.params;
-    if (unitId && token) {
-      this.setState({
-        loading: true
-      });
-      const requestBody = {
-        query: `query Unit($id: ID!) {
-          unit(id: $id) {
-            _id
-            name
-            head {
-              _id
-              name
-              surname
-              patronymic
-              rank { name }
-              position { 
-                name
-                juniorPositions {
-                  _id
-                  name
+  return (
+    <React.Fragment>
+      {
+        isAlertShown &&
+        <div style={{ paddingTop: '1rem' }}>
+          <Alert success={isAlertSuccess}
+                 dismiss={closeAlert}>
+            {alertContent}
+          </Alert>
+        </div>
+      }
+      {
+        loading && <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+          <Spinner/>
+        </div>
+      }
+      {
+        data && data.unit && <React.Fragment>
+          <h1>{data.unit.name}</h1>
+          <Unit unit={data.unit}
+                setEmployeeToUpdate={id => setEmployee(data.unit.employees.find(e => e._id === id))}
+                showCreateEmployeeModal={setCreatModalVisibility}
+                updateEmployee={updateEmployee}
+                deleteEmployee={deleteEmployee}/>
+          <Posts posts={data.unit.posts}
+                 addPost={addPost}
+                 deletePost={deletePost}/>
+          {
+            (employeeToUpdate || isCreateModalShown) &&
+            <React.Fragment>
+              <Backdrop/>
+              <Modal>
+                {employeeToUpdate &&
+                <UpdateEmployeeForm employee={employeeToUpdate}
+                                    positions={data.unit.head.position.juniorPositions}
+                                    updateEmployee={updateEmployee}
+                                    closeModal={() => setEmployee(null)}/>
                 }
-              }
-            }
-            employees {
-              _id
-              rank {
-                _id
-                index
-                name
-                shortName
-              }
-              position {
-                name
-                shortName
-              }
-              name
-              surname
-              patronymic
-              dateOfBirth
-              addressOfResidence {
-                _id
-                region
-                district
-                city
-                village
-                urbanVillage
-                street
-                houseNumber
-                apartmentNumber
-              }
-              registrationAddress {
-                _id
-                region
-                district
-                city
-                village
-                urbanVillage
-                street
-                houseNumber
-                apartmentNumber
-              }
-            }
-            posts {
-              _id
-              name
-            }
+                {isCreateModalShown &&
+                <CreateEmployeeForm positions={data.unit.head.position.juniorPositions}
+                                    createEmployee={createEmployee}
+                                    closeModal={setCreatModalVisibility}/>
+                }
+              </Modal>
+            </React.Fragment>
           }
-        }`,
-        variables: {id: unitId}
-      };
-      axios.get('/graphql', {
-        baseURL: 'http://localhost:3001/',
-        params: requestBody,
-        headers: {'Authorization': `Bearer ${token}`}
-      })
-        .then(res => {
-          const {unit} = res.data.data;
-          this.setState({
-            unit,
-            loading: false
-          });
-        })
-        .catch(err => {
-          console.error(err);
-          this.setState({
-            loading: false,
-            isAlertShown: true,
-            isAlertSuccess: false,
-            alertContent: 'Щось трапилося. Звернуться до адміністратора.'
-          })
-        });
-    }
-  }
+        </React.Fragment>
+      }
+    </React.Fragment>
+  );
 }
 
 export default withRouter(UnitContainer);
