@@ -135,6 +135,23 @@ const DELETE_EMPLOYEE = gql`
   }
 `;
 
+const ADD_POST = gql`
+  mutation CreatePost($unitId: ID!, $postName:String!) {
+    createPost(unitId: $unitId, postName: $postName) {
+      _id
+      name
+    }
+  }
+`;
+
+const DELETE_POST = gql`
+  mutation DeletePost($id: ID!) {
+    deletePost(id: $id) {
+      _id
+    }
+  }
+`;
+
 function UnitContainer(props) {
   const [isAlertShown, setAlertVisibility] = useState(false);
   const [isAlertSuccess, setSuccessAlertState] = useState(true);
@@ -154,6 +171,8 @@ function UnitContainer(props) {
   });
   const [createEmployeeMutation] = useMutation(CREATE_EMPLOYEE);
   const [deleteEmployeeMutation] = useMutation(DELETE_EMPLOYEE);
+  const [addPostMutation] = useMutation(ADD_POST);
+  const [deletePostMutation] = useMutation(DELETE_POST);
 
   // unit
   const createEmployee = employeeData => {
@@ -229,6 +248,7 @@ function UnitContainer(props) {
     }
   });
 
+  // todo
   const updateEmployee = employeeData => {
     const { data, addressOfResidence, registrationAddress } = employeeData;
     const token = localStorage.getItem('token');
@@ -318,94 +338,75 @@ function UnitContainer(props) {
   };
 
   // post
-  const addPost = postName => {
-    const { _id: unitId } = this.state.unit;
-    const requestBody = {
-      query: `
-          mutation CreatePost($unitId: ID!, $postName:String!) {
-            createPost(unitId: $unitId, postName: $postName) {
-              _id
-              name
-            }
-          }
-        `,
-      variables: {
-        unitId,
-        postName
-      }
-    };
-
-    axios.post('/graphql',
-      {},
-      {
-        baseURL: 'http://localhost:3001/',
-        params: requestBody,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+  const addPost = postName => addPostMutation({
+    variables: {
+      unitId: data.unit._id,
+      postName
+    },
+    update: (cache, { data: { createPost } }) => {
+      const { unit } = cache.readQuery({
+        query: UNIT,
+        variables: {
+          id: data.unit._id
         }
-      })
-      .then(res => {
-        const post = res.data.data.createPost;
-        this.setState(prevState => ({
-          unit: Object.assign({}, prevState.unit, { posts: [...prevState.unit.posts, post] }),
-          isAlertShown: true,
-          isAlertSuccess: true,
-          alertContent: 'Пост вдало додано'
-        }));
-      })
-      .catch(err => {
-        console.log(err);
-        this.setState({
-          isAlertShown: true,
-          isAlertSuccess: false,
-          alertContent: 'Щось трапилося. Звернуться до адміністратора.'
-        });
       });
-  };
-
-  const deletePost = postId => {
-    const requestBody = {
-      query: `
-          mutation DeletePost($id: ID!) {
-            deletePost(id: $id) {
-              _id
-            }
-          }
-        `,
-      variables: {
-        id: postId
-      }
-    };
-
-    axios.post('/graphql',
-      {},
-      {
-        baseURL: 'http://localhost:3001/',
-        params: requestBody,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+      cache.writeQuery({
+        query: UNIT,
+        variables: {
+          id: data.unit._id
+        },
+        data: {
+          unit: Object.assign({}, unit, {posts: unit.posts.concat(createPost)})
         }
-      })
-      .then(res => {
-        const { _id } = res.data.data.deletePost;
-        const postsUpdated = this.state.unit.posts.filter(post => post._id !== _id);
-        this.setState(prevState => ({
-          unit: Object.assign({}, prevState.unit, { posts: postsUpdated }),
-          isAlertShown: true,
-          isAlertSuccess: true,
-          alertContent: 'Пост вдало видалено'
-        }));
-      })
-      .catch(err => {
-        console.log(err);
-        this.setState({
-          isAlertShown: true,
-          isAlertSuccess: false,
-          alertContent: 'Щось трапилося. Зверніться до адміністратора.'
-        });
       });
-  };
 
+      // code below this must be called in onCompleted handler
+      // try to refactor at 3.1.0 release
+      setCreatModalVisibility(false);
+      showAlert(true, 'Пост додано успішно.');
+    },
+    onError: error => {
+      console.error(error);
+      setCreatModalVisibility(false);
+      showAlert(false);
+    }
+  });
+
+  const deletePost = postId => deletePostMutation({
+    variables: {
+      id: postId
+    },
+    update: (cache, { data: { deletePost } }) => {
+      const { unit } = cache.readQuery({
+        query: UNIT,
+        variables: {
+          id: data.unit._id
+        }
+      });
+      cache.writeQuery({
+        query: UNIT,
+        variables: {
+          id: data.unit._id
+        },
+        data: {
+          unit: Object.assign(
+            {},
+            unit,
+            {posts: unit.posts.filter(({_id}) => _id !== deletePost._id)})
+        }
+      });
+
+      // code below this must be called in onCompleted handler
+      // try to refactor at 3.1.0 release
+      showAlert(true, 'Пост видалено успішно.');
+    },
+    onError: error => {
+      console.error(error);
+      showAlert(false);
+    }
+  });
+
+  // alerts
   const showAlert = (success, content = 'Something happens') => {
     setAlertVisibility(true);
     setSuccessAlertState(success);
@@ -436,7 +437,6 @@ function UnitContainer(props) {
           <Unit unit={data.unit}
                 setEmployeeToUpdate={id => setEmployee(data.unit.employees.find(e => e._id === id))}
                 showCreateEmployeeModal={setCreatModalVisibility}
-                updateEmployee={updateEmployee}
                 deleteEmployee={deleteEmployee}/>
           <Posts posts={data.unit.posts}
                  addPost={addPost}
