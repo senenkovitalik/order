@@ -124,7 +124,16 @@ const CREATE_EMPLOYEE = gql`
         apartmentNumber
       }
     }
-  }`;
+  }
+`;
+
+const DELETE_EMPLOYEE = gql`
+  mutation DeleteEmployee($id: ID!) {
+    deleteEmployee(id: $id) {
+      _id
+    }
+  }
+`;
 
 function UnitContainer(props) {
   const [isAlertShown, setAlertVisibility] = useState(false);
@@ -144,6 +153,7 @@ function UnitContainer(props) {
     }
   });
   const [createEmployeeMutation] = useMutation(CREATE_EMPLOYEE);
+  const [deleteEmployeeMutation] = useMutation(DELETE_EMPLOYEE);
 
   // unit
   const createEmployee = employeeData => {
@@ -184,6 +194,40 @@ function UnitContainer(props) {
       }
     });
   };
+
+  const deleteEmployee = employeeId => deleteEmployeeMutation({
+    variables: {
+      id: employeeId
+    },
+    update: (cache, { data: { deleteEmployee } }) => {
+      const { unit } = cache.readQuery({
+        query: UNIT,
+        variables: {
+          id: data.unit._id
+        }
+      });
+      cache.writeQuery({
+        query: UNIT,
+        variables: {
+          id: data.unit._id
+        },
+        data: {
+          unit: Object.assign(
+            {},
+            unit,
+            {employees: unit.employees.filter(({_id}) => _id !== deleteEmployee._id)})
+        }
+      });
+
+      // code below this must be called in onCompleted handler
+      // try to refactor at 3.1.0 release
+      showAlert(true, 'Працівника видалено успішно.');
+    },
+    onError: error => {
+      console.error(error);
+      showAlert(false);
+    }
+  });
 
   const updateEmployee = employeeData => {
     const { data, addressOfResidence, registrationAddress } = employeeData;
@@ -271,43 +315,6 @@ function UnitContainer(props) {
           console.error(err);
         });
     }
-  };
-
-  const deleteEmployee = employeeId => {
-    const token = localStorage.getItem('token');
-    const requestBody = {
-      query: `mutation DeleteEmployee($id: ID!) {
-          deleteEmployee(id: $id) {
-            _id
-          }
-        }`,
-      variables: { id: employeeId }
-    };
-
-    axios.post('/graphql', {}, {
-      baseURL: 'http://localhost:3001/',
-      params: requestBody,
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(res => {
-        const { deleteEmployee } = res.data.data;
-        // update Unit
-        const unit = Object.assign({}, this.state.unit);
-        unit.employees = unit.employees.filter(e => e._id !== deleteEmployee._id);
-        // show Alert
-        this.setState({
-          unit,
-          isAlertShown: true,
-          isAlertSuccess: true
-        });
-      })
-      .catch(err => {
-        this.setState({
-          isAlertShown: true,
-          isAlertSuccess: false
-        });
-        console.error(err);
-      });
   };
 
   // post
