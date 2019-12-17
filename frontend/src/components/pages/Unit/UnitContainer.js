@@ -1,162 +1,22 @@
 import React, { useState } from 'react';
-import Posts from '../Posts/Posts';
-import Unit from './Unit';
-import { withRouter } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import axios from 'axios';
 import { useMutation, useQuery } from '@apollo/react-hooks';
-import { gql } from 'apollo-boost';
 import Spinner from '../../Spiner/Spinner';
 import Alert from '../../Alert/Alert';
 import Backdrop from '../../Backdrop/Backdrop';
 import Modal from '../../Modal/Modal';
 import UpdateEmployeeForm from '../../forms/UpdateEmployeeForm/UpdateEmployeeForm';
 import CreateEmployeeForm from '../../forms/CreateEmployeeForm/CreateEmployeeForm';
-
-const UNIT = gql`
-  query Unit($id: ID!) {
-    unit(id: $id) {
-      _id
-      name
-      head {
-        _id
-        name
-        surname
-        patronymic
-        rank { name }
-        position { 
-          name
-          juniorPositions {
-            _id
-            name
-          }
-        }
-      }
-      employees {
-        _id
-        rank {
-          _id
-          index
-          name
-          shortName
-        }
-        position {
-          name
-          shortName
-        }
-        name
-        surname
-        patronymic
-        dateOfBirth
-        addressOfResidence {
-          _id
-          region
-          district
-          city
-          village
-          urbanVillage
-          street
-          houseNumber
-          apartmentNumber
-        }
-        registrationAddress {
-          _id
-          region
-          district
-          city
-          village
-          urbanVillage
-          street
-          houseNumber
-          apartmentNumber
-        }
-      }
-      posts {
-        _id
-        name
-      }
-    }
-  }`;
-
-const CREATE_EMPLOYEE = gql`
-  mutation CreateEmployee(
-    $employee: EmployeeInput!,
-    $addressOfResidence: AddressInput,
-    $registrationAddress: AddressInput
-  ) {
-    createEmployee(
-      employee: $employee,
-      addressOfResidence: $addressOfResidence,
-      registrationAddress: $registrationAddress
-    ) {
-      _id
-      rank {
-        _id
-        index
-        name
-        shortName
-      }
-      position {
-        name
-        shortName
-      }
-      name
-      surname
-      patronymic
-      dateOfBirth
-      addressOfResidence {
-        region
-        district
-        city
-        village
-        urbanVillage
-        street
-        houseNumber
-        apartmentNumber
-      }
-      registrationAddress {
-        region
-        district
-        city
-        village
-        urbanVillage
-        street
-        houseNumber
-        apartmentNumber
-      }
-    }
-  }
-`;
-
-const DELETE_EMPLOYEE = gql`
-  mutation DeleteEmployee($id: ID!) {
-    deleteEmployee(id: $id) {
-      _id
-    }
-  }
-`;
-
-const ADD_POST = gql`
-  mutation CreatePost($unitId: ID!, $postName:String!) {
-    createPost(unitId: $unitId, postName: $postName) {
-      _id
-      name
-    }
-  }
-`;
-
-const DELETE_POST = gql`
-  mutation DeletePost($id: ID!) {
-    deletePost(id: $id) {
-      _id
-    }
-  }
-`;
+import { ADD_POST, CREATE_EMPLOYEE, DELETE_EMPLOYEE, DELETE_POST, UNIT } from './queries';
 
 function UnitContainer(props) {
   const [isAlertShown, setAlertVisibility] = useState(false);
   const [isAlertSuccess, setSuccessAlertState] = useState(true);
   const [alertContent, setAlertContent] = useState('Something happens');
   const [employeeToUpdate, setEmployee] = useState(null);
+  const [postName, setPostName] = useState('');
+  const [isPostNameValid, setPostNameValidity] = useState(false);
   const [isCreateModalShown, setCreatModalVisibility] = useState(null);
 
   const { loading, data } = useQuery(UNIT, {
@@ -197,7 +57,7 @@ function UnitContainer(props) {
             id: data.unit._id
           },
           data: {
-            unit: Object.assign({}, unit, {employees: unit.employees.concat(createEmployee)})
+            unit: Object.assign({}, unit, { employees: unit.employees.concat(createEmployee) })
           }
         });
 
@@ -234,7 +94,7 @@ function UnitContainer(props) {
           unit: Object.assign(
             {},
             unit,
-            {employees: unit.employees.filter(({_id}) => _id !== deleteEmployee._id)})
+            { employees: unit.employees.filter(({ _id }) => _id !== deleteEmployee._id) })
         }
       });
 
@@ -338,7 +198,13 @@ function UnitContainer(props) {
   };
 
   // post
-  const addPost = postName => addPostMutation({
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setPostName(name);
+    setPostNameValidity(value.length > 3);
+  };
+
+  const addPost = () => addPostMutation({
     variables: {
       unitId: data.unit._id,
       postName
@@ -356,7 +222,7 @@ function UnitContainer(props) {
           id: data.unit._id
         },
         data: {
-          unit: Object.assign({}, unit, {posts: unit.posts.concat(createPost)})
+          unit: Object.assign({}, unit, { posts: unit.posts.concat(createPost) })
         }
       });
 
@@ -392,7 +258,7 @@ function UnitContainer(props) {
           unit: Object.assign(
             {},
             unit,
-            {posts: unit.posts.filter(({_id}) => _id !== deletePost._id)})
+            { posts: unit.posts.filter(({ _id }) => _id !== deletePost._id) })
         }
       });
 
@@ -434,13 +300,65 @@ function UnitContainer(props) {
       {
         data && data.unit && <React.Fragment>
           <h1>{data.unit.name}</h1>
-          <Unit unit={data.unit}
-                setEmployeeToUpdate={id => setEmployee(data.unit.employees.find(e => e._id === id))}
-                showCreateEmployeeModal={setCreatModalVisibility}
-                deleteEmployee={deleteEmployee}/>
-          <Posts posts={data.unit.posts}
-                 addPost={addPost}
-                 deletePost={deletePost}/>
+
+          {/* Employees */}
+          <h2>Особовий склад</h2>
+          <table>
+            <thead>
+            <tr>
+              <th>#</th>
+              <th>Вій. звання</th>
+              <th>ПІБ</th>
+              <th>Посада</th>
+              <th>Operation</th>
+            </tr>
+            </thead>
+            <tbody>
+            {
+              data.unit.employees.sort((a, b) => b.rank.index - a.rank.index)
+                .map((employee, index) =>
+                  <tr key={employee._id}>
+                    <td>{index + 1}</td>
+                    <td>{employee.rank.shortName}</td>
+                    <td>
+                      <Link to={`/employee/${employee._id}`}>
+                        {employee.surname} {employee.name} {employee.patronymic}
+                      </Link>
+                    </td>
+                    <td>{employee.position.name}</td>
+                    <td>
+                      <button onClick={() => setEmployee(employee)}>Update</button>
+                      <button onClick={() => deleteEmployee(employee._id)}>Delete</button>
+                    </td>
+                  </tr>
+                )
+            }
+            </tbody>
+          </table>
+
+          <button onClick={() => setCreatModalVisibility(true)}>Add Employee</button>
+
+          {/* Posts */}
+          <h2>Бойові пости</h2>
+          <ul>
+            {data.unit.posts.map(({ _id, name }) => <li key={_id}>
+              <Link to={`${props.location.pathname}/posts/${_id}`}>{name}</Link>
+              <button onClick={() => deletePost(_id)}>Delete</button>
+            </li>)}
+          </ul>
+
+          <form>
+            <label>
+              New post{' '}
+              <input type='text'
+                     name='postName'
+                     onChange={handleChange}
+                     title={'Щось типу БП-000 чи 2БП-000'}/>
+            </label>
+            <button onClick={() => addPost()} disabled={!isPostNameValid}>Add post</button>
+          </form>
+
+          {/* Forms */}
           {
             (employeeToUpdate || isCreateModalShown) &&
             <React.Fragment>

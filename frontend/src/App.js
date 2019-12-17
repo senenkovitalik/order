@@ -5,7 +5,6 @@ import LoginForm from './components/pages/Login/LoginForm';
 import Navbar from './components/Navbar/Navbar';
 import Employee from './components/pages/Employee/Employee';
 import './App.css';
-import Posts from './components/pages/Posts/Posts';
 import PostInfo from './components/pages/Posts/PostInfo';
 import OrderChart from './components/pages/OrderChart/OrderChart';
 import UnitContainer from './components/pages/Unit/UnitContainer';
@@ -76,12 +75,11 @@ function App() {
         <Route exact path='/' render={() => <div>Please, login</div>}/>
         <Route path='/login' render={() => <LoginForm getLogin={getLoginHandler}/>}/>
         {user && <React.Fragment>
-          <Route path='/unit/:unitId' component={UnitContainer}/>
-          <Route path='/unit/:unitId/posts' component={Posts}/>
-          <Route path='/unit/:unitId/posts/:postId' component={PostInfo}/>
-          <Route path='/unit/:unitId/posts/:postId/orderChart' component={OrderChart}/>
-          <Route path='/employee/:id' component={Employee}/>
-          <Route path='/order' component={Order}/>
+          <Route exact path='/unit/:unitId/posts/:postId/orderChart' component={OrderChart}/>
+          <Route exact path='/unit/:unitId/posts/:postId' component={PostInfo}/>
+          <Route exact path='/unit/:unitId' component={UnitContainer}/>
+          <Route exact path='/employee/:id' component={Employee}/>
+          <Route exact path='/order' component={Order}/>
         </React.Fragment>}
       </Switch>
       {user
