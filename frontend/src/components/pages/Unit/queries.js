@@ -65,6 +65,18 @@ export const UNIT = gql`
     }
   }`;
 
+export const CREATE_UNIT = gql`
+  mutation CreateUnit(
+    $name: String!,
+    $shortName: String!,
+    $head: ID!
+  ) {
+    unit {
+      name
+    }
+  }
+`;
+
 export const CREATE_EMPLOYEE = gql`
   mutation CreateEmployee(
     $employee: EmployeeInput!,

@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useMutation, useQuery } from '@apollo/react-hooks';
 import Spinner from '../../Spiner/Spinner';
 import Alert from '../../Alert/Alert';
 import Backdrop from '../../Backdrop/Backdrop';
 import Modal from '../../Modal/Modal';
-import UpdateEmployeeForm from '../../forms/UpdateEmployeeForm/UpdateEmployeeForm';
-import CreateEmployeeForm from '../../forms/CreateEmployeeForm/CreateEmployeeForm';
-import { ADD_POST, CREATE_EMPLOYEE, DELETE_EMPLOYEE, DELETE_POST, UNIT } from './queries';
+import UpdateEmployeeForm from './UpdateEmployeeForm/UpdateEmployeeForm';
+import CreateEmployeeForm from './CreateEmployeeForm/CreateEmployeeForm';
+import { ADD_POST, CREATE_EMPLOYEE, CREATE_UNIT, DELETE_EMPLOYEE, DELETE_POST, UNIT } from './queries';
+import CreateUnitForm from './CreateUnitForm/CreateUnitForm';
 
 function UnitContainer(props) {
   const [isAlertShown, setAlertVisibility] = useState(false);
@@ -18,6 +19,7 @@ function UnitContainer(props) {
   const [postName, setPostName] = useState('');
   const [isPostNameValid, setPostNameValidity] = useState(false);
   const [isCreateModalShown, setCreatModalVisibility] = useState(null);
+  const [isChildUnitModalShown, setChildUnitModalVisibility] = useState(false);
 
   const { loading, data } = useQuery(UNIT, {
     variables: {
@@ -31,6 +33,7 @@ function UnitContainer(props) {
   });
   const [createEmployeeMutation] = useMutation(CREATE_EMPLOYEE);
   const [deleteEmployeeMutation] = useMutation(DELETE_EMPLOYEE);
+  const [createUnitMutation] = useMutation(CREATE_UNIT);
   const [addPostMutation] = useMutation(ADD_POST);
   const [deletePostMutation] = useMutation(DELETE_POST);
 
@@ -107,6 +110,42 @@ function UnitContainer(props) {
       showAlert(false);
     }
   });
+
+  const createUnit = ({ name, shortName, head }) =>
+    createUnitMutation({
+      variables: {
+        name,
+        shortName,
+        head
+      },
+      update: (cache, { data: { createUnit } }) => {
+        const { unit } = cache.readQuery({
+          query: UNIT,
+          variables: {
+            id: data.unit._id
+          }
+        });
+        cache.writeQuery({
+          query: UNIT,
+          variables: {
+            id: data.unit._id
+          },
+          data: {
+            unit: Object.assign({}, unit, { childUnits: unit.childUnits.concat(createUnit) })
+          }
+        });
+
+        // code below this must be called in onCompleted handler
+        // try to refactor at 3.1.0 release
+        setChildUnitModalVisibility(false);
+        showAlert(true, 'Підрозділ додано успішно.');
+      },
+      onError: error => {
+        console.error(error);
+        setCreatModalVisibility(false);
+        showAlert(false);
+      }
+    });
 
   // todo
   const updateEmployee = employeeData => {
@@ -337,6 +376,7 @@ function UnitContainer(props) {
           </table>
 
           <button onClick={() => setCreatModalVisibility(true)}>Add Employee</button>
+          <button onClick={() => setChildUnitModalVisibility(true)}>Add child Unit</button>
 
           {/* Posts */}
           <h2>Бойові пости</h2>
@@ -360,7 +400,7 @@ function UnitContainer(props) {
 
           {/* Forms */}
           {
-            (employeeToUpdate || isCreateModalShown) &&
+            (employeeToUpdate || isCreateModalShown || isChildUnitModalShown) &&
             <React.Fragment>
               <Backdrop/>
               <Modal>
@@ -375,6 +415,10 @@ function UnitContainer(props) {
                                     createEmployee={createEmployee}
                                     closeModal={setCreatModalVisibility}/>
                 }
+                {isChildUnitModalShown && <CreateUnitForm heads={data.unit.employees}
+                                                          createUnit={createUnit}
+                                                          hideModal={() => setChildUnitModalVisibility(false)}/>
+                }
               </Modal>
             </React.Fragment>
           }
@@ -384,4 +428,4 @@ function UnitContainer(props) {
   );
 }
 
-export default withRouter(UnitContainer);
+export default UnitContainer;

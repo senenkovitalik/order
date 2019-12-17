@@ -1,6 +1,6 @@
 import React from 'react';
-import convertDate from '../../../utils';
-import { addressData } from '../../data';
+import convertDate from '../../../../utils';
+import { addressData } from '../../../data';
 import axios from 'axios';
 
 import './CreateEmployeeForm.css';
