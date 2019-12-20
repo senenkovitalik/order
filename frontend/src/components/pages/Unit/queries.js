@@ -17,10 +17,6 @@ export const UNIT = gql`
         position {
           _id
           name
-          juniorPositions {
-            _id
-            name
-          }
         }
       }
       employees {
@@ -45,6 +41,9 @@ export const UNIT = gql`
         _id
         name
         shortName
+        head {
+          _id
+        }
       }
       posts {
         _id

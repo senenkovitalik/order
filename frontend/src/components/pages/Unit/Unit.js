@@ -11,6 +11,8 @@ import CreateEmployeeForm from './CreateEmployeeForm/CreateEmployeeForm';
 import { ADD_POST, CREATE_EMPLOYEE, CREATE_UNIT, DELETE_EMPLOYEE, DELETE_POST, UNIT } from './queries';
 import CreateUnitForm from './CreateUnitForm/CreateUnitForm';
 
+import './Unit.css';
+
 function Unit(props) {
   const [isAlertShown, setAlertVisibility] = useState(false);
   const [isAlertSuccess, setSuccessAlertState] = useState(true);
@@ -330,7 +332,7 @@ function Unit(props) {
     );
   }
 
-  const {name, head, employees, childUnits, posts} = data.unit;
+  const { name, head, employees, childUnits, posts } = data.unit;
 
   return (
     <React.Fragment>
@@ -356,7 +358,7 @@ function Unit(props) {
           <h2>Особовий склад</h2>
           {!!employees.length
             ? <React.Fragment>
-              <table>
+              <table className='employees'>
                 <thead>
                 <tr>
                   <th>#</th>
@@ -399,7 +401,8 @@ function Unit(props) {
           {!!childUnits.length
             ? <React.Fragment>
               <ul>
-                {childUnits.map(({ _id, name }) => <li key={_id}><Link to={`/unit/${_id}`}>{name}</Link>
+                {childUnits.map(({ _id, name }) => <li key={_id}>
+                  <Link to={`/unit/${_id}`}>{name}</Link>
                 </li>)}
               </ul>
             </React.Fragment>
@@ -435,19 +438,18 @@ function Unit(props) {
         {(employeeToUpdate || isCreateModalShown || isChildUnitModalShown) && <React.Fragment>
           <Backdrop/>
           <Modal>
+            {/* todo: fetch junior positions from Form component */}
             {employeeToUpdate && <UpdateEmployeeForm employee={employeeToUpdate}
                                                      positions={head.position.juniorPositions}
                                                      updateEmployee={updateEmployee}
-                                                     closeModal={() => setEmployee(null)}/>
-            }
+                                                     closeModal={() => setEmployee(null)}/>}
+            {/* todo: fetch junior positions from Form component */}
             {isCreateModalShown && <CreateEmployeeForm positions={head.position.juniorPositions}
                                                        createEmployee={createEmployee}
-                                                       closeModal={setCreatModalVisibility}/>
-            }
+                                                       closeModal={setCreatModalVisibility}/>}
             {isChildUnitModalShown && <CreateUnitForm heads={employees}
                                                       createUnit={createUnit}
-                                                      hideModal={() => setChildUnitModalVisibility(false)}/>
-            }
+                                                      hideModal={() => setChildUnitModalVisibility(false)}/>}
           </Modal>
         </React.Fragment>}
       </React.Fragment>}
