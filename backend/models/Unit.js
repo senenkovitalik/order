@@ -4,33 +4,45 @@ const Employee = require('./Employee');
 const Post = require('./Post');
 
 const unitSchema = new Schema({
-  name: { type: String, required: true },
-  shortName: { type: String, required: false },
+  name: {
+    type: String,
+    required: true
+  },
+  shortName: {
+    type: String,
+    required: false
+  },
   parentUnit: {
     type: Schema.Types.ObjectId,
     ref: 'Unit',
-    autopopulate: true
   },
   childUnits: [{
     type: Schema.Types.ObjectId,
-    ref: 'Unit'
+    ref: 'Unit',
   }],
   head: {
     type: Schema.Types.ObjectId,
     ref: 'Employee',
     required: true,
-    autopopulate: true
   },
   employees: [{
     type: Schema.Types.ObjectId,
     ref: 'Employee',
-    autopopulate: true
   }],
   posts: [{
     type: Schema.Types.ObjectId,
     ref: 'Post',
-    autopopulate: true
   }]
+});
+
+unitSchema.post('save', async function(doc) {
+  // insert Unit _id into parentUnit childUnits array
+  try {
+    const parentUnit = await mongoose.models.Unit.findById(doc.parentUnit);
+    await mongoose.models.Unit.findByIdAndUpdate(doc.parentUnit, {childUnits: parentUnit.childUnits.concat(doc._id)});
+  } catch (err) {
+    throw err;
+  }
 });
 
 unitSchema.plugin(require('mongoose-autopopulate'));

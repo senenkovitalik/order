@@ -8,6 +8,14 @@ const postSchema = new Schema({
     type: String,
     required: true
   },
+  shortName: {
+    type: String,
+    required: true
+  },
+  position: {
+    type: String,
+    required: true
+  },
   unit: {
     type: Schema.Types.ObjectId,
     ref: 'Unit',

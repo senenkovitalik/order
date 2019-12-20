@@ -13,18 +13,15 @@ const employeeSchema = new Schema({
   addressOfResidence: {
     type: Schema.Types.ObjectId,
     ref: 'Address',
-    autopopulate: true
   },
   registrationAddress: {
     type: Schema.Types.ObjectId,
     ref: 'Address',
-    autopopulate: true
   },
   rank: {
     type: Schema.Types.ObjectId,
     ref: 'Rank',
     required: true,
-    autopopulate: true
   },
   position: {
     type: Schema.Types.ObjectId,
@@ -36,7 +33,6 @@ const employeeSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Unit',
     required: true,
-    autopopulate: true
   },
   type: {
     type: String,

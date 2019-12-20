@@ -1,12 +1,52 @@
 const Unit = require('../../models/Unit');
 
 module.exports = {
-  unit: async ({id}, req) => {
+  unit: async ({ id }, req) => {
     if (!req.isAuth) {
       throw new Error('Unauthorized');
     }
     try {
-      return await Unit.findById(id).exec();
+      const populateOpts = [
+        {
+          path: 'head',
+          model: 'Employee',
+          populate: [
+            {
+              path: 'rank',
+              model: 'Rank'
+            }, {
+              path: 'position',
+              model: 'Position',
+              populate: {
+                path: 'juniorPositions',
+                model: 'Position'
+              }
+            }]
+        },
+        {
+          path: 'employees',
+          model: 'Employee',
+          populate: [
+            {
+              path: 'rank',
+              model: 'Rank'
+            },
+            {
+              path: 'position',
+              model: 'Position'
+            }
+          ]
+        },
+        {
+          path: 'posts',
+          model: 'Post'
+        },
+        {
+          path: 'childUnits',
+          model: 'Unit'
+        }
+      ];
+      return await Unit.findById(id).populate(populateOpts).exec();
     } catch (err) {
       throw err;
     }
@@ -16,9 +56,20 @@ module.exports = {
       throw new Error('Unauthorized');
     }
     try {
-      return await Unit.find()
-        .populate('head employees')
-        .exec();
+      return await Unit.find().exec();
+    } catch (err) {
+      throw err;
+    }
+  },
+
+  createUnit: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthorized');
+    }
+    try {
+      const unitModel = new Unit(args);
+      const newUnit = await unitModel.save();
+      return await Unit.findById(newUnit._id);
     } catch (err) {
       throw err;
     }

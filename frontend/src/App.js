@@ -7,7 +7,7 @@ import Employee from './components/pages/Employee/Employee';
 import './App.css';
 import PostInfo from './components/pages/Posts/PostInfo';
 import OrderChart from './components/pages/OrderChart/OrderChart';
-import UnitContainer from './components/pages/Unit/UnitContainer';
+import Unit from './components/pages/Unit/Unit';
 import { gql } from 'apollo-boost';
 import { useApolloClient, useLazyQuery } from '@apollo/react-hooks';
 import Spinner from './components/Spiner/Spinner';
@@ -77,7 +77,7 @@ function App() {
         {user && <React.Fragment>
           <Route exact path='/unit/:unitId/posts/:postId/orderChart' component={OrderChart}/>
           <Route exact path='/unit/:unitId/posts/:postId' component={PostInfo}/>
-          <Route exact path='/unit/:unitId' component={UnitContainer}/>
+          <Route exact path='/unit/:unitId' component={Unit}/>
           <Route exact path='/employee/:id' component={Employee}/>
           <Route exact path='/order' component={Order}/>
         </React.Fragment>}

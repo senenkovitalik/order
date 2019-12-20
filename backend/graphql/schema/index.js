@@ -140,6 +140,7 @@ module.exports = buildSchema(`
   }
   
   type RootMutation {
+    createUnit(parentUnit: ID!, name: String!, shortName: String!, head: ID!): Unit!
     createEmployee(employee: EmployeeInput!, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
     updateEmployee(id: ID!, data: EmployeeInput, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
     updateAddress(id: ID!, data: AddressInput!): Address!

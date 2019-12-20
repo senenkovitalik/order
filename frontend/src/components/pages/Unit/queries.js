@@ -10,8 +10,12 @@ export const UNIT = gql`
         name
         surname
         patronymic
-        rank { name }
-        position { 
+        rank {
+          _id
+          name
+        }
+        position {
+          _id
           name
           juniorPositions {
             _id
@@ -28,6 +32,7 @@ export const UNIT = gql`
           shortName
         }
         position {
+          _id
           name
           shortName
         }
@@ -35,28 +40,11 @@ export const UNIT = gql`
         surname
         patronymic
         dateOfBirth
-        addressOfResidence {
-          _id
-          region
-          district
-          city
-          village
-          urbanVillage
-          street
-          houseNumber
-          apartmentNumber
-        }
-        registrationAddress {
-          _id
-          region
-          district
-          city
-          village
-          urbanVillage
-          street
-          houseNumber
-          apartmentNumber
-        }
+      }
+      childUnits {
+        _id
+        name
+        shortName
       }
       posts {
         _id
