@@ -126,7 +126,7 @@ module.exports = buildSchema(`
   type RootQuery {
     ranks: [Rank!]!
     rank(id: String!): Rank
-    position(name: String!): Position
+    position(_id: ID!): Position
     positions: [Position!]!
     employees: [Employee!]!
     employee(id: String!): Employee

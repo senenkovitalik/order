@@ -8,3 +8,14 @@ export const RANKS = gql`
       name
     }
   }`;
+
+export const POSITIONS = gql`
+  query Position($id: ID!) {
+    position(_id: $id) {
+      juniorPositions {
+        _id
+        name
+      }
+    }
+  }
+`;

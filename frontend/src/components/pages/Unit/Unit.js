@@ -438,9 +438,8 @@ function Unit(props) {
         {(employeeToUpdate || isCreateModalShown || isChildUnitModalShown) && <React.Fragment>
           <Backdrop/>
           <Modal>
-            {/* todo: fetch junior positions from Form component */}
             {employeeToUpdate && <UpdateEmployeeForm employee={employeeToUpdate}
-                                                     positions={head.position.juniorPositions}
+                                                     headPosition={head.position._id}
                                                      updateEmployee={updateEmployee}
                                                      closeModal={() => setEmployee(null)}/>}
             {/* todo: fetch junior positions from Form component */}

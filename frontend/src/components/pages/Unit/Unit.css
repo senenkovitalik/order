@@ -11,19 +11,3 @@
 .employees th, td {
     padding: 5px;
 }
-
-.employee-form label {
-    display: block;
-}
-
-.employee-form label > span {
-    width: 200px;
-    font-weight: bold;
-    float: left;
-    padding-right: 5px;
-}
-
-.employee-form label > input,
-.employee-form label > select {
-    width: 250px;
-}
