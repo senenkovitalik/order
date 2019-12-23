@@ -1,9 +1,9 @@
 .modal {
     position: absolute;
+    box-sizing: border-box;
     top: 10%;
-    left: 25%;
-    width: 50%;
-    border: 1px solid black;
+    width: 38%;
+    left: calc(62% / 2);
     background-color: #fff;
     padding: 2rem;
 }

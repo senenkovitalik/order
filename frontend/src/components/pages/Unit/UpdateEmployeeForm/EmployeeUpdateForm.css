@@ -1,0 +1,9 @@
+.field-name {
+    display: inline-block;
+    width: 38%
+}
+
+.field-input {
+    width: 62%;
+    box-sizing: border-box;
+}
