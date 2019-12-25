@@ -1,12 +1,12 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import convertDate from '../../../../utils';
-import {addressData} from '../../../data';
-import {useQuery} from '@apollo/react-hooks';
-import {RANKS, POSITIONS} from './queries';
+import { addressData } from '../../../data';
+import { useQuery } from '@apollo/react-hooks';
+import { POSITIONS, RANKS } from './queries';
 
-import './UpdateEmployeeForm.css';
+import './EmployeeUpdateForm.css';
 
-export default function UpdateEmployeeForm({employee, headPosition, closeModal}) {
+export default function UpdateEmployeeForm({ employee, headPosition, closeModal }) {
 
   const [surname, setSurname] = useState(employee.surname);
   const [name, setName] = useState(employee.name);
@@ -17,18 +17,18 @@ export default function UpdateEmployeeForm({employee, headPosition, closeModal})
   const [addressOfResidence, setAddressOfResidence] = useState(employee.addressOfResidence);
   const [registrationAddress, setRegistrationAddress] = useState(employee.registrationAddress);
 
-  const handleDate = ({target: {value}}) => {
+  const handleDate = ({ target: { value } }) => {
     const parts = value.split('-');
     setDateOfBirth(new Date(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2])));
   };
 
   // todo: refactor
-  const handleAddressOfResidence = ({target: {name, value}}) =>
-    setAddressOfResidence(Object.assign({}, addressOfResidence, {[name]: value}));
+  const handleAddressOfResidence = ({ target: { name, value } }) =>
+    setAddressOfResidence(Object.assign({}, addressOfResidence, { [name]: value }));
 
   // todo: refactor
-  const handleRegistrationAddress = ({target: {name, value}}) =>
-    setRegistrationAddress(Object.assign({}, registrationAddress, {[name]: value}));
+  const handleRegistrationAddress = ({ target: { name, value } }) =>
+    setRegistrationAddress(Object.assign({}, registrationAddress, { [name]: value }));
 
   const addressMap = [
     {
@@ -43,13 +43,13 @@ export default function UpdateEmployeeForm({employee, headPosition, closeModal})
     }
   ];
 
-  const {loading, data} = useQuery(RANKS, {
+  const { loading, data } = useQuery(RANKS, {
     onError: error => {
       console.log(error);
     }
   });
 
-  const {data: positionsData, loading: positionLoading} = useQuery(POSITIONS, {
+  const { data: positionsData, loading: positionLoading } = useQuery(POSITIONS, {
     variables: {
       id: headPosition
     },
@@ -65,7 +65,7 @@ export default function UpdateEmployeeForm({employee, headPosition, closeModal})
       {/* Surname */}
       <div>
         <label>
-          <span className='field-header'>Прізвище</span>
+          <span className='field-name'>Прізвище</span>
           <input className='field-input' type='text' defaultValue={surname} onChange={e => setSurname(e.target.value)}/>
         </label>
       </div>
@@ -73,7 +73,7 @@ export default function UpdateEmployeeForm({employee, headPosition, closeModal})
       {/* Name */}
       <div>
         <label>
-          <span className='field-header'>Ім`я</span>
+          <span className='field-name'>Ім`я</span>
           <input className='field-input' type='text' defaultValue={name} onChange={e => setName(e.target.value)}/>
         </label>
       </div>
@@ -81,15 +81,16 @@ export default function UpdateEmployeeForm({employee, headPosition, closeModal})
       {/* Patronymic */}
       <div>
         <label>
-          <span className='field-header'>Побатькові</span>
-          <input className='field-input' type='text' defaultValue={patronymic} onChange={e => setPatronymic(e.target.value)}/>
+          <span className='field-name'>Побатькові</span>
+          <input className='field-input' type='text' defaultValue={patronymic}
+                 onChange={e => setPatronymic(e.target.value)}/>
         </label>
       </div>
 
       {/* Rank */}
       <div>
         <label>
-          <span className='field-header'>Військове звання</span>
+          <span className='field-name'>Військове звання</span>
           {
             loading
               ? <span>Завантаження...</span>
@@ -102,26 +103,10 @@ export default function UpdateEmployeeForm({employee, headPosition, closeModal})
         </label>
       </div>
 
-      <hr/>
-
-      {/* Unit */}
-      <div>
-        <label>
-          <span className='field-header'>Підрозділ</span>
-          <select className='field-input'>
-            <option>Unit 1</option>
-            <option>Unit 2</option>
-            <option>Unit 3</option>
-          </select>
-        </label>
-      </div>
-
-      <hr/>
-
       {/* Position */}
       <div>
         <label>
-          <span className='field-header'>Посада</span>
+          <span className='field-name'>Посада</span>
           {positionLoading
             ? <div>Завантаження...</div>
             : <select className='field-input' defaultValue={position} onChange={e => setPosition(e.target.value)}>
@@ -134,18 +119,18 @@ export default function UpdateEmployeeForm({employee, headPosition, closeModal})
       {/* Birthday */}
       <div>
         <label>
-          <span className='field-header'>День народження</span>
+          <span className='field-name'>День народження</span>
           <input className='field-input' type="date" defaultValue={convertDate(dateOfBirth)} onChange={handleDate}/>
         </label>
       </div>
 
-      {addressMap.map(({blockName, data, handler}, i) => <React.Fragment key={i}>
+      {addressMap.map(({ blockName, data, handler }, i) => <React.Fragment key={i}>
         <div>
           <b>{blockName}</b>
         </div>
         {addressData.map((item, i) => <div key={i}>
           <label>
-            <span className='field-header'>{item.title}</span>
+            <span className='field-name'>{item.title}</span>
             <input className='field-input' type='text' name={item.field} defaultValue={data ? data[item.field] : ''}
                    onChange={handler}/>
           </label>
