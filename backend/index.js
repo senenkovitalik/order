@@ -1,10 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const expressGraphql = require('express-graphql');
 
-const schema = require('./graphql/schema/index');
+const expressGraphql = require('express-graphql');
+const {importSchema} = require('graphql-import');
+const {makeExecutableSchema} = require('graphql-tools');
+
+const typeDefs = importSchema('./graphql/schema/index.graphql');
 const resolvers = require('./graphql/resolvers/rootResolver');
+const schema = makeExecutableSchema({typeDefs, resolvers});
 
 const cors = require('./middleware/cors');
 const isAuth = require('./middleware/is-auth');
@@ -19,7 +23,6 @@ app.use(isAuth);
 
 app.use('/graphql', expressGraphql({
   schema,
-  rootValue: resolvers,
   graphiql: true
 }));
 

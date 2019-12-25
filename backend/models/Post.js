@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Unit = require('./unit');
-const MonthDuties = require('./MonthDuties');
 
 const postSchema = new Schema({
   name: {
@@ -16,11 +15,10 @@ const postSchema = new Schema({
     type: String,
     required: true
   },
-  unit: {
+  duties: [{
     type: Schema.Types.ObjectId,
-    ref: 'Unit',
-    required: true
-  }
+    ref: 'Duty'
+  }]
 });
 
 postSchema.post('save', async ({_id, unit: unitId}) => {
@@ -40,9 +38,6 @@ postSchema.pre('remove', async function() {
     const updatedUnit = await Unit.findById(this.unit).exec();
     updatedUnit.posts = updatedUnit.posts.filter(post => post._id.toString() !== this._id.toString());
     await updatedUnit.save();
-
-    // delete month duties associated with post
-    await MonthDuties.findOneAndRemove({post: new mongoose.Types.ObjectId(this._id)}).exec();
   } catch (err) {
     throw err;
   }
