@@ -5,7 +5,6 @@ const mongoose = require('mongoose');
 const expressGraphql = require('express-graphql');
 const {importSchema} = require('graphql-import');
 const {buildSchema} = require('graphql');
-// const {makeExecutableSchema} = require('graphql-tools');
 
 const typeDefs = importSchema('./graphql/schema/index.graphql');
 const schema = buildSchema(typeDefs);
