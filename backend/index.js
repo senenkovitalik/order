@@ -4,11 +4,12 @@ const mongoose = require('mongoose');
 
 const expressGraphql = require('express-graphql');
 const {importSchema} = require('graphql-import');
-const {makeExecutableSchema} = require('graphql-tools');
+const {buildSchema} = require('graphql');
+// const {makeExecutableSchema} = require('graphql-tools');
 
 const typeDefs = importSchema('./graphql/schema/index.graphql');
+const schema = buildSchema(typeDefs);
 const resolvers = require('./graphql/resolvers/rootResolver');
-const schema = makeExecutableSchema({typeDefs, resolvers});
 
 const cors = require('./middleware/cors');
 const isAuth = require('./middleware/is-auth');
@@ -23,6 +24,7 @@ app.use(isAuth);
 
 app.use('/graphql', expressGraphql({
   schema,
+  rootValue: resolvers,
   graphiql: true
 }));
 

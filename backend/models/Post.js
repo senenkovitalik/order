@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Unit = require('./unit');
+const Duty = require('./Duty');
 
 const postSchema = new Schema({
   name: {
