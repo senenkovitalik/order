@@ -47,7 +47,7 @@ type Unit {
     childUnits: [Unit!]!
     head: Employee!
     employees: [Employee!]!
-    posts: [Post!]!
+    posts(id: ID): [Post!]!
 }
 
 type Post {
@@ -55,7 +55,7 @@ type Post {
     name: String!
     shortName: String!
     position: String!
-    duties: [Duty!]!
+    duties(year: Int, month: Int): [Duty!]!
 }
 
 # Date eq to 'YYYY-MM-DD'
@@ -77,56 +77,57 @@ type AuthData {
     token: String!
 }
 
-input AddressInput {
-    _id: ID
-    region: String
-    district: String
-    city: String
-    village: String
-    urbanVillage: String
-    street: String
-    houseNumber: String
-    apartmentNumber: String
-}
-
-input EmployeeInput {
-    name: String
-    surname: String
-    patronymic: String
-    dateOfBirth: String
-    addressOfResidence: ID
-    registrationAddress: ID
-    rank: ID!
-    position: ID!
-    unit: ID!
-}
+#input AddressInput {
+#    _id: ID
+#    region: String
+#    district: String
+#    city: String
+#    village: String
+#    urbanVillage: String
+#    street: String
+#    houseNumber: String
+#    apartmentNumber: String
+#}
+#
+#input EmployeeInput {
+#    name: String
+#    surname: String
+#    patronymic: String
+#    dateOfBirth: String
+#    addressOfResidence: ID
+#    registrationAddress: ID
+#    rank: ID!
+#    position: ID!
+#    unit: ID!
+#}
 
 type Query {
-    ranks: [Rank!]!
-    rank(id: String!): Rank
-    position(_id: ID!): Position
-    positions: [Position!]!
-    employees: [Employee!]!
-    employee(id: String!): Employee
-    users: [User!]!
-    user(userId: String!): User
-    userByToken: User!
-    units: [Unit!]!
-    unit(id: ID!): Unit
+#    ranks: [Rank!]!
+#    rank(id: String!): Rank
+#    position(_id: ID!): Position
+#    positions: [Position!]!
+#    employees: [Employee!]!
+#    employee(id: String!): Employee
+#    users: [User!]!
+#    user(userId: String!): User
+#    userByToken: User!
+#    units: [Unit!]!
     login(login: String!, password: String!): AuthData
+    unit(id: ID!): Unit
+    post(id: ID!): Post!
 }
 
-type Mutation {
-    createUnit(parentUnit: ID!, name: String!, shortName: String!, head: ID!): Unit!
-    createEmployee(employee: EmployeeInput!, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
-    updateEmployee(id: ID!, data: EmployeeInput, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
-    updateAddress(id: ID!, data: AddressInput!): Address!
-    deleteEmployee(id: ID!): Employee!
-    createPost(unitId: ID!, postName: String!): Post!
-    deletePost(id: ID!): Post!
-}
+#type Mutation {
+#    createUnit(parentUnit: ID!, name: String!, shortName: String!, head: ID!): Unit!
+#    createEmployee(employee: EmployeeInput!, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
+#    updateEmployee(id: ID!, data: EmployeeInput, addressOfResidence: AddressInput, registrationAddress: AddressInput): Employee!
+#    updateAddress(id: ID!, data: AddressInput!): Address!
+#    deleteEmployee(id: ID!): Employee!
+#    createPost(unitId: ID!, postName: String!): Post!
+#    deletePost(id: ID!): Post!
+#}
 
 schema {
     query: Query
-    mutation: Mutation
+#    mutation: Mutation
 }

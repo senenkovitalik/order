@@ -1,14 +1,16 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-
-const expressGraphql = require('express-graphql');
+const graphqlHTTP = require('express-graphql');
+const {makeExecutableSchema} = require('graphql-tools');
 const {importSchema} = require('graphql-import');
-const {buildSchema} = require('graphql');
 
 const typeDefs = importSchema('./graphql/schema/index.graphql');
-const schema = buildSchema(typeDefs);
 const resolvers = require('./graphql/resolvers/rootResolver');
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers
+});
 
 const cors = require('./middleware/cors');
 const isAuth = require('./middleware/is-auth');
@@ -21,18 +23,16 @@ app.use(bodyParser.json());
 app.use(cors);
 app.use(isAuth);
 
-app.use('/graphql', expressGraphql({
+app.use('/graphql', graphqlHTTP({
   schema,
-  rootValue: resolvers,
   graphiql: true
 }));
 
-const { MONGO_USER, MONGO_PASSWORD, MONGO_DB } = process.env;
-
+const {MONGO_USER, MONGO_PASSWORD, MONGO_DB} = process.env;
 mongoose.set('useFindAndModify', false);
 mongoose.connect(`mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@cluster0-wgttx.mongodb.net/${MONGO_DB}?retryWrites=true&w=majority`, {useNewUrlParser: true})
-.then(() => {
-  const port = 3001;
-  app.listen(port, () => console.log(`Start server at http://localhost:${port}`));
-})
-.catch(err => console.log(err));
+  .then(() => {
+    const port = 3001;
+    app.listen(port, () => console.log(`Start server at http://localhost:${port}\nGraphiQL at http://localhost:3001/graphql`));
+  })
+  .catch(err => console.log(err));

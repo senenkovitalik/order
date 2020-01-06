@@ -1,32 +1,21 @@
-const mongoose = require('mongoose');
-const Post = require('../../models/Post');
+const Duty = require('../../models/Duty');
 
 module.exports = {
-  createPost: async ({unitId, postName}, req) => {
-    if (!req.isAuth) {
-      throw new Error('Unauthorized');
-    }
-
-    try {
-      const post = new Post({
-        name: postName,
-        unit: unitId
+  Post: {
+    duties: async (parent, {year, month}) => {
+      const startDate = new Date(year, month, 1);
+      const endDate = new Date(year, month + 1, 0);
+      const startDateFormatted = startDate.toISOString().split('T')[0];
+      const endDateFormatted = endDate.toISOString().split('T')[0];
+      return await Duty.find({
+        _id: {
+          $in: parent.duties
+        },
+        date: {
+          $gte: startDateFormatted,
+          $lte: endDateFormatted
+        }
       });
-      return await post.save();
-    } catch (err) {
-      console.log(err);
-    }
-  },
-  deletePost: async ({id}, req) => {
-    if (!req.isAuth) {
-      throw new Error('Unauthorized');
-    }
-
-    try {
-      const post = await Post.findById(id).exec();
-      return await post.remove();
-    } catch (err) {
-      throw err;
     }
   }
 };

@@ -45,6 +45,4 @@ unitSchema.post('save', async function(doc) {
   }
 });
 
-unitSchema.plugin(require('mongoose-autopopulate'));
-
 module.exports = mongoose.models.Unit || mongoose.model('Unit', unitSchema);
