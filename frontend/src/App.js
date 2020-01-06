@@ -8,29 +8,14 @@ import './App.css';
 import PostInfo from './components/pages/Posts/PostInfo';
 import OrderChart from './components/pages/OrderChart/OrderChart';
 import Unit from './components/pages/Unit/Unit';
-import { gql } from 'apollo-boost';
+import {loader} from 'graphql.macro';
 import { useApolloClient, useLazyQuery } from '@apollo/react-hooks';
 import Spinner from './components/Spiner/Spinner';
 
-const LOGIN = gql`
-  query Login($login: String!, $password: String!) {
-    login(login: $login, password: $password) {
-      user {
-        _id
-        employee {
-          _id
-          unit {
-            _id
-          }
-        }
-      }
-      token
-    }
-  }
-`;
-
 function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+
+  const LOGIN = loader('./LOGIN.graphql');
   const [getLogin, { loading, data }] = useLazyQuery(LOGIN);
 
   const client = useApolloClient();

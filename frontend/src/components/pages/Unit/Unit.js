@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useMutation, useQuery } from '@apollo/react-hooks';
+import {loader} from 'graphql.macro';
 import Spinner from '../../Spiner/Spinner';
 import Alert from '../../Alert/Alert';
 import Backdrop from '../../Backdrop/Backdrop';
 import Modal from '../../Modal/Modal';
 import UpdateEmployeeForm from './UpdateEmployeeForm/UpdateEmployeeForm';
 import CreateEmployeeForm from './CreateEmployeeForm/CreateEmployeeForm';
-import { ADD_POST, CREATE_EMPLOYEE, CREATE_UNIT, DELETE_EMPLOYEE, DELETE_POST, UNIT } from './queries';
+import { ADD_POST, CREATE_EMPLOYEE, CREATE_UNIT, DELETE_EMPLOYEE, DELETE_POST } from './queries';
 import CreateUnitForm from './CreateUnitForm/CreateUnitForm';
 
 import './Unit.css';
@@ -22,6 +23,8 @@ function Unit(props) {
   const [isPostNameValid, setPostNameValidity] = useState(false);
   const [isCreateModalShown, setCreatModalVisibility] = useState(null);
   const [isChildUnitModalShown, setChildUnitModalVisibility] = useState(false);
+
+  const UNIT = loader('./queries/UNIT.graphql');
 
   const { loading, data } = useQuery(UNIT, {
     variables: {

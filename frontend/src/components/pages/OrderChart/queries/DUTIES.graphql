@@ -1,0 +1,36 @@
+query Duties($unitId: ID!, $postId: ID!, $year: Int!, $month: Int!) {
+    unit(id: $unitId) {
+        head {
+            _id
+            name
+            surname
+            rank {
+                name
+            }
+            position {
+                name
+            }
+        }
+        employees {
+            _id
+            surname
+            name
+            rank {
+                _id
+                index
+                shortName
+            }
+        }
+    }
+    post(id: $postId) {
+        _id
+        duties(year: $year, month: $month) {
+            _id
+            date
+            type
+            employee {
+                _id
+            }
+        }
+    }
+}

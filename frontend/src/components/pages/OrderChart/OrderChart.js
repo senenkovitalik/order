@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {loader} from 'graphql.macro';
 import Controls from '../../Controls/Controls';
 import './OrderChart.css';
 import Row from '../../Row/Row';
@@ -6,11 +7,12 @@ import Popover from '../../Popover/Popover';
 import UpperResolution from '../OrderChart/UpperResolution/UpperResolution';
 import BottomResolution from '../OrderChart/BottomResolution/BottomResolution';
 import {monthes} from '../../data';
-import axios from 'axios';
 import Alert from '../../Alert/Alert';
 import Spinner from '../../Spiner/Spinner';
+import {getSearchParams} from '../../../utils';
+import {useQuery} from "@apollo/react-hooks";
 
-function OrderChart() {
+function OrderChart(props) {
   const [currentEmployeeId, setCurrentEmployeeId] = useState(null);
   const [currentDay, setCurrentDay] = useState(null);
   const [isFullDuty, setDutyType] = useState(true);
@@ -20,29 +22,44 @@ function OrderChart() {
   const [isPopoverShown, setPopoverVisibility] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState({x: 0, y: 0});
 
-  /*
-  Set/remove duties per day
-   */
+  const {year, month} = getSearchParams(props);
+
+  const DUTIES = loader('./queries/DUTIES.graphql');
+  const {loading, data} = useQuery(DUTIES, {
+    variables: {
+      unitId: props.match.params.unitId,
+      postId: props.match.params.postId,
+      year,
+      month
+    },
+    onError: error => {
+      console.error(error);
+      // setAlertVisibility(true);
+      // setSuccessAlertState(false);
+    }
+  });
+
+  // Set/remove duties per day
   const checkDay = dutyType => {
-    if (!(currentDay || currentEmployeeId)) {
-      return;
-    }
-
-    const employee = data.unit.employees.find(e => e._id === employeeId);
-    const usedDuty = employee.duties.find(d => d.day === day);
-
-    if (!!usedDuty) {
-      employee.duties = employee.duties.filter(duty => duty.day !== day);
-    } else {
-      employee.duties.push({currentDay, type: dutyType});
-    }
-
-    this.setState(prevState => ({
-      unit: {
-        ...prevState.unit,
-        employees: prevState.unit.employees.filter(e => e._id !== employeeId).concat(employee)
-      }
-    }));
+    // if (!(currentDay || currentEmployeeId)) {
+    //   return;
+    // }
+    //
+    // const employee = data.unit.employees.find(e => e._id === employeeId);
+    // const usedDuty = employee.duties.find(d => d.day === day);
+    //
+    // if (!!usedDuty) {
+    //   employee.duties = employee.duties.filter(duty => duty.day !== day);
+    // } else {
+    //   employee.duties.push({currentDay, type: dutyType});
+    // }
+    //
+    // this.setState(prevState => ({
+    //   unit: {
+    //     ...prevState.unit,
+    //     employees: prevState.unit.employees.filter(e => e._id !== employeeId).concat(employee)
+    //   }
+    // }));
   };
 
   const togglePopover = (isShown, e) => {
@@ -117,30 +134,30 @@ function OrderChart() {
       }
     };
 
-    axios.post('/graphql',
-      {},
-      {
-        baseURL: 'http://localhost:3001/',
-        params: requestBody,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      })
-      .then(res => {
-        this.setState({
-          isAlertShown: true,
-          isAlertSuccess: true,
-          alertContent: 'Зміни збережено успішно'
-        });
-      })
-      .catch(err => {
-        console.log(err);
-        this.setState({
-          isAlertShown: true,
-          isAlertSuccess: false,
-          alertContent: 'Щось трапилося. Зверніться до адміністратора за допомогою.'
-        });
-      });
+    // axios.post('/graphql',
+    //   {},
+    //   {
+    //     baseURL: 'http://localhost:3001/',
+    //     params: requestBody,
+    //     headers: {
+    //       'Authorization': `Bearer ${localStorage.getItem('token')}`
+    //     }
+    //   })
+    //   .then(res => {
+    //     this.setState({
+    //       isAlertShown: true,
+    //       isAlertSuccess: true,
+    //       alertContent: 'Зміни збережено успішно'
+    //     });
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //     this.setState({
+    //       isAlertShown: true,
+    //       isAlertSuccess: false,
+    //       alertContent: 'Щось трапилося. Зверніться до адміністратора за допомогою.'
+    //     });
+    //   });
   };
 
   const dismissAlert = () => {
@@ -149,74 +166,55 @@ function OrderChart() {
     });
   };
 
-  // todo: refactor
-  const getSearchParams = () => {
-    const searchProp = this.props.location.search;
-    if (!searchProp.length) {
-      return null;
-    }
-    const searchStr = searchProp.slice(1);
-    const parts = searchStr.split('&');
-    const searchObj = {};
-    parts.forEach(p => {
-      const [key, value] = p.split('=');
-      searchObj[key] = parseInt(value, 10);
+  if (loading) {
+    return <div style={{display: 'flex', justifyContent: 'center'}}>
+      <Spinner/>
+    </div>;
+  }
+
+  if (data) {
+    const currentMonth = monthes[month - 1];
+    const days = [...Array(currentMonth.days)].map((x, i) => {
+      const d = new Date(year, month - 1, i + 1);
+      const isHoliday = d.getDay() === 0 || d.getDay() === 6;
+      return <th key={i + 1} style={{backgroundColor: isHoliday ? 'grey' : 'white'}}>{i + 1}</th>;
     });
-    return searchObj;
-  }
+    const rows = data.unit.employees
+      .sort((a, b) => b.rank.index - a.rank.index)
+      .map((employee, i) =>
+        <Row key={employee._id}
+             year={year}
+             month={month}
+             days={currentMonth.days}
+             checkDay={checkDay}
+             setCurrentEmployeeId={setCurrentEmployeeId}
+             setCurrentDay={setCurrentDay}
+             employee={employee}
+             togglePopover={togglePopover}
+             index={i + 1}/>
+      );
 
-  const {year, month} = getSearchParams();
-  if (!year && !month) {
-    return null;
-  }
-  const currentMonth = monthes[month - 1];
-  const head = this.state.unit ? this.state.unit.head : null;
-  const employees = this.state.unit ? this.state.unit.employees : [];
-  const days = [...Array(currentMonth.days)].map((x, i) => {
-    const d = new Date(year, month - 1, i + 1);
-    const isHoliday = d.getDay() === 0 || d.getDay() === 6;
-    return <th key={i + 1} style={{backgroundColor: isHoliday ? 'grey' : 'white'}}>{i + 1}</th>;
-  });
-  const rows = employees.sort((a, b) => b.rank.index - a.rank.index)
-    .map((employee, i) =>
-      <Row key={employee._id}
-           year={year}
-           month={month}
-           days={currentMonth.days}
-           checkDay={this.checkDay}
-           setCurrentEmployeeId={this.setCurrentEmployeeId}
-           setCurrentDay={this.setCurrentDay}
-           employee={employee}
-           togglePopover={this.togglePopover}
-           index={i + 1}/>
-    );
-  const parentUnit = this.state.unit ? this.state.unit.parentUnit : null;
-  return (
-    <div style={{padding: '2rem'}}>
-      {this.state.isAlertShown && <Alert success={this.state.isAlertSuccess}
-                                         dismiss={this.dismissAlert}>{this.state.alertContent}</Alert>}
+    return (
+      <div style={{padding: '2rem'}}>
+        {isAlertShown && <Alert success={isAlertSuccess} dismiss={dismissAlert}>{alertContent}</Alert>}
 
-      {this.state.loading
-        ? <div style={{display: 'flex', justifyContent: 'center'}}>
-          <Spinner/>
-        </div>
-        : <React.Fragment>
+        {data && <React.Fragment>
           <div style={{padding: '0.5rem'}}>{''}</div>
 
           <div className="order-chart landscape" style={{border: '1px solid black'}}>
 
-            <Controls isFullDuty={this.state.isFullDuty}
-                      handleChange={this.handleRadioChange}
-                      clearDuties={this.clearDuties}
-                      saveDuties={this.saveDuties}/>
+            <Controls isFullDuty={isFullDuty}
+                      handleChange={handleRadioChange}
+                      clearDuties={clearDuties}
+                      saveDuties={saveDuties}/>
 
-            {parentUnit && <UpperResolution head={parentUnit.head}/>}
+            <UpperResolution head={data.unit.head}/>
 
             <br/><br/><br/><br/>
 
             <div className="row row_centered">
               <p>ГРАФІК ЧЕРГУВАННЯ</p>
-              <p>особового складу {this.state.unit ? this.state.unit.name : ''}</p>
+              <p>особового складу {data.unit.name}</p>
               <p>на {currentMonth.name} {year} року</p>
             </div>
 
@@ -241,19 +239,18 @@ function OrderChart() {
 
             <br/><br/>
 
-            <BottomResolution head={head}/>
+            <BottomResolution head={data.unit.head}/>
 
-            {
-              !this.state.isFullDuty &&
-              <Popover isShown={this.state.isPopoverShown}
-                       togglePopover={this.togglePopover}
-                       position={this.state.popoverPosition}
-                       checkDay={this.checkDay}/>
+            {!isFullDuty && <Popover isShown={isPopoverShown}
+                                     togglePopover={togglePopover}
+                                     position={popoverPosition}
+                                     checkDay={checkDay}/>
             }
           </div>
         </React.Fragment>}
-    </div>
-  );
+      </div>
+    );
+  }
 }
 
 export default OrderChart;

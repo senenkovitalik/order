@@ -1,57 +1,5 @@
 import { gql } from 'apollo-boost';
 
-export const UNIT = gql`
-  query Unit($id: ID!) {
-    unit(id: $id) {
-      _id
-      name
-      head {
-        _id
-        name
-        surname
-        patronymic
-        rank {
-          _id
-          name
-        }
-        position {
-          _id
-          name
-        }
-      }
-      employees {
-        _id
-        rank {
-          _id
-          index
-          name
-          shortName
-        }
-        position {
-          _id
-          name
-          shortName
-        }
-        name
-        surname
-        patronymic
-        dateOfBirth
-      }
-      childUnits {
-        _id
-        name
-        shortName
-        head {
-          _id
-        }
-      }
-      posts {
-        _id
-        name
-      }
-    }
-  }`;
-
 export const CREATE_UNIT = gql`
   mutation CreateUnit(
     $name: String!,
