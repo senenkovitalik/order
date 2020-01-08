@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import './Cell.css';
 import { dutyMapping } from '../data';
 
@@ -25,14 +24,3 @@ function cell({ day, isHoliday, duty, setCurrentDay, togglePopover }) {
 }
 
 export default cell;
-
-cell.propTypes = {
-  day: PropTypes.number.isRequired,
-  isHoliday: PropTypes.bool.isRequired,
-  duty: PropTypes.shape({
-    day: PropTypes.number.isRequired,
-    type: PropTypes.string.isRequired
-  }),
-  setCurrentDay: PropTypes.func.isRequired,
-  togglePopover: PropTypes.func.isRequired
-};

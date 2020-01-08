@@ -1,13 +1,16 @@
 query Duties($unitId: ID!, $postId: ID!, $year: Int!, $month: Int!) {
     unit(id: $unitId) {
+        _id
         head {
             _id
             name
             surname
             rank {
+                _id
                 name
             }
             position {
+                _id
                 name
             }
         }
@@ -15,6 +18,7 @@ query Duties($unitId: ID!, $postId: ID!, $year: Int!, $month: Int!) {
             _id
             surname
             name
+            patronymic
             rank {
                 _id
                 index
@@ -24,6 +28,8 @@ query Duties($unitId: ID!, $postId: ID!, $year: Int!, $month: Int!) {
     }
     post(id: $postId) {
         _id
+        name
+        position
         duties(year: $year, month: $month) {
             _id
             date

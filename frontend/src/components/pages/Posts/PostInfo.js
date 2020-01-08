@@ -1,11 +1,7 @@
 import React from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { monthes } from '../../data';
 import Spinner from '../../Spiner/Spinner';
-
-const CancelToken = axios.CancelToken;
-let cancel;
 
 class PostInfo extends React.Component {
   state = {
@@ -57,43 +53,10 @@ class PostInfo extends React.Component {
 
   // fetch month duties
   componentDidMount() {
-    this.setState({ loading: true });
-
-    const requestBody = {
-      query: `
-          query MonthDuties($year: Int!, $post: ID!) {
-            monthDuties(year: $year, post: $post) {
-              _id
-              year
-              month
-            }
-          }
-        `,
-      variables: {
-        year: new Date().getFullYear(),
-        post: this.props.match.params.postId
-      }
-    };
-    axios.get('/graphql', {
-      baseURL: 'http://localhost:3001/',
-      params: requestBody,
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-      cancelToken: new CancelToken(c => cancel = c)
-    })
-      .then(res => {
-        this.setState({
-          monthDuties: res.data.data.monthDuties,
-          loading: false
-        });
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  }
-
-  // cancel all requests
-  componentWillUnmount() {
-    cancel();
+    this.setState({
+      monthDuties: [],
+      loading: false
+    });
   }
 }
 

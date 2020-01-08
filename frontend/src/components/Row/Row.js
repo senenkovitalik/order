@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import Cell from '../Cell/Cell';
 
 class Row extends React.Component {
@@ -19,7 +18,7 @@ class Row extends React.Component {
         const day = i + 1;
         const d = new Date(this.props.year, this.props.month - 1, day);
         const isHoliday = d.getDay() === 0 || d.getDay() === 6;
-        const duty = this.props.employee.duties.find(duty => duty.day === day);
+        const duty = null;
         return <Cell key={day}
                      day={day}
                      isHoliday={isHoliday}
@@ -40,27 +39,5 @@ class Row extends React.Component {
     );
   }
 }
-
-Row.propTypes = {
-  employee: PropTypes.shape({
-    _id: PropTypes.string,
-    rank: PropTypes.shape({
-      index: PropTypes.number,
-      shortName: PropTypes.string
-    }),
-    index: PropTypes.number,
-    shortName: PropTypes.string,
-    name: PropTypes.string,
-    surname: PropTypes.string,
-    patronymic: PropTypes.string
-  }).isRequired,
-  year: PropTypes.number.isRequired,
-  month: PropTypes.number.isRequired,
-  index: PropTypes.number.isRequired,
-  checkDay: PropTypes.func.isRequired,
-  setCurrentEmployeeId: PropTypes.func.isRequired,
-  setCurrentDay: PropTypes.func.isRequired,
-  togglePopover: PropTypes.func.isRequired
-};
 
 export default Row;
