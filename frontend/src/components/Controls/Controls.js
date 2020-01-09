@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './Controls.css';
 
-function controls({ isFullDuty, handleChange, clearDuties, saveDuties }) {
+function controls({ isFullDuty, handleChange }) {
   return (
     <div className='controls'>
       <ul>
@@ -25,10 +25,10 @@ function controls({ isFullDuty, handleChange, clearDuties, saveDuties }) {
           </label>
         </li>
         <li>
-          <button type='button' onClick={clearDuties}>Очистити</button>
+          <button type='button'>Очистити</button>
         </li>
         <li>
-          <button type='button' onClick={saveDuties}>Зберегти</button>
+          <button type='button'>Зберегти</button>
         </li>
       </ul>
     </div>

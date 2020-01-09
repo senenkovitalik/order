@@ -1,0 +1,6 @@
+query DutyExistence($postId: ID!) {
+    dutyExistence(postId: $postId) {
+        year
+        month
+    }
+}

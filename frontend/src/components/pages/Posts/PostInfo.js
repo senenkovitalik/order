@@ -1,63 +1,59 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { monthes } from '../../data';
+import React, {useState} from 'react';
+import {Link} from 'react-router-dom';
+import {loader} from 'graphql.macro';
+import {useQuery} from '@apollo/react-hooks';
+import {monthes} from '../../data';
 import Spinner from '../../Spiner/Spinner';
 
-class PostInfo extends React.Component {
-  state = {
-    monthDuties: [],
-    loading: false
-  };
+const DUTY_EXISTENCE = loader('./DUTY_EXISTENCE.graphql');
 
-  handleSubmit = e => {
+function PostInfo(props) {
+  const [dateRef, setRef] = useState(undefined);
+
+  const {loading, error, data} = useQuery(DUTY_EXISTENCE, {
+    variables: {
+      postId: props.match.params.postId
+    }
+  });
+
+  const handleSubmit = e => {
     e.preventDefault();
-    const [year, month] = this.dateRef.value.split('-');
-    this.props.history.push(`${this.props.location.pathname}/orderChart?year=${year}&month=${month}`);
+    const [year, month] = dateRef.value.split('-');
+    props.history.push(`${props.location.pathname}/orderChart?year=${year}&month=${month}`);
   };
 
-  render() {
-    return (
-      <div style={{ padding: '2rem' }}>
-        <h2>Графіки чергування на {new Date().getFullYear()}</h2>
-        {
-          this.state.loading &&
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <Spinner/>
-          </div>
-        }
-        <div>
-          {
-            !!this.state.monthDuties.length &&
-            <ul>
-              {this.state.monthDuties.map(({ _id, year, month }) =>
-                <li key={_id}>
-                  <Link to={`${this.props.location.pathname}/orderChart?year=${year}&month=${month}`}>
-                    Графік чергування - {monthes[month - 1].name}, {year}
-                  </Link>
-                </li>)
-              }
-            </ul>
-          }
-          {
-            !this.state.monthDuties.length && !this.state.loading && 'Нічого не знайдено :('
-          }
-        </div>
-        <form onSubmit={this.handleSubmit}>
-          <label>Заповнити графік чергування на{' '}<input type='month'
-                                                           ref={(element) => this.dateRef = element}/></label>
-          <input type='submit' value={'Заповнити'}/>
-        </form>
-      </div>
-    );
+  if (loading) {
+    return <div style={{display: 'flex', justifyContent: 'center'}}>
+      <Spinner/>
+    </div>;
   }
 
-  // fetch month duties
-  componentDidMount() {
-    this.setState({
-      monthDuties: [],
-      loading: false
-    });
+  if (error) {
+    return <div>Some error happens</div>;
   }
+
+  return (<div style={{padding: '2rem'}}>
+      <h2>Графіки чергування на {new Date().getFullYear()}</h2>
+      <div>
+        {!!data.dutyExistence.length
+          ? <ul>
+            {data.dutyExistence.map(({year, month}, i) =>
+              <li key={i}>
+                <Link to={`${props.location.pathname}/orderChart?year=${year}&month=${month}`}>
+                  Графік чергування - {monthes[month - 1].name}, {year}
+                </Link>
+              </li>)
+            }
+          </ul>
+          : 'Нічого не знайдено :('}
+      </div>
+      <form onSubmit={handleSubmit}>
+        <label>Заповнити графік чергування на{' '}
+          <input type='month' ref={(element) => setRef(element)}/></label>
+        <input type='submit' value={'Заповнити'}/>
+      </form>
+    </div>
+  );
 }
 
 export default PostInfo;

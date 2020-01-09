@@ -11,8 +11,9 @@ import UpdateEmployeeForm from './UpdateEmployeeForm/UpdateEmployeeForm';
 import CreateEmployeeForm from './CreateEmployeeForm/CreateEmployeeForm';
 import { ADD_POST, CREATE_EMPLOYEE, CREATE_UNIT, DELETE_EMPLOYEE, DELETE_POST } from './queries';
 import CreateUnitForm from './CreateUnitForm/CreateUnitForm';
-
 import './Unit.css';
+
+const UNIT = loader('./queries/UNIT.graphql');
 
 function Unit(props) {
   const [isAlertShown, setAlertVisibility] = useState(false);
@@ -23,8 +24,6 @@ function Unit(props) {
   const [isPostNameValid, setPostNameValidity] = useState(false);
   const [isCreateModalShown, setCreatModalVisibility] = useState(null);
   const [isChildUnitModalShown, setChildUnitModalVisibility] = useState(false);
-
-  const UNIT = loader('./queries/UNIT.graphql');
 
   const { loading, data } = useQuery(UNIT, {
     variables: {
