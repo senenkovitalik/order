@@ -66,6 +66,12 @@ type Duty {
     type: String!
 }
 
+# bad name
+type DutyExistence {
+    year: Int!
+    month: Int!
+}
+
 type User {
     _id: ID!
     login: String!
@@ -115,6 +121,7 @@ type Query {
     login(login: String!, password: String!): AuthData
     unit(id: ID!): Unit
     post(id: ID!): Post!
+    dutyExistence(postId: ID!): [DutyExistence!]!
 }
 
 #type Mutation {

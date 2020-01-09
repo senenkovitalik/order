@@ -55,6 +55,9 @@ module.exports = {
       } catch (error) {
         throw error;
       }
+    },
+    dutyExistence: (_, {postId}) => {
+      return [];
     }
   }
 };
