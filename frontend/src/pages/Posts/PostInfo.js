@@ -1,9 +1,9 @@
-import React, {useState} from 'react';
-import {Link} from 'react-router-dom';
-import {loader} from 'graphql.macro';
-import {useQuery} from '@apollo/react-hooks';
-import {monthes} from '../../data';
-import Spinner from '../../Spiner/Spinner';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { loader } from 'graphql.macro';
+import { useQuery } from '@apollo/react-hooks';
+import { monthes } from '../../data';
+import Spinner from '../../components/Spiner/Spinner';
 
 const DUTY_EXISTENCE = loader('./DUTY_EXISTENCE.graphql');
 

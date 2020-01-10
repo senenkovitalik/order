@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import convertDate from '../../../../utils';
+import { convertDate } from '../../../utils';
 import { addressData } from '../../../data';
 import { useQuery } from '@apollo/react-hooks';
 import { POSITIONS, RANKS } from './queries';

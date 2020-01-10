@@ -1,15 +1,15 @@
-import React, {useEffect, useState} from 'react';
-import {Redirect, Route, Switch} from 'react-router-dom';
-import Order from './components/pages/Order/Order';
-import LoginForm from './components/pages/Login/LoginForm';
+import React, { useEffect, useState } from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import Order from './pages/Order/Order';
+import LoginForm from './pages/Login/LoginForm';
 import Navbar from './components/Navbar/Navbar';
-import Employee from './components/pages/Employee/Employee';
+import Employee from './pages/Employee/Employee';
 import './App.css';
-import PostInfo from './components/pages/Posts/PostInfo';
-import OrderChart from './components/pages/OrderChart/OrderChart';
-import Unit from './components/pages/Unit/Unit';
-import {loader} from 'graphql.macro';
-import {useApolloClient, useLazyQuery} from '@apollo/react-hooks';
+import PostInfo from './pages/Posts/PostInfo';
+import OrderChart from './pages/OrderChart/OrderChart';
+import Unit from './pages/Unit/Unit';
+import { loader } from 'graphql.macro';
+import { useApolloClient, useLazyQuery } from '@apollo/react-hooks';
 import Spinner from './components/Spiner/Spinner';
 
 const LOGIN = loader('./LOGIN.graphql');

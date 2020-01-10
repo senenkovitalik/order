@@ -7,7 +7,7 @@ const convertDate = date => {
   return `${d.getFullYear()}-${d.getMonth() < 10 ? `0${d.getMonth()}` : d.getMonth()}-${d.getDate() < 10 ? `0${d.getDate()}` : d.getDate()}`;
 };
 
-export function getSearchParams(props) {
+const getSearchParams = props => {
   const searchProp = props.location.search;
   if (!searchProp.length) {
     return null;
@@ -20,6 +20,13 @@ export function getSearchParams(props) {
     searchObj[key] = parseInt(value, 10);
   });
   return searchObj;
-}
+};
 
-export default convertDate;
+const detectHoliday = date => {
+  const d = typeof date === 'number'
+    ? new Date(date)
+    : date;
+  return d.getDay() === 0 || d.getDay() === 6;
+};
+
+export {convertDate, getSearchParams, detectHoliday};

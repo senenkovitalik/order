@@ -1,5 +1,5 @@
 import React from 'react';
-import convertDate from '../../../../utils';
+import { convertDate } from '../../../utils';
 import { addressData } from '../../../data';
 import axios from 'axios';
 

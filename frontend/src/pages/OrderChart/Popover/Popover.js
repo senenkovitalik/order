@@ -1,5 +1,5 @@
-import React, {useContext, useState} from 'react';
-import {DutyContext} from '../DutyContext';
+import React, { useContext, useState } from 'react';
+import { DutyContext } from '../DutyContext';
 import './Popover.css';
 
 function Popover() {

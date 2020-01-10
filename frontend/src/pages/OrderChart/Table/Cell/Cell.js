@@ -1,13 +1,14 @@
-import React, {useContext} from 'react';
-import {DutyContext} from '../../DutyContext';
+import React, { useContext } from 'react';
+import { DutyContext } from '../../DutyContext';
 import './Cell.css';
-import {dutyMapping} from '../../../../data';
+import { dutyMapping } from '../../../../data';
+import { detectHoliday } from '../../../../utils';
 
-export default function Cell({date, isHoliday, duty}) {
+export default function Cell({date, duty}) {
   const {setPopoverPosition, setPopoverVisibility, setCurrentDate, checkDuty} = useContext(DutyContext);
 
   const content = duty ? dutyMapping[duty.type].content : null;
-  const useHolidayStyle = isHoliday ? 'cell_holiday' : '';
+  const useHolidayStyle = detectHoliday(date) ? 'cell_holiday' : '';
   const useDutyStyle = duty ? dutyMapping[duty.type].className : '';
   const classNames = `cell ${useHolidayStyle} ${useDutyStyle}`;
 
