@@ -19,7 +19,7 @@ function PostInfo(props) {
   const handleSubmit = e => {
     e.preventDefault();
     const [year, month] = dateRef.value.split('-');
-    props.history.push(`${props.location.pathname}/orderChart?year=${year}&month=${month+1}`);
+    props.history.push(`${props.location.pathname}/orderChart?year=${year}&month=${month}`);
   };
 
   if (loading) {
