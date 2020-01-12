@@ -2,6 +2,7 @@ const Duty = require('../../models/Duty');
 
 module.exports = {
   Post: {
+    // month (from 0-11)
     duties: async (parent, {year, month}) => {
       const startDate = new Date(year, month, 1);
       const endDate = new Date(year, month + 1, 0);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { loader } from 'graphql.macro';
-import { useQuery } from '@apollo/react-hooks';
+import { useMutation, useQuery } from '@apollo/react-hooks';
 import Controls from './Controls/Controls';
 import Popover from './Popover/Popover';
 import Spinner from '../../components/Spiner/Spinner';
@@ -8,8 +8,10 @@ import Table from './Table/Table';
 import { DutyContext } from './DutyContext';
 import { getSearchParams } from '../../utils';
 import './OrderChart.css';
+import Alert from '../../components/Alert/Alert';
 
 const DUTIES = loader('./queries/DUTIES.graphql');
+const SAVE_DUTIES = loader('./queries/SAVE_DUTIES.graphql');
 
 export default function OrderChart(props) {
   const [duties, setDuties] = useState([]);
@@ -19,6 +21,13 @@ export default function OrderChart(props) {
   const [currentEmployeeId, setCurrentEmployeeId] = useState(null);
   const [currentDate, setCurrentDate] = useState(null);
 
+  const [alertSettings, setAlertObject] = useState({
+    display: false,
+    success: true,
+    content: 'default content'
+  });
+
+  // month value (from 1-12)
   const { year, month } = getSearchParams(props);
 
   const { loading, error, data } = useQuery(DUTIES, {
@@ -26,8 +35,20 @@ export default function OrderChart(props) {
       unitId: props.match.params.unitId,
       postId: props.match.params.postId,
       year,
-      month
+      month: month - 1
     }
+  });
+
+  const [saveDuties, {
+    error: saveDutiesError,
+    loading: saveDutiesLoading,
+    data: savedDutiesData
+  }] = useMutation(SAVE_DUTIES, {
+    onCompleted: () => setAlertObject({
+      display: true,
+      success: true,
+      content: 'All data successfully saved'
+    })
   });
 
   const checkDuty = dutyType => {
@@ -50,17 +71,34 @@ export default function OrderChart(props) {
     }
   };
 
-  const clearDuties = () => {
-    setDuties([]);
+  const clearDuties = () => setDuties([]);
+
+  const saveDutiesHandler = () => {
+    saveDuties({
+      variables: {
+        postId: props.match.params.postId,
+        duties: duties.map(({ date, type, employee: { _id } }) => ({ date, type, employee: _id })),
+        year,
+        month
+      }
+    });
   };
 
-  const saveDuties = () => {
-    console.log('Try to save duties', duties);
+  const dismissAlert = () => {
+    setAlertObject({
+      display: false,
+      success: true,
+      content: 'default content'
+    });
   };
 
   useEffect(() => {
     if (!data) return;
-    setDuties(data.post.duties);
+    const formattedDuties = data.post.duties.map(({ date, ...rest }) => ({
+      date: new Date(parseInt(date)),
+      ...rest
+    }));
+    setDuties(formattedDuties);
   }, [data]);
 
   if (loading) {
@@ -85,17 +123,18 @@ export default function OrderChart(props) {
         setCurrentDate
       }}>
       <div style={{ padding: '2rem' }}>
-        {/*{isAlertShown && <Alert success={isAlertSuccess} dismiss={dismissAlert}>{alertContent}</Alert>}*/}
+        {alertSettings.display && <Alert success={alertSettings.success} dismiss={dismissAlert}>{alertSettings.content}</Alert>}
 
         <div className="order-chart landscape" style={{ border: '1px solid black' }}>
 
           <Controls isFullDuty={isFullDuty}
                     setDutyType={() => setDutyType(!isFullDuty)}
                     clearDuties={() => clearDuties()}
-                    saveDuties={() => saveDuties()}
+                    saveDuties={() => saveDutiesHandler()}
           />
 
-          <Table unit={data.unit} post={data.post} duties={duties} date={new Date(year, month)}/>
+          {/* month value (from 0-11) */}
+          <Table unit={data.unit} post={data.post} duties={duties} date={new Date(year, month - 1)}/>
 
           {!isFullDuty && <Popover/>}
         </div>

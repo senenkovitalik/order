@@ -11,17 +11,15 @@ export default function Table({ unit, post, duties, date }) {
   const d = new Date(date.getTime());
   const days = [...Array(currentMonth.days)].map((x, i) => {
     const backgroundColor = detectHoliday(d.setDate(i + 1)) ? 'grey' : 'white';
-    return <th key={i + 1} style={{backgroundColor}}>{i + 1}</th>;
+    return <th key={i + 1} style={{ backgroundColor }}>{i + 1}</th>;
   });
 
-  const rows = unit.employees.sort((a, b) => b.rank.index - a.rank.index)
-    .map(employee => {
-        const employeeDuties = duties.filter(duty => duty.employee._id === employee._id);
-        return <Row key={employee._id}
-                    employee={employee}
-                    duties={employeeDuties}
-                    date={date} />;
-      }
+  const rows = unit.employees
+    .sort((a, b) => b.rank.index - a.rank.index)
+    .map(employee => <Row key={employee._id}
+                          employee={employee}
+                          duties={duties.filter(duty => duty.employee._id === employee._id)}
+                          date={date}/>
     );
 
   return (
