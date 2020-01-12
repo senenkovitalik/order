@@ -6,7 +6,7 @@ import { monthes } from '../../../../data';
 export default function Row({ date, employee, duties }) {
   const { setCurrentEmployeeId } = useContext(DutyContext);
 
-  const currentMonth = monthes[date.getMonth() - 1];
+  const currentMonth = monthes[date.getMonth()];
 
   const cells = [...Array(currentMonth.days)].map((x, i) => {
     const dutyDate = new Date(date.getFullYear(), date.getMonth(), i + 1);

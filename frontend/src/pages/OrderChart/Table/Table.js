@@ -6,7 +6,7 @@ import { detectHoliday } from '../../../utils';
 import { monthes } from '../../../data';
 
 export default function Table({ unit, post, duties, date }) {
-  const currentMonth = monthes[date.getMonth() - 1];
+  const currentMonth = monthes[date.getMonth()];
 
   const d = new Date(date.getTime());
   const days = [...Array(currentMonth.days)].map((x, i) => {
