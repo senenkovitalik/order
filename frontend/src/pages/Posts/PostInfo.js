@@ -19,7 +19,7 @@ function PostInfo(props) {
   const handleSubmit = e => {
     e.preventDefault();
     const [year, month] = dateRef.value.split('-');
-    props.history.push(`${props.location.pathname}/orderChart?year=${year}&month=${month}`);
+    props.history.push(`${props.location.pathname}/orderChart?year=${year}&month=${month+1}`);
   };
 
   if (loading) {
@@ -39,8 +39,8 @@ function PostInfo(props) {
           ? <ul>
             {data.dutyExistence.map(({year, month}, i) =>
               <li key={i}>
-                <Link to={`${props.location.pathname}/orderChart?year=${year}&month=${month}`}>
-                  Графік чергування - {monthes[month - 1].name}, {year}
+                <Link to={`${props.location.pathname}/orderChart?year=${year}&month=${month+1}`}>
+                  Графік чергування - {monthes[month].name}, {year}
                 </Link>
               </li>)
             }
