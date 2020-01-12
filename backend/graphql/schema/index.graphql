@@ -55,7 +55,7 @@ type Post {
     name: String!
     shortName: String!
     position: String!
-    duties(year: Int, month: Int): [Duty!]!
+    duties(year: Int, month: Int, day: Int): [Duty!]!
 }
 
 type Duty {
