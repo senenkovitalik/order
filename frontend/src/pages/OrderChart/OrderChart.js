@@ -102,15 +102,6 @@ export default function OrderChart(props) {
     });
   };
 
-  // useEffect(() => {
-  //   if (!data) return;
-  //   const formattedDuties = data.post.duties.map(({ date, ...rest }) => ({
-  //     date: new Date(parseInt(date)),
-  //     ...rest
-  //   }));
-  //   setDuties(formattedDuties);
-  // }, [data]);
-
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center' }}>
       <Spinner/>

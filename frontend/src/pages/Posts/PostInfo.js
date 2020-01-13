@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { loader } from 'graphql.macro';
 import { useQuery } from '@apollo/react-hooks';
@@ -10,7 +10,7 @@ const DUTY_EXISTENCE = loader('./DUTY_EXISTENCE.graphql');
 function PostInfo(props) {
   const [dateRef, setRef] = useState(undefined);
 
-  const {loading, error, data} = useQuery(DUTY_EXISTENCE, {
+  const {loading, error, data, refetch} = useQuery(DUTY_EXISTENCE, {
     variables: {
       postId: props.match.params.postId
     }
@@ -21,6 +21,12 @@ function PostInfo(props) {
     const [year, month] = dateRef.value.split('-');
     props.history.push(`${props.location.pathname}/orderChart?year=${year}&month=${month}`);
   };
+
+  // we need to keep data updated
+  // after each creat/delete duty
+  useEffect(() => {
+    refetch();
+  });
 
   if (loading) {
     return <div style={{display: 'flex', justifyContent: 'center'}}>
