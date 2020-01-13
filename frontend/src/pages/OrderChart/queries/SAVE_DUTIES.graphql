@@ -1,5 +1,5 @@
 mutation SaveDuties($postId: ID!, $duties: [DutyInput!]!, $year: Int!, $month: Int!) {
-    saveDuties(postId: $postId, duties: $duties) {
+    saveDuties(postId: $postId, duties: $duties, year: $year, month: $month) {
         _id
         name
         position

@@ -13,6 +13,10 @@ const dutySchema = new Schema({
   type: {
     type: String,
     required: true
+  },
+  post: {
+    type: Schema.Types.ObjectId,
+    ref: 'Post'
   }
 });
 

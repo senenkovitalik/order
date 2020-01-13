@@ -17,7 +17,7 @@ const getSearchParams = props => {
   const searchObj = {};
   parts.forEach(p => {
     const [key, value] = p.split('=');
-    searchObj[key] = parseInt(value, 10);
+    searchObj[key] = value;
   });
   return searchObj;
 };

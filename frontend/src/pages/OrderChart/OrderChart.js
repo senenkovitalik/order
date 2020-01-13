@@ -13,6 +13,8 @@ import Alert from '../../components/Alert/Alert';
 const DUTIES = loader('./queries/DUTIES.graphql');
 const SAVE_DUTIES = loader('./queries/SAVE_DUTIES.graphql');
 
+// on frontend month values range (from 1-12)
+// on backend month values range (from 0-11)
 export default function OrderChart(props) {
   const [duties, setDuties] = useState([]);
   const [isFullDuty, setDutyType] = useState(true);
@@ -27,8 +29,9 @@ export default function OrderChart(props) {
     content: 'default content'
   });
 
-  // month value (from 1-12)
-  const { year, month } = getSearchParams(props);
+  const searchParams = getSearchParams(props);
+  const year = parseInt(searchParams.year);
+  const month = parseInt(searchParams.month);
 
   const { loading, error, data } = useQuery(DUTIES, {
     variables: {
@@ -36,6 +39,13 @@ export default function OrderChart(props) {
       postId: props.match.params.postId,
       year,
       month: month - 1
+    },
+    onCompleted: data => {
+      const formattedDuties = data.post.duties.map(({ date, ...rest }) => ({
+        date: new Date(parseInt(date)),
+        ...rest
+      }));
+      setDuties(formattedDuties);
     }
   });
 
@@ -79,7 +89,7 @@ export default function OrderChart(props) {
         postId: props.match.params.postId,
         duties: duties.map(({ date, type, employee: { _id } }) => ({ date, type, employee: _id })),
         year,
-        month
+        month: month - 1
       }
     });
   };
@@ -92,14 +102,14 @@ export default function OrderChart(props) {
     });
   };
 
-  useEffect(() => {
-    if (!data) return;
-    const formattedDuties = data.post.duties.map(({ date, ...rest }) => ({
-      date: new Date(parseInt(date)),
-      ...rest
-    }));
-    setDuties(formattedDuties);
-  }, [data]);
+  // useEffect(() => {
+  //   if (!data) return;
+  //   const formattedDuties = data.post.duties.map(({ date, ...rest }) => ({
+  //     date: new Date(parseInt(date)),
+  //     ...rest
+  //   }));
+  //   setDuties(formattedDuties);
+  // }, [data]);
 
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -123,7 +133,8 @@ export default function OrderChart(props) {
         setCurrentDate
       }}>
       <div style={{ padding: '2rem' }}>
-        {alertSettings.display && <Alert success={alertSettings.success} dismiss={dismissAlert}>{alertSettings.content}</Alert>}
+        {alertSettings.display &&
+        <Alert success={alertSettings.success} dismiss={dismissAlert}>{alertSettings.content}</Alert>}
 
         <div className="order-chart landscape" style={{ border: '1px solid black' }}>
 

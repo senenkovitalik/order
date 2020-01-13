@@ -51,16 +51,22 @@ module.exports = {
       if (!req.isAuth) {
         throw new Error('Unauthorized');
       }
+
       try {
-        return await Post.findById(id);
+        const duties = await Duty.find({post: id});
+        const post = await Post.findById(id);
+        return Object.assign({}, post._doc, {duties: duties.map(({_id}) => _id)});
       } catch (error) {
         throw error;
       }
     },
-    dutyExistence: async (_, { postId: _id }) => {
+    dutyExistence: async (_, { postId: _id }, req) => {
+      if (!req.isAuth) {
+        throw new Error('Unauthorized');
+      }
+
       try {
-        const post = await Post.findById(_id);
-        const duties = await Duty.find({ _id: { $in: post.duties } });
+        const duties = await Duty.find({ post: _id });
         return duties
           .map(({ date }) => ({
             year: date.getFullYear(),
@@ -78,21 +84,32 @@ module.exports = {
     },
   },
   Mutation: {
-    saveDuties: async (_, { postId: _id, duties }) => {
+    saveDuties: async (_, { postId, duties, year, month, day }, req) => {
+      if (!req.isAuth) {
+        throw new Error('Unauthorized');
+      }
+
       try {
-        let post;
-        // always remove all duties (by post and date) from duties collection and Post.duties
-        post = await Post.findOneAndUpdate({ _id }, { duties: [] }, { new: false });
-        await Duty.deleteMany({ _id: { $in: post.duties.map(({ _id }) => _id) } });
+        // remove all duties by postId, year, month
+        const startDate = new Date(year, month, day ? day : 1);
+        const endDate = new Date(year, day ? month : month + 1, day ? day : 1);
+        await Duty.deleteMany({
+          date: day
+            ? startDate.toISOString()
+            : {
+              $gte: startDate.toISOString(),
+              $lte: endDate.toISOString()
+            }
+        });
+
+        const post = await Post.findById(postId);
 
         // save
-        if (!!duties.length) {
-          const result = await Duty.create(duties);
-          const dutyIds = result.map(duty => duty._id);
-          post = await Post.findOneAndUpdate({ _id }, { duties: dutyIds }, { new: true });
-        }
+        const newDuties = !!duties.length
+          ? await Duty.create(duties.map(duty => ({...duty, post: postId})))
+          : [];
 
-        return post;
+        return Object.assign({}, post._doc, { duties: newDuties });
       } catch (error) {
         return error;
       }

@@ -96,7 +96,7 @@ type Query {
 }
 
 type Mutation {
-    saveDuties(postId: ID!, duties: [DutyInput]!): Post!
+    saveDuties(postId: ID!, duties: [DutyInput!]!, year: Int!, month: Int!): Post!
 }
 
 schema {
