@@ -69,20 +69,3 @@ export const DELETE_EMPLOYEE = gql`
     }
   }
 `;
-
-export const ADD_POST = gql`
-  mutation CreatePost($unitId: ID!, $postName:String!) {
-    createPost(unitId: $unitId, postName: $postName) {
-      _id
-      name
-    }
-  }
-`;
-
-export const DELETE_POST = gql`
-  mutation DeletePost($id: ID!) {
-    deletePost(id: $id) {
-      _id
-    }
-  }
-`;

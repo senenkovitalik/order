@@ -9,19 +9,20 @@ import Backdrop from '../../components/Backdrop/Backdrop';
 import Modal from '../../components/Modal/Modal';
 import UpdateEmployeeForm from './UpdateEmployeeForm/UpdateEmployeeForm';
 import CreateEmployeeForm from './CreateEmployeeForm/CreateEmployeeForm';
-import { ADD_POST, CREATE_EMPLOYEE, CREATE_UNIT, DELETE_EMPLOYEE, DELETE_POST } from './queries';
+import { CREATE_EMPLOYEE, CREATE_UNIT, DELETE_EMPLOYEE } from './queries';
 import CreateUnitForm from './CreateUnitForm/CreateUnitForm';
 import './Unit.css';
 
 const UNIT = loader('./queries/UNIT.graphql');
+const CREATE_POST = loader('./queries/CREATE_POST.graphql');
+const DELETE_POST = loader('./queries/DELETE_POST.graphql');
 
 function Unit(props) {
   const [isAlertShown, setAlertVisibility] = useState(false);
   const [isAlertSuccess, setSuccessAlertState] = useState(true);
   const [alertContent, setAlertContent] = useState('Something happens');
   const [employeeToUpdate, setEmployee] = useState(null);
-  const [postName, setPostName] = useState('');
-  const [isPostNameValid, setPostNameValidity] = useState(false);
+  const [newPostData, setPostData] = useState({});
   const [isCreateModalShown, setCreatModalVisibility] = useState(null);
   const [isChildUnitModalShown, setChildUnitModalVisibility] = useState(false);
 
@@ -38,8 +39,51 @@ function Unit(props) {
   const [createEmployeeMutation] = useMutation(CREATE_EMPLOYEE);
   const [deleteEmployeeMutation] = useMutation(DELETE_EMPLOYEE);
   const [createUnitMutation] = useMutation(CREATE_UNIT);
-  const [addPostMutation] = useMutation(ADD_POST);
-  const [deletePostMutation] = useMutation(DELETE_POST);
+  const [creatPostMutation] = useMutation(CREATE_POST, {
+    update: (cache, { data: { createPost } }) => {
+      const { unit } = cache.readQuery({
+        query: UNIT,
+        variables: {
+          id: data.unit._id
+        }
+      });
+      cache.writeQuery({
+        query: UNIT,
+        variables: {
+          id: data.unit._id
+        },
+        data: {
+          unit: Object.assign({}, unit, { posts: unit.posts.concat(createPost) })
+        }
+      });
+    },
+    onCompleted: () => showAlert(true, 'Пост додано успішно.'),
+    onError: () => showAlert(false)
+  });
+  const [deletePostMutation] = useMutation(DELETE_POST, {
+    update: (cache, { data: { deletePost } }) => {
+      const { unit } = cache.readQuery({
+        query: UNIT,
+        variables: {
+          id: data.unit._id
+        }
+      });
+      cache.writeQuery({
+        query: UNIT,
+        variables: {
+          id: data.unit._id
+        },
+        data: {
+          unit: Object.assign(
+            {},
+            unit,
+            { posts: unit.posts.filter(({ _id }) => _id !== deletePost._id) })
+        }
+      });
+    },
+    onCompleted: () => showAlert(true, 'Пост видалено успішно.'),
+    onError: () => showAlert(false)
+  });
 
   // unit
   const createEmployee = employeeData => {
@@ -242,78 +286,12 @@ function Unit(props) {
 
   // post
   const handleChange = e => {
+    e.preventDefault();
     const { name, value } = e.target;
-    setPostName(name);
-    setPostNameValidity(value.length > 3);
+    const postObj = Object.assign({}, newPostData);
+    postObj[name] = value;
+    setPostData(postObj);
   };
-
-  const addPost = () => addPostMutation({
-    variables: {
-      unitId: data.unit._id,
-      postName
-    },
-    update: (cache, { data: { createPost } }) => {
-      const { unit } = cache.readQuery({
-        query: UNIT,
-        variables: {
-          id: data.unit._id
-        }
-      });
-      cache.writeQuery({
-        query: UNIT,
-        variables: {
-          id: data.unit._id
-        },
-        data: {
-          unit: Object.assign({}, unit, { posts: unit.posts.concat(createPost) })
-        }
-      });
-
-      // code below this must be called in onCompleted handler
-      // try to refactor at 3.1.0 release
-      setCreatModalVisibility(false);
-      showAlert(true, 'Пост додано успішно.');
-    },
-    onError: error => {
-      console.error(error);
-      setCreatModalVisibility(false);
-      showAlert(false);
-    }
-  });
-
-  const deletePost = postId => deletePostMutation({
-    variables: {
-      id: postId
-    },
-    update: (cache, { data: { deletePost } }) => {
-      const { unit } = cache.readQuery({
-        query: UNIT,
-        variables: {
-          id: data.unit._id
-        }
-      });
-      cache.writeQuery({
-        query: UNIT,
-        variables: {
-          id: data.unit._id
-        },
-        data: {
-          unit: Object.assign(
-            {},
-            unit,
-            { posts: unit.posts.filter(({ _id }) => _id !== deletePost._id) })
-        }
-      });
-
-      // code below this must be called in onCompleted handler
-      // try to refactor at 3.1.0 release
-      showAlert(true, 'Пост видалено успішно.');
-    },
-    onError: error => {
-      console.error(error);
-      showAlert(false);
-    }
-  });
 
   // alerts
   const showAlert = (success, content = 'Something happens') => {
@@ -420,19 +398,41 @@ function Unit(props) {
               <ul>
                 {posts.map(({ _id, name }) => <li key={_id}>
                   <Link to={`${props.location.pathname}/posts/${_id}`}>{name}</Link>
-                  <button onClick={() => deletePost(_id)}>Delete</button>
+                  <button onClick={() => deletePostMutation({
+                      variables: {
+                        unitId: props.match.params.unitId,
+                        postId: _id
+                      }
+                    }
+                  )}>Delete
+                  </button>
                 </li>)}
               </ul>
             </React.Fragment>
             : fallbackMessage
           }
 
-          <form>
+          <form onSubmit={e => e.preventDefault()}>
+            Додати пост<br/>
             <label>
-              Додати пост{' '}
-              <input type='text' name='postName' onChange={handleChange} title={'Щось типу БП-000 чи 2БП-000'}/>
-            </label>
-            <button onClick={() => addPost()} disabled={!isPostNameValid}>ОК</button>
+              Назва{' '}
+              <input type='text' name='name' onChange={handleChange} title={'Щось типу Експедиція чи Станція'}/>
+            </label><br/>
+            <label>
+              Скорочена назва{' '}
+              <input type='text' name='shortName' onChange={handleChange} title={'Щось типу БП-000 чи 2БП-000'}/>
+            </label><br/>
+            <label>
+              Найменвання номеру чергової обслуги{' '}
+              <input type='text' name='position' onChange={handleChange} title={'Механік, помічник, лінійний наглядач'}/>
+            </label><br/>
+            <button onClick={() => creatPostMutation({
+              variables: {
+                unitId: data.unit._id,
+                post: newPostData
+              }
+            })}>ОК
+            </button>
           </form>
         </div>}
 

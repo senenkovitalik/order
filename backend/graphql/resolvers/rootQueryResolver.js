@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../../models/User');
@@ -53,9 +54,9 @@ module.exports = {
       }
 
       try {
-        const duties = await Duty.find({post: id});
+        const duties = await Duty.find({ post: id });
         const post = await Post.findById(id);
-        return Object.assign({}, post._doc, {duties: duties.map(({_id}) => _id)});
+        return Object.assign({}, post._doc, { duties: duties.map(({ _id }) => _id) });
       } catch (error) {
         throw error;
       }
@@ -106,10 +107,50 @@ module.exports = {
 
         // save
         const newDuties = !!duties.length
-          ? await Duty.create(duties.map(duty => ({...duty, post: postId})))
+          ? await Duty.create(duties.map(duty => ({ ...duty, post: postId })))
           : [];
 
         return Object.assign({}, post._doc, { duties: newDuties });
+      } catch (error) {
+        return error;
+      }
+    },
+    createPost: async (_, {unitId, post}, req) => {
+      if (!req.isAuth) {
+        throw new Error('Unauthorized');
+      }
+
+      try {
+        const createdPost = await Post.create(post);
+
+        // add Post ID to Unit.posts
+        const unit = await Unit.findById(unitId);
+        unit.posts = unit.posts.concat([createdPost._id]);
+        await unit.save();
+
+        return createdPost;
+      } catch (error) {
+        return error;
+      }
+    },
+    deletePost: async (_, { unitId, postId }, req) => {
+      if (!req.isAuth) {
+        throw new Error('Unauthorized');
+      }
+
+      try {
+        // delete Post
+        const deletedPost = await Post.findByIdAndDelete(postId);
+
+        // delete all post Duties
+        await Duty.deleteMany({ post: postId });
+
+        // delete Post ID from Unit.posts
+        const unit = await Unit.findById(unitId);
+        unit.posts = unit.posts.filter(id => !id.equals(mongoose.Types.ObjectId(postId)));
+        await unit.save();
+
+        return deletedPost;
       } catch (error) {
         return error;
       }

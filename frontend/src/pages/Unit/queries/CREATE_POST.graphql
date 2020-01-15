@@ -1,0 +1,8 @@
+mutation CreatePost($unitId: ID!, $post: PostInput!) {
+    createPost(unitId: $unitId, post: $post) {
+        _id
+        name
+        shortName
+        position
+    }
+}

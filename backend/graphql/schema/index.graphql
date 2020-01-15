@@ -58,6 +58,12 @@ type Post {
     duties(year: Int, month: Int, day: Int): [Duty!]!
 }
 
+input PostInput {
+    name: String!
+    shortName: String!
+    position: String!
+}
+
 type Duty {
     _id: ID!
     date: String!
@@ -97,6 +103,8 @@ type Query {
 
 type Mutation {
     saveDuties(postId: ID!, duties: [DutyInput!]!, year: Int!, month: Int!): Post!
+    createPost(unitId: ID!, post: PostInput!): Post!
+    deletePost(unitId: ID!, postId: ID!): Post!
 }
 
 schema {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { loader } from 'graphql.macro';
 import { useMutation, useQuery } from '@apollo/react-hooks';
 import Controls from './Controls/Controls';

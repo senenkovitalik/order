@@ -45,6 +45,8 @@ query Unit($id: ID!) {
         posts {
             _id
             name
+            shortName
+            position
         }
     }
 }
