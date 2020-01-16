@@ -9,9 +9,10 @@ import Backdrop from '../../components/Backdrop/Backdrop';
 import Modal from '../../components/Modal/Modal';
 import UpdateEmployeeForm from './UpdateEmployeeForm/UpdateEmployeeForm';
 import CreateEmployeeForm from './CreateEmployeeForm/CreateEmployeeForm';
-import { CREATE_EMPLOYEE, CREATE_UNIT, DELETE_EMPLOYEE } from './queries';
-import CreateUnitForm from './CreateUnitForm/CreateUnitForm';
+import { CREATE_EMPLOYEE, DELETE_EMPLOYEE } from './queries';
 import './Unit.css';
+import Posts from './Posts/Posts';
+import Units from './Units/Units';
 
 const UNIT = loader('./queries/UNIT.graphql');
 const CREATE_POST = loader('./queries/CREATE_POST.graphql');
@@ -22,24 +23,20 @@ function Unit(props) {
   const [isAlertSuccess, setSuccessAlertState] = useState(true);
   const [alertContent, setAlertContent] = useState('Something happens');
   const [employeeToUpdate, setEmployee] = useState(null);
-  const [newPostData, setPostData] = useState({});
   const [isCreateModalShown, setCreatModalVisibility] = useState(null);
-  const [isChildUnitModalShown, setChildUnitModalVisibility] = useState(false);
 
   const { loading, data } = useQuery(UNIT, {
     variables: {
       id: props.match.params.unitId
     },
     onError: error => {
-      console.error(error);
       setAlertVisibility(true);
       setSuccessAlertState(false);
     }
   });
   const [createEmployeeMutation] = useMutation(CREATE_EMPLOYEE);
   const [deleteEmployeeMutation] = useMutation(DELETE_EMPLOYEE);
-  const [createUnitMutation] = useMutation(CREATE_UNIT);
-  const [creatPostMutation] = useMutation(CREATE_POST, {
+  const [createPostMutation] = useMutation(CREATE_POST, {
     update: (cache, { data: { createPost } }) => {
       const { unit } = cache.readQuery({
         query: UNIT,
@@ -159,42 +156,6 @@ function Unit(props) {
     }
   });
 
-  const createUnit = ({ name, shortName, head }) => createUnitMutation({
-    variables: {
-      parentUnit: data.unit._id,
-      name,
-      shortName,
-      head
-    },
-    update: (cache, { data: { createUnit } }) => {
-      const { unit } = cache.readQuery({
-        query: UNIT,
-        variables: {
-          id: data.unit._id
-        }
-      });
-      cache.writeQuery({
-        query: UNIT,
-        variables: {
-          id: data.unit._id
-        },
-        data: {
-          unit: Object.assign({}, unit, { childUnits: unit.childUnits.concat(createUnit) })
-        }
-      });
-
-      // code below this must be called in onCompleted handler
-      // try to refactor at 3.1.0 release
-      setChildUnitModalVisibility(false);
-      showAlert(true, 'Підрозділ додано успішно.');
-    },
-    onError: error => {
-      console.error(error);
-      setChildUnitModalVisibility(false);
-      showAlert(false);
-    }
-  });
-
   // todo
   const updateEmployee = employeeData => {
     const { data, addressOfResidence, registrationAddress } = employeeData;
@@ -285,12 +246,22 @@ function Unit(props) {
   };
 
   // post
-  const handleChange = e => {
-    e.preventDefault();
-    const { name, value } = e.target;
-    const postObj = Object.assign({}, newPostData);
-    postObj[name] = value;
-    setPostData(postObj);
+  const createPost = postData => {
+    createPostMutation({
+      variables: {
+        unitId: data.unit._id,
+        post: postData
+      }
+    });
+  };
+
+  const deletePost = id => {
+    deletePostMutation({
+      variables: {
+        unitId: data.unit._id,
+        postId: id
+      }
+    });
   };
 
   // alerts
@@ -312,7 +283,7 @@ function Unit(props) {
     );
   }
 
-  const { name, head, employees, childUnits, posts } = data.unit;
+  const { name, head, employees } = data.unit;
 
   return (
     <React.Fragment>
@@ -375,69 +346,13 @@ function Unit(props) {
           <button onClick={() => setCreatModalVisibility(true)}>Додати працівника</button>
         </div>}
 
-        {/* Child Units */}
-        {<div>
-          <h2>Підрозділи</h2>
-          {!!childUnits.length
-            ? <React.Fragment>
-              <ul>
-                {childUnits.map(({ _id, name }) => <li key={_id}>
-                  <Link to={`/unit/${_id}`}>{name}</Link>
-                </li>)}
-              </ul>
-            </React.Fragment>
-            : fallbackMessage}
-          <button onClick={() => setChildUnitModalVisibility(true)}>Додати підрозділ</button>
-        </div>}
+        <Units unitId={data.unit._id} childUnits={data.unit.childUnits} employees={data.unit.employees} showAlert={showAlert}/>
 
-        {/* Posts */}
-        {<div>
-          <h2>Бойові пости</h2>
-          {!!posts.length
-            ? <React.Fragment>
-              <ul>
-                {posts.map(({ _id, name }) => <li key={_id}>
-                  <Link to={`${props.location.pathname}/posts/${_id}`}>{name}</Link>
-                  <button onClick={() => deletePostMutation({
-                      variables: {
-                        unitId: props.match.params.unitId,
-                        postId: _id
-                      }
-                    }
-                  )}>Delete
-                  </button>
-                </li>)}
-              </ul>
-            </React.Fragment>
-            : fallbackMessage
-          }
-
-          <form onSubmit={e => e.preventDefault()}>
-            Додати пост<br/>
-            <label>
-              Назва{' '}
-              <input type='text' name='name' onChange={handleChange} title={'Щось типу Експедиція чи Станція'}/>
-            </label><br/>
-            <label>
-              Скорочена назва{' '}
-              <input type='text' name='shortName' onChange={handleChange} title={'Щось типу БП-000 чи 2БП-000'}/>
-            </label><br/>
-            <label>
-              Найменвання номеру чергової обслуги{' '}
-              <input type='text' name='position' onChange={handleChange} title={'Механік, помічник, лінійний наглядач'}/>
-            </label><br/>
-            <button onClick={() => creatPostMutation({
-              variables: {
-                unitId: data.unit._id,
-                post: newPostData
-              }
-            })}>ОК
-            </button>
-          </form>
-        </div>}
+        <Posts posts={data.unit.posts} pathname={props.location.pathname} createPost={createPost}
+               deletePost={deletePost}/>
 
         {/* Forms */}
-        {(employeeToUpdate || isCreateModalShown || isChildUnitModalShown) && <React.Fragment>
+        {(employeeToUpdate || isCreateModalShown) && <React.Fragment>
           <Backdrop/>
           <Modal>
             {employeeToUpdate && <UpdateEmployeeForm employee={employeeToUpdate}
@@ -448,9 +363,6 @@ function Unit(props) {
             {isCreateModalShown && <CreateEmployeeForm positions={head.position.juniorPositions}
                                                        createEmployee={createEmployee}
                                                        closeModal={setCreatModalVisibility}/>}
-            {isChildUnitModalShown && <CreateUnitForm heads={employees}
-                                                      createUnit={createUnit}
-                                                      hideModal={() => setChildUnitModalVisibility(false)}/>}
           </Modal>
         </React.Fragment>}
       </React.Fragment>}

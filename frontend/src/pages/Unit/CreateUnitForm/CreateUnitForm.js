@@ -1,43 +1,50 @@
 import React, { useState } from 'react';
 
-const style = {
-  width: '12rem',
-  display: 'inline-block'
-};
+import './CreateUnitForm.css';
 
-function CreateUnitForm ({ heads, createUnit, hideModal }) {
+function CreateUnitForm({ employees, createUnit, close, error }) {
   const [name, setName] = useState('');
   const [shortName, setShortName] = useState('');
-  const [head, setHead] = useState(heads[0]);
+  const [head, setHead] = useState(employees[0]);
+
+  const clearForm = () => {
+    setName('');
+    setShortName('');
+    setHead('');
+  };
 
   return (
-    <form>
+    <form onSubmit={e => e.preventDefault()}>
       <h3>Додати підрозділ</h3>
+      {error && <span style={{ color: 'red' }}>Щось трапилося. Спробуйте ще раз.</span>}
+
       <label>
-        <div style={style}>Назва</div>
-        <input type='text' name='name' value={name} onChange={e => setName(e.target.value)} />
+        <span className='form-field'>Назва</span>
+        <input type='text' name='name' value={name} onChange={e => setName(e.target.value)}/>
       </label>
       <br/>
 
       <label>
-        <div style={style}>Умовне найменування</div>
-        <input type='text' name='shortName' value={shortName} onChange={e => setShortName(e.target.value)} />
+        <span className='form-field'>Скорочена назва</span>
+        <input type='text' name='shortName' value={shortName} onChange={e => setShortName(e.target.value)}/>
       </label>
       <br/>
 
       <label>
-        <div style={style}>Керівник</div>
+        <span className='form-field'>Керівник</span>
         <select value={head} onChange={e => setHead(e.target.value)}>
-          {heads.map(head => <option key={head._id} value={head._id}>{head.surname} {head.name} {head.patronymic}</option>)}
+          {employees.map(employee => <option key={employee._id} value={employee._id}>
+            {employee.surname} {employee.name} {employee.patronymic}
+          </option>)}
         </select>
       </label>
       <br/>
 
-      <input type='button' value='Submit'
-             onClick={() => createUnit({ name, shortName, head })}
-             disabled={!(name && shortName && head)}
-      />
-      <button onClick={() => hideModal()}>Cancel</button>
+      <button onClick={() => createUnit({ name, shortName, head: head._id })}
+              disabled={!(name && shortName && head)}>OK
+      </button>
+      <button onClick={clearForm} disabled={!(name || setShortName || setHead)}>Очистити</button>
+      <button onClick={close}>Cancel</button>
     </form>
   );
 }

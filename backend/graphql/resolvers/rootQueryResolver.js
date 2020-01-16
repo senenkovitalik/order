@@ -115,7 +115,7 @@ module.exports = {
         return error;
       }
     },
-    createPost: async (_, {unitId, post}, req) => {
+    createPost: async (_, { unitId, post }, req) => {
       if (!req.isAuth) {
         throw new Error('Unauthorized');
       }
@@ -151,6 +151,26 @@ module.exports = {
         await unit.save();
 
         return deletedPost;
+      } catch (error) {
+        return error;
+      }
+    },
+    createUnit: async (_, {parentUnit, unit}, req) => {
+      if (!req.isAuth) {
+        throw new Error('Unauthorized');
+      }
+
+      console.log(parentUnit, unit);
+
+      try {
+        const createdUnit = await Unit.create(unit);
+
+        // add Unit ID to parent Unit.childUnits
+        const parent = await Unit.findById(parentUnit);
+        parent.childUnits = parent.childUnits.concat([createdUnit._id]);
+        await parent.save();
+
+        return createdUnit;
       } catch (error) {
         return error;
       }
