@@ -1,15 +1,86 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Backdrop from '../../../components/Backdrop/Backdrop';
+import Modal from '../../../components/Modal/Modal';
+import CreatePostForm from './CreatPostForm/CreatePostForm';
+import { loader } from 'graphql.macro';
+import { useMutation } from '@apollo/react-hooks';
 
-export default function Posts({ posts, pathname, createPost, deletePost }) {
-  const [name, setName] = useState('');
-  const [shortName, setShortName] = useState('');
-  const [position, setPosition] = useState('');
+const UNIT = loader('../UNIT.graphql');
+const CREATE_POST = loader('./CREATE_POST.graphql');
+const DELETE_POST = loader('./DELETE_POST.graphql');
 
-  const clearForm = () => {
-    setName('');
-    setShortName('');
-    setPosition('');
+export default function Posts({ unitId, posts, pathname, showAlert }) {
+  const [isModalShown, setModalVisibility] = useState(false);
+  const [createError, setCreateError] = useState(null);
+
+  const [createPostMutation] = useMutation(CREATE_POST, {
+    update: (cache, { data: { createPost } }) => {
+      const { unit } = cache.readQuery({
+        query: UNIT,
+        variables: {
+          id: unitId
+        }
+      });
+      cache.writeQuery({
+        query: UNIT,
+        variables: {
+          id: unitId
+        },
+        data: {
+          unit: Object.assign({}, unit, { posts: unit.posts.concat(createPost) })
+        }
+      });
+    },
+    onCompleted: () => showAlert(true, 'Пост додано успішно.'),
+    onError: error => {
+      showAlert(false);
+      setCreateError(error);
+    }
+  });
+  const [deletePostMutation] = useMutation(DELETE_POST, {
+    update: (cache, { data: { deletePost } }) => {
+      const { unit } = cache.readQuery({
+        query: UNIT,
+        variables: {
+          id: unitId
+        }
+      });
+      cache.writeQuery({
+        query: UNIT,
+        variables: {
+          id: unitId
+        },
+        data: {
+          unit: Object.assign(
+            {},
+            unit,
+            { posts: unit.posts.filter(({ _id }) => _id !== deletePost._id) })
+        }
+      });
+    },
+    onCompleted: () => showAlert(true, 'Пост видалено успішно.'),
+    onError: () => showAlert(false)
+  });
+
+  const createPost = postData => createPostMutation({
+    variables: {
+      unitId: unitId,
+      post: postData
+    }
+  });
+
+  const deletePost = (postId, postName) => {
+    const result = window.confirm(`Ви дійсно хочете видалити пост '${postName}'`);
+    if (!result) {
+      return;
+    }
+    return deletePostMutation({
+      variables: {
+        unitId: unitId,
+        postId
+      }
+    });
   };
 
   return (
@@ -19,37 +90,20 @@ export default function Posts({ posts, pathname, createPost, deletePost }) {
         ? <ul>
           {posts.map(({ _id, name }) => <li key={_id}>
             <Link to={`${pathname}/posts/${_id}`}>{name}</Link>
-            <button onClick={() => deletePost(_id)}>Delete
+            <button onClick={() => deletePost(_id, name)}>Delete
             </button>
           </li>)}
         </ul>
         : <div>Нічого не знайдено</div>}
 
-      <form onSubmit={e => e.preventDefault()}>
-        Додати пост<br/>
-        <label>
-          Назва{' '}
-          <input type='text' name='name' value={name} onChange={e => setName(e.target.value)}
-                 title={'Щось типу Експедиція чи Станція'}/>
-        </label>
-        <br/>
-        <label>
-          Скорочена назва{' '}
-          <input type='text' name='shortName' value={shortName} onChange={e => setShortName(e.target.value)}
-                 title={'Щось типу БП-000 чи 2БП-000'}/>
-        </label>
-        <br/>
-        <label>
-          Найменвання номеру чергової обслуги{' '}
-          <input type='text' name='position' value={position} onChange={e => setPosition(e.target.value)}
-                 title={'Механік, помічник, лінійний наглядач'}/>
-        </label>
-        <br/>
-        <button onClick={() => createPost({ name, shortName, position })}
-                disabled={!(name && shortName && position)}>ОК
-        </button>
-        <button onClick={clearForm} disabled={!(name || shortName || position)}>Очистити</button>
-      </form>
+      <button onClick={() => setModalVisibility(true)}>Додати пост</button>
+
+      {isModalShown && <React.Fragment>
+        <Backdrop closeModal={() => setModalVisibility(false)}/>
+        <Modal>
+          <CreatePostForm createPost={createPost} close={() => setModalVisibility(false)} error={createError}/>
+        </Modal>
+      </React.Fragment>}
     </div>
   );
 }

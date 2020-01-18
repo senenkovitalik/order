@@ -6,7 +6,7 @@ import Backdrop from '../../../components/Backdrop/Backdrop';
 import Modal from '../../../components/Modal/Modal';
 import CreateUnitForm from './CreateUnitForm/CreateUnitForm';
 
-const UNIT = loader('../queries/UNIT.graphql');
+const UNIT = loader('../UNIT.graphql');
 const CREATE_UNIT = loader('./CREATE_UNIT.graphql');
 const DELETE_UNIT = loader('./DELETE_UNIT.graphql');
 

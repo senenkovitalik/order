@@ -14,9 +14,7 @@ import './Unit.css';
 import Posts from './Posts/Posts';
 import Units from './Units/Units';
 
-const UNIT = loader('./queries/UNIT.graphql');
-const CREATE_POST = loader('./queries/CREATE_POST.graphql');
-const DELETE_POST = loader('./queries/DELETE_POST.graphql');
+const UNIT = loader('./UNIT.graphql');
 
 function Unit(props) {
   const [isAlertShown, setAlertVisibility] = useState(false);
@@ -36,51 +34,6 @@ function Unit(props) {
   });
   const [createEmployeeMutation] = useMutation(CREATE_EMPLOYEE);
   const [deleteEmployeeMutation] = useMutation(DELETE_EMPLOYEE);
-  const [createPostMutation] = useMutation(CREATE_POST, {
-    update: (cache, { data: { createPost } }) => {
-      const { unit } = cache.readQuery({
-        query: UNIT,
-        variables: {
-          id: data.unit._id
-        }
-      });
-      cache.writeQuery({
-        query: UNIT,
-        variables: {
-          id: data.unit._id
-        },
-        data: {
-          unit: Object.assign({}, unit, { posts: unit.posts.concat(createPost) })
-        }
-      });
-    },
-    onCompleted: () => showAlert(true, 'Пост додано успішно.'),
-    onError: () => showAlert(false)
-  });
-  const [deletePostMutation] = useMutation(DELETE_POST, {
-    update: (cache, { data: { deletePost } }) => {
-      const { unit } = cache.readQuery({
-        query: UNIT,
-        variables: {
-          id: data.unit._id
-        }
-      });
-      cache.writeQuery({
-        query: UNIT,
-        variables: {
-          id: data.unit._id
-        },
-        data: {
-          unit: Object.assign(
-            {},
-            unit,
-            { posts: unit.posts.filter(({ _id }) => _id !== deletePost._id) })
-        }
-      });
-    },
-    onCompleted: () => showAlert(true, 'Пост видалено успішно.'),
-    onError: () => showAlert(false)
-  });
 
   // unit
   const createEmployee = employeeData => {
@@ -245,25 +198,6 @@ function Unit(props) {
     }
   };
 
-  // post
-  const createPost = postData => {
-    createPostMutation({
-      variables: {
-        unitId: data.unit._id,
-        post: postData
-      }
-    });
-  };
-
-  const deletePost = id => {
-    deletePostMutation({
-      variables: {
-        unitId: data.unit._id,
-        postId: id
-      }
-    });
-  };
-
   // alerts
   const showAlert = (success, content = 'Something happens') => {
     setAlertVisibility(true);
@@ -346,10 +280,10 @@ function Unit(props) {
           <button onClick={() => setCreatModalVisibility(true)}>Додати працівника</button>
         </div>}
 
-        <Units unitId={data.unit._id} childUnits={data.unit.childUnits} employees={data.unit.employees} showAlert={showAlert}/>
+        <Units unitId={data.unit._id} childUnits={data.unit.childUnits} employees={data.unit.employees}
+               showAlert={showAlert}/>
 
-        <Posts posts={data.unit.posts} pathname={props.location.pathname} createPost={createPost}
-               deletePost={deletePost}/>
+        <Posts unitId={data.unit._id} posts={data.unit.posts} pathname={props.location.pathname} showAlert={showAlert}/>
 
         {/* Forms */}
         {(employeeToUpdate || isCreateModalShown) && <React.Fragment>
