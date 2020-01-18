@@ -35,14 +35,4 @@ const unitSchema = new Schema({
   }]
 });
 
-unitSchema.post('save', async function(doc) {
-  // insert Unit _id into parentUnit childUnits array
-  try {
-    const parentUnit = await mongoose.models.Unit.findById(doc.parentUnit);
-    await mongoose.models.Unit.findByIdAndUpdate(doc.parentUnit, {childUnits: parentUnit.childUnits.concat(doc._id)});
-  } catch (err) {
-    throw err;
-  }
-});
-
 module.exports = mongoose.models.Unit || mongoose.model('Unit', unitSchema);

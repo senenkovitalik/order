@@ -155,22 +155,55 @@ module.exports = {
         return error;
       }
     },
-    createUnit: async (_, {parentUnit, unit}, req) => {
+    createUnit: async (_, { parentUnitId, unit }, req) => {
       if (!req.isAuth) {
         throw new Error('Unauthorized');
       }
 
-      console.log(parentUnit, unit);
-
       try {
-        const createdUnit = await Unit.create(unit);
+        const parentUnit = await Unit.findById(parentUnitId);
+
+        if (!parentUnit) {
+          return new Error(`Unit ${parentUnitId} couldn't be found`);
+        }
+
+        const createdUnit = await Unit.create({...unit, parentUnit: parentUnitId});
 
         // add Unit ID to parent Unit.childUnits
-        const parent = await Unit.findById(parentUnit);
-        parent.childUnits = parent.childUnits.concat([createdUnit._id]);
-        await parent.save();
+        parentUnit.childUnits = parentUnit.childUnits.concat([createdUnit._id]);
+        await parentUnit.save();
 
         return createdUnit;
+      } catch (error) {
+        return error;
+      }
+    },
+    deleteUnit: async (_, {id}, req) => {
+      if (!req.isAuth) {
+        throw new Error('Unauthorized');
+      }
+
+      try {
+        const unitToDelete = await Unit.findById(id);
+
+        if (!unitToDelete) {
+          return new Error(`Unit ${id} couldn't be found`);
+        }
+
+        // delete Unit _id from parentUnit.childUnits
+        const parentUnit = await Unit.findById(unitToDelete.parentUnit);
+
+        if (!parentUnit) {
+          return new Error(`Unit ${id} doesn't have parent Unit`)
+        }
+
+        parentUnit.childUnits = parentUnit.childUnits.filter(childUnitId => !childUnitId.equals(mongoose.Types.ObjectId(id)));
+        await parentUnit.save();
+
+        // delete Unit
+        await unitToDelete.deleteOne();
+
+        return unitToDelete;
       } catch (error) {
         return error;
       }

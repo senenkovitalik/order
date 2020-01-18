@@ -4,10 +4,11 @@ import { useMutation } from '@apollo/react-hooks';
 import { loader } from 'graphql.macro';
 import Backdrop from '../../../components/Backdrop/Backdrop';
 import Modal from '../../../components/Modal/Modal';
-import CreateUnitForm from '../CreateUnitForm/CreateUnitForm';
+import CreateUnitForm from './CreateUnitForm/CreateUnitForm';
 
 const UNIT = loader('../queries/UNIT.graphql');
 const CREATE_UNIT = loader('./CREATE_UNIT.graphql');
+const DELETE_UNIT = loader('./DELETE_UNIT.graphql');
 
 export default function Units({ unitId, childUnits, employees, showAlert }) {
   const [isModalShown, setModalVisibility] = useState(false);
@@ -27,7 +28,7 @@ export default function Units({ unitId, childUnits, employees, showAlert }) {
           id: unitId
         },
         data: {
-          unit: Object.assign({}, unit, { childUnits: unit.childUnits.concat(createUnit) })
+          unit: Object.assign({}, unit, { childUnits: unit.childUnits.concat([createUnit]) })
         }
       });
     },
@@ -35,18 +36,51 @@ export default function Units({ unitId, childUnits, employees, showAlert }) {
       setModalVisibility(false);
       showAlert(true, 'Підрозділ додано успішно.');
     },
-    onError: (error) => {
-      showAlert(false);
-      setCreateError(error);
-    }
+    onError: error => setCreateError(error)
+  });
+
+  const [deleteUnitMutation] = useMutation(DELETE_UNIT, {
+    update: (cache, { data: { deleteUnit } }) => {
+      const { unit } = cache.readQuery({
+        query: UNIT,
+        variables: {
+          id: unitId
+        }
+      });
+      cache.writeQuery({
+        query: UNIT,
+        variables: {
+          id: unitId
+        },
+        data: {
+          unit: Object.assign({}, unit, {
+            childUnits: unit.childUnits.filter(childUnit => childUnit._id !== deleteUnit._id)
+          })
+        }
+      });
+    },
+    onCompleted: () => showAlert(true, 'Підрозділ видалено успішно.'),
+    onError: () => showAlert(false)
   });
 
   const createUnit = unitData => createUnitMutation({
     variables: {
-      parentUnit: unitId,
+      parentUnitId: unitId,
       unit: unitData
     }
   });
+
+  const deleteUnit = (unitId, unitName) => {
+    const result = window.confirm(`Ви дійсно хочете видалити підрозідл '${unitName}'`);
+    if (!result) {
+      return;
+    }
+    return deleteUnitMutation({
+      variables: {
+        id: unitId
+      }
+    });
+  };
 
   return (
     <div>
@@ -55,7 +89,7 @@ export default function Units({ unitId, childUnits, employees, showAlert }) {
         ? <ul>
           {childUnits.map(({ _id, name }) => <li key={_id}>
             <Link to={`/unit/${_id}`}>{name}</Link>
-            <button type='button'>Видалити</button>
+            <button type='button' onClick={() => deleteUnit(_id, name)}>Видалити</button>
           </li>)}
         </ul>
         : <div>Нічого не знайдено</div>}

@@ -5,7 +5,7 @@ import './CreateUnitForm.css';
 function CreateUnitForm({ employees, createUnit, close, error }) {
   const [name, setName] = useState('');
   const [shortName, setShortName] = useState('');
-  const [head, setHead] = useState(employees[0]);
+  const [head, setHead] = useState(employees[0]._id);
 
   const clearForm = () => {
     setName('');
@@ -40,10 +40,10 @@ function CreateUnitForm({ employees, createUnit, close, error }) {
       </label>
       <br/>
 
-      <button onClick={() => createUnit({ name, shortName, head: head._id })}
+      <button onClick={() => createUnit({ name, shortName, head })}
               disabled={!(name && shortName && head)}>OK
       </button>
-      <button onClick={clearForm} disabled={!(name || setShortName || setHead)}>Очистити</button>
+      <button onClick={clearForm} disabled={!(name || shortName || head)}>Очистити</button>
       <button onClick={close}>Cancel</button>
     </form>
   );

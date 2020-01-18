@@ -1,6 +1,10 @@
-mutation CreateUnit($parentUnit: ID!, $unit: UnitInput!) {
-    createUnit(parentUnit: $parentUnit, unit: $unit) {
+mutation CreateUnit($parentUnitId: ID!, $unit: UnitInput!) {
+    createUnit(parentUnitId: $parentUnitId, unit: $unit) {
         _id
         name
+        shortName
+        head {
+            _id
+        }
     }
 }
