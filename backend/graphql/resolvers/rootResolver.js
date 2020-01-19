@@ -1,13 +1,13 @@
 const rootQueryResolver = require('./rootQueryResolver');
-const userResolver = require('./userResolver');
 const unitResolver = require('./unitResolver');
 const employeeResolver = require('./employeeResolver');
 const postResolver = require('./postResolver');
+const positionResolver = require('./positionsResolver');
 
 module.exports = {
   ...rootQueryResolver,
-  ...userResolver,
   ...unitResolver,
   ...employeeResolver,
-  ...postResolver
+  ...postResolver,
+  ...positionResolver
 };

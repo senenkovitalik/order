@@ -2,12 +2,8 @@ query Login($login: String!, $password: String!) {
     login(login: $login, password: $password) {
         user {
             _id
-            employee {
-                _id
-                unit {
-                    _id
-                }
-            }
+            employee
+            unit
         }
         token
     }

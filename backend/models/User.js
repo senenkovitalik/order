@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const Employee = require('../models/Employee');
 
 const userSchema = new Schema({
   login: {
@@ -14,7 +13,11 @@ const userSchema = new Schema({
   },
   employee: {
     type: Schema.Types.ObjectId,
-    ref: 'Employee'
+    required: true
+  },
+  unit: {
+    type: Schema.Types.ObjectId,
+    required: true
   }
 });
 

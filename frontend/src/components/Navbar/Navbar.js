@@ -19,7 +19,7 @@ export default function navbar({user, logout}) {
       {
         user && <React.Fragment>
           <li className='nav__item'><Link to='/'>Home</Link></li>
-          <li className='nav__item'><Link to={`/unit/${user.employee.unit._id}`}>Підрозіл</Link></li>
+          <li className='nav__item'><Link to={`/unit/${user.unit}`}>Підрозіл</Link></li>
           <li className='nav__item'><Link to='/order'>Витяг чергової зміни</Link></li>
           <li className='nav__item'><FakeLink title='Logout' logout={logout}/></li>
         </React.Fragment>

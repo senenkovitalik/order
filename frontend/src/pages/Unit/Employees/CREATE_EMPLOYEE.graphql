@@ -1,0 +1,18 @@
+mutation CreateEmployee($unitID: ID!, $employeeData: EmployeeInput!) {
+    createEmployee(unitID: $unitID, employeeData: $employeeData) {
+        _id
+        name
+        surname
+        patronymic
+        rank {
+            _id
+            name
+            shortName
+        }
+        position {
+            _id
+            name
+            shortName
+        }
+    }
+}

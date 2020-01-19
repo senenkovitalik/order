@@ -5,37 +5,37 @@ const User = require('../../models/User');
 const Unit = require('../../models/Unit');
 const Post = require('../../models/Post');
 const Duty = require('../../models/Duty');
+const Rank = require('../../models/Rank');
+const Position = require('../../models/Position');
+const Employee = require('../../models/Employee');
 
 module.exports = {
   Query: {
     login: async (_, { login, password }) => {
-      let user;
       try {
-        user = await User.findOne({ login });
+        const user = await User.findOne({ login });
+        if (!user) {
+          return new Error('User doesn\'t exist!');
+        }
+
+        const isEqual = await bcrypt.compare(password, user.password);
+        if (!isEqual) {
+          return new Error('Password is incorrect!');
+        }
+
+        const credentials = {
+          userId: user._id,
+          login: user.login
+        };
+        const token = jwt.sign(credentials, process.env.JWT_PASSWORD);
+
+        return {
+          user,
+          token
+        };
       } catch (error) {
-        console.log(error);
         throw error;
       }
-
-      if (!user) {
-        throw new Error('User doesn\'t exist!');
-      }
-
-      const isEqual = await bcrypt.compare(password, user.password);
-      if (!isEqual) {
-        throw new Error('Password is incorrect!');
-      }
-
-      const credentials = {
-        userId: user._id,
-        login: user.login
-      };
-      const token = jwt.sign(credentials, process.env.JWT_PASSWORD);
-
-      return {
-        user,
-        token
-      };
     },
     unit: async (_, { id }, req) => {
       if (!req.isAuth) {
@@ -83,6 +83,20 @@ module.exports = {
         return error;
       }
     },
+    ranks: async () => {
+      try {
+        return await Rank.find();
+      } catch (error) {
+        return error;
+      }
+    },
+    position: async (_, { id }) => {
+      try {
+        return await Position.findById(id);
+      } catch (error) {
+        return error;
+      }
+    }
   },
   Mutation: {
     saveDuties: async (_, { postId, duties, year, month, day }, req) => {
@@ -167,7 +181,7 @@ module.exports = {
           return new Error(`Unit ${parentUnitId} couldn't be found`);
         }
 
-        const createdUnit = await Unit.create({...unit, parentUnit: parentUnitId});
+        const createdUnit = await Unit.create({ ...unit, parentUnit: parentUnitId });
 
         // add Unit ID to parent Unit.childUnits
         parentUnit.childUnits = parentUnit.childUnits.concat([createdUnit._id]);
@@ -178,7 +192,7 @@ module.exports = {
         return error;
       }
     },
-    deleteUnit: async (_, {id}, req) => {
+    deleteUnit: async (_, { id }, req) => {
       if (!req.isAuth) {
         throw new Error('Unauthorized');
       }
@@ -194,7 +208,7 @@ module.exports = {
         const parentUnit = await Unit.findById(unitToDelete.parentUnit);
 
         if (!parentUnit) {
-          return new Error(`Unit ${id} doesn't have parent Unit`)
+          return new Error(`Unit ${id} doesn't have parent Unit`);
         }
 
         parentUnit.childUnits = parentUnit.childUnits.filter(childUnitId => !childUnitId.equals(mongoose.Types.ObjectId(id)));
@@ -204,6 +218,43 @@ module.exports = {
         await unitToDelete.deleteOne();
 
         return unitToDelete;
+      } catch (error) {
+        return error;
+      }
+    },
+    deleteEmployee: async (_, { unitID, employeeID }, req) => {
+      try {
+        // find unit for Employee
+        const unit = await Unit.findById(unitID);
+        if (!unit) {
+          return new Error(`Impossible to find a Unit ${unitID} for the Employee ${employeeID}`);
+        }
+        // delete Employee ID from Unit.employees
+        unit.employees = unit.employees.filter(id => !id.equals(mongoose.Types.ObjectId(employeeID)));
+        await unit.save();
+        // delete Employee
+        return await Employee.findByIdAndDelete(employeeID);
+      } catch (error) {
+        return error;
+      }
+    },
+    createEmployee: async (_, { unitID, employeeData }, req) => {
+      if (!req.isAuth) {
+        throw new Error('Unauthorized');
+      }
+      try {
+        // find Unit
+        const unit = await Unit.findById(unitID);
+        if (!unit) {
+          return new Error(`Unit ${unitID} for employee was not found`);
+        }
+        // create Employee
+        const employee = await Employee.create(employeeData);
+        // add Employee ID to Unit.employees
+        unit.employees = unit.employees.concat([employee._id]);
+        await unit.save();
+
+        return employee;
       } catch (error) {
         return error;
       }

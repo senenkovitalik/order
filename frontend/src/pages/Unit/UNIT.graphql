@@ -32,7 +32,6 @@ query Unit($id: ID!) {
             name
             surname
             patronymic
-            dateOfBirth
         }
         childUnits {
             _id

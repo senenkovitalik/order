@@ -1,4 +1,5 @@
 const Rank = require('../../models/Rank');
+const Position = require('../../models/Position');
 
 module.exports = {
   Employee: {
@@ -6,7 +7,13 @@ module.exports = {
       try {
         return await Rank.findById(parent.rank);
       } catch (error) {
-        console.log(error);
+        throw error;
+      }
+    },
+    position: async parent => {
+      try {
+        return await Position.findById(parent.position);
+      } catch (error) {
         throw error;
       }
     }

@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import { loader } from 'graphql.macro';
+import { useApolloClient, useLazyQuery } from '@apollo/react-hooks';
+import Unit from './pages/Unit/Unit';
 import Order from './pages/Order/Order';
 import LoginForm from './pages/Login/LoginForm';
 import Navbar from './components/Navbar/Navbar';
-import Employee from './pages/Employee/Employee';
-import './App.css';
 import PostInfo from './pages/Posts/PostInfo';
 import OrderChart from './pages/OrderChart/OrderChart';
-import Unit from './pages/Unit/Unit';
-import { loader } from 'graphql.macro';
-import { useApolloClient, useLazyQuery } from '@apollo/react-hooks';
 import Spinner from './components/Spiner/Spinner';
+import './App.css';
 
 const LOGIN = loader('./LOGIN.graphql');
 
-function App() {
+export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
   const [getLogin, {loading, data}] = useLazyQuery(LOGIN);
 
@@ -57,7 +56,7 @@ function App() {
     <div className="App" style={{padding: '1rem 2rem'}}>
       <Navbar user={user} logout={handleLogout}/>
       {user
-        ? <Redirect from='/login' to={`/unit/${user.employee.unit._id}`}/>
+        ? <Redirect from='/login' to={`/unit/${user.unit}`}/>
         : <Redirect from='*' to='/login'/>
       }
       <Switch>
@@ -66,11 +65,8 @@ function App() {
         <Route exact path='/unit/:unitId/posts/:postId/orderChart' component={OrderChart}/>
         <Route exact path='/unit/:unitId/posts/:postId' component={PostInfo}/>
         <Route exact path='/unit/:unitId' component={Unit}/>
-        <Route exact path='/employee/:id' component={Employee}/>
         <Route exact path='/order' component={Order}/>
       </Switch>
     </div>
   );
 }
-
-export default App;

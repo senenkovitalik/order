@@ -1,28 +1,16 @@
 const Position = require('../../models/Position');
 
 module.exports = {
-  Query: {
-    position: async ({_id}) => {
+  Position: {
+    juniorPositions: async (parent) => {
       try {
-        return await Position.findById(_id).populate([
-          {
-            path: 'juniorPositions',
-            model: 'Position'
-          },
-          {
-            path: 'seniorPosition',
-            model: 'Position'
+        return await Position.find({
+          _id: {
+            $in: parent.juniorPositions
           }
-        ]).exec();
-      } catch (err) {
-        throw err;
-      }
-    },
-    positions: async () => {
-      try {
-        return await Position.find().exec();
-      } catch (err) {
-        throw err;
+        });
+      } catch (error) {
+        return error;
       }
     }
   }

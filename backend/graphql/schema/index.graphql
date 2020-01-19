@@ -30,13 +30,16 @@ type Employee {
     name: String!
     surname: String!
     patronymic: String!
-    dateOfBirth: String!
-    addressOfResidence: Address
-    registrationAddress: Address
     rank: Rank!
     position: Position!
-    type: String
-    unit: Unit!
+}
+
+input EmployeeInput {
+    name: String!
+    surname: String!
+    patronymic: String!
+    rank: ID!
+    position: ID!
 }
 
 type Unit {
@@ -92,7 +95,8 @@ input DutyInput {
 type User {
     _id: ID!
     login: String!
-    employee: Employee!
+    employee: ID!
+    unit: ID!
 }
 
 type AuthData {
@@ -105,6 +109,8 @@ type Query {
     unit(id: ID!): Unit
     post(id: ID!): Post!
     dutyExistence(postId: ID!): [DutyExistence!]!
+    ranks: [Rank!]!
+    position(id: ID!): Position!
 }
 
 type Mutation {
@@ -113,6 +119,8 @@ type Mutation {
     deletePost(unitId: ID!, postId: ID!): Post!
     createUnit(parentUnitId: ID!, unit: UnitInput!): Unit!
     deleteUnit(id: ID!): Unit!
+    createEmployee(unitID: ID!, employeeData: EmployeeInput!): Employee!
+    deleteEmployee(unitID: ID!, employeeID: ID!): Employee!
 }
 
 schema {
