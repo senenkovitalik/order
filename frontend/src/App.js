@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Route, Switch, withRouter } from 'react-router-dom';
 import { loader } from 'graphql.macro';
 import { useApolloClient, useLazyQuery } from '@apollo/react-hooks';
 import Unit from './pages/Unit/Unit';
@@ -13,54 +13,45 @@ import './App.css';
 
 const LOGIN = loader('./LOGIN.graphql');
 
-export default function App() {
+function App({ history }) {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
-  const [getLogin, {loading, data}] = useLazyQuery(LOGIN);
+  const [getLogin, { loading }] = useLazyQuery(LOGIN, {
+    onCompleted: ({ login: { user, token } }) => {
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', token);
+      setUser(user);
+      history.push(`/unit/${user.unit}`);
+    }
+  });
 
   const client = useApolloClient();
 
-  const getLoginHandler = (login, password) => {
-    getLogin({
-      variables: {
-        login,
-        password
-      }
-    })
-  };
+  const getLoginHandler = (login, password) => getLogin({
+    variables: {
+      login,
+      password
+    }
+  });
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    client.clearStore().then();
-    setUser(null);
+    client.clearStore().then(_ => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+      history.push('/login');
+    });
   };
 
-  // todo: bad approach, must use onCompleted
-  useEffect(() => {
-    if (!data) {
-      return;
-    }
-    const {user, token} = data.login;
-    localStorage.setItem('user', JSON.stringify(user));
-    localStorage.setItem('token', token);
-    setUser(user);
-  }, [data]);
-
   if (loading) {
-    return <div style={{display: 'flex', justifyContent: 'center', padding: '3rem'}}>
+    return <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
       <Spinner/>
     </div>;
   }
 
   return (
-    <div className="App" style={{padding: '1rem 2rem'}}>
-      <Navbar user={user} logout={handleLogout}/>
-      {user
-        ? <Redirect from='/login' to={`/unit/${user.unit}`}/>
-        : <Redirect from='*' to='/login'/>
-      }
+    <div className="App" style={{ padding: '1rem 2rem' }}>
+      {user && <Navbar user={user} logout={handleLogout}/>}
       <Switch>
-        <Route exact path='/' render={() => <div>Please, login</div>}/>
         <Route path='/login' render={() => <LoginForm getLogin={getLoginHandler}/>}/>
         <Route exact path='/unit/:unitId/posts/:postId/orderChart' component={OrderChart}/>
         <Route exact path='/unit/:unitId/posts/:postId' component={PostInfo}/>
@@ -70,3 +61,5 @@ export default function App() {
     </div>
   );
 }
+
+export default withRouter(App);
