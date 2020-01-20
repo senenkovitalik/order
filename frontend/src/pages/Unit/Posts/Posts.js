@@ -32,7 +32,10 @@ export default function Posts({ unitId, posts, pathname, showAlert }) {
         }
       });
     },
-    onCompleted: () => showAlert(true, 'Пост додано успішно.'),
+    onCompleted: () => {
+      showAlert(true, 'Пост додано успішно.');
+      setModalVisibility(false);
+    },
     onError: error => {
       showAlert(false);
       setCreateError(error);
