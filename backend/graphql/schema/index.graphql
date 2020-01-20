@@ -13,6 +13,12 @@ type Position {
     juniorPositions: [Position]!
 }
 
+input PositionInput {
+    name: String!
+    shortName: String!
+    seniorPosition: ID!
+}
+
 type Address {
     _id: ID!
     region: String
@@ -121,6 +127,8 @@ type Mutation {
     deleteUnit(id: ID!): Unit!
     createEmployee(unitID: ID!, employeeData: EmployeeInput!): Employee!
     deleteEmployee(unitID: ID!, employeeID: ID!): Employee!
+    createPosition(positionData: PositionInput!): Position!
+    updatePosition(id: ID!, positionData: PositionInput!): Position!
 }
 
 schema {

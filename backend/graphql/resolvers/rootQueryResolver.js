@@ -258,6 +258,36 @@ module.exports = {
       } catch (error) {
         return error;
       }
+    },
+    createPosition: async (_, { positionData }, req) => {
+      if (!req.isAuth()) {
+        return new Error('Unauthorized');
+      }
+      try {
+        // find senior Position
+        const seniorPosition = await Position.findById(positionData.seniorPosition);
+        if (!seniorPosition) {
+          return new Error(`Senior position ${positionData.seniorPosition} for Position '${positionData.name}' not found`);
+        }
+        // create Position
+        const position = await Position.create(positionData);
+        seniorPosition.juniorPositions = seniorPosition.juniorPositions.concat([position._id]);
+        await seniorPosition.save();
+
+        return position;
+      } catch (error) {
+        return error;
+      }
+    },
+    updatePosition: async (_, { id, positionData }) => {
+      if (!req.isAuth()) {
+        return new Error('Unauthorized');
+      }
+      try {
+        return await Position.findByIdAndUpdate(id, positionData, { new: true });
+      } catch (error) {
+        return error;
+      }
     }
   }
 };

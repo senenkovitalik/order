@@ -14,6 +14,11 @@ query Unit($id: ID!) {
             position {
                 _id
                 name
+                juniorPositions {
+                    _id
+                    name
+                    shortName
+                }
             }
         }
         employees {

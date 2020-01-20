@@ -1,0 +1,7 @@
+mutation UpdatePosition($id: ID!, $positionData: PositionInput!) {
+    updatePosition(id: $id, positionData: $positionData) {
+        _id
+        name
+        shortName
+    }
+}

@@ -6,6 +6,7 @@ import Alert from '../../components/Alert/Alert';
 import Posts from './Posts/Posts';
 import Units from './Units/Units';
 import Employees from './Employees/Employees';
+import Positions from "./Positions/Positions";
 
 const UNIT = loader('./UNIT.graphql');
 
@@ -56,6 +57,8 @@ export default function Unit(props) {
           {data.unit.head.position.name}<br/>
           {data.unit.head.rank.name} {data.unit.head.surname} {data.unit.head.name} {data.unit.head.patronymic}
         </div>
+
+        <Positions positions={data.unit.head.position.juniorPositions} showAlert={showAlert}/>
 
         <Employees unitID={data.unit._id} employees={data.unit.employees} headPosition={data.unit.head.position._id}
                    showAlert={showAlert}/>
