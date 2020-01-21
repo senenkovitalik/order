@@ -6,6 +6,7 @@ import Form from '../../../components/form/Form/Form';
 
 const CREATE = 'CREATE';
 const UPDATE = 'UPDATE';
+const DELETE = 'DELETE';
 
 const actionMap = {
   CREATE: 'Додати посаду',
@@ -15,6 +16,7 @@ const actionMap = {
 const UNIT = loader('../UNIT.graphql');
 const CREATE_POSITION = loader('./CREATE_POSITION.graphql');
 const UPDATE_POSITION = loader('./UPDATE_POSITION.graphql');
+const DELETE_POSITION = loader('./DELETE_POSITION.graphql');
 
 export default function Positions({ unitID, seniorPositionID, positions, showAlert }) {
   const [isModalShown, setModalVisibility] = useState(false);
@@ -70,20 +72,61 @@ export default function Positions({ unitID, seniorPositionID, positions, showAle
     }
   });
 
-  const actionHandler = (actionType, positionToUpdate) => {
-    setActionType(actionType);
-    switch (actionType) {
-      case UPDATE:
-        setID(positionToUpdate._id);
-        fillForm(positionToUpdate);
-        break;
-      case CREATE:
-        clearForm();
-        break;
-      default:
-        break;
+  const [deletePosition] = useMutation(DELETE_POSITION, {
+    update: (cache, { data: { deletePosition } }) => {
+      const { unit } = cache.readQuery({
+        query: UNIT,
+        variables: {
+          id: unitID
+        }
+      });
+      cache.writeQuery({
+        query: UNIT,
+        variables: {
+          id: unitID
+        },
+        data: {
+          unit: Object.assign({}, unit, {
+            head: Object.assign({}, unit.head, {
+              position: Object.assign({}, unit.head.position, {
+                juniorPositions: unit.head.position.juniorPositions.filter(({_id}) => _id !== deletePosition._id)
+              })
+            })
+          })
+        }
+      });
+    },
+    onCompleted: () => {
+      showAlert(true, 'Посаду видалено успішно.');
+      setModalVisibility(false);
+    },
+    onError: error => {
+      showAlert(false);
+      setError(error);
     }
-    setModalVisibility(true);
+  });
+
+  const actionHandler = (actionType, position) => {
+    setActionType(actionType);
+
+    if (actionType === CREATE) {
+      clearForm();
+      setModalVisibility(true);
+    }
+
+    if (actionType === UPDATE) {
+      fillForm(position);
+      setID(position._id);
+      setModalVisibility(true);
+    }
+
+    if (actionType === DELETE) {
+      deletePosition({
+        variables: {
+          id: position._id
+        }
+      });
+    }
   };
 
   const fillForm = position => {
@@ -172,11 +215,12 @@ export default function Positions({ unitID, seniorPositionID, positions, showAle
         {positions.map((position) => <li key={position._id}>
           {position.name}
           {' '}
-          <button onClick={() => actionHandler('UPDATE', position)}>Оновити</button>
+          <button onClick={() => actionHandler(UPDATE, position)}>Оновити</button>
+          <button onClick={() => actionHandler(DELETE, position)}>Видалити</button>
         </li>)}
       </ul>}
 
-      <button onClick={() => actionHandler('CREATE')}>Додати посаду</button>
+      <button onClick={() => actionHandler(CREATE)}>Додати посаду</button>
 
       {isModalShown &&
       <ModalLayout hide={hideModal}>

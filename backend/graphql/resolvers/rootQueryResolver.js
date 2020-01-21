@@ -288,6 +288,31 @@ module.exports = {
       } catch (error) {
         return error;
       }
-    }
+    },
+    deletePosition: async (_, { id }, req) => {
+      if (!req.isAuth) {
+        return new Error('Unauthorized');
+      }
+      try {
+        // find Position
+        const position = await Position.findById(id);
+        if (!position) {
+          return new Error(`Can't find Position '${id}'`);
+        }
+        // find senior Position
+        const seniorPosition = await Position.findById(position.seniorPosition);
+        if (!seniorPosition) {
+          return new Error(`Can't find senior position for Position '${id}'`);
+        }
+        await position.deleteOne();
+        // remove Position ID from seniorPosition.juniorPositions
+        seniorPosition.juniorPositions = seniorPosition.juniorPositions.filter(juniorPositionID => !juniorPositionID.equals(mongoose.Types.ObjectId(id)));
+        await seniorPosition.save();
+
+        return position;
+      } catch (error) {
+        return error;
+      }
+    },
   }
 };

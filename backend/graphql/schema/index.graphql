@@ -129,6 +129,7 @@ type Mutation {
     deleteEmployee(unitID: ID!, employeeID: ID!): Employee!
     createPosition(positionData: PositionInput!): Position!
     updatePosition(id: ID!, positionData: PositionInput!): Position!
+    deletePosition(id: ID!): Position!
 }
 
 schema {
