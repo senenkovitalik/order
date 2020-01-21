@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import Backdrop from "../../../components/Backdrop/Backdrop";
-import Modal from "../../../components/Modal/Modal";
-import FormInput from "../../../components/form/FormInput/FormInput";
-import FormButton from "../../../components/form/FormButton/FormButton";
-import { loader } from "graphql.macro";
-import { useMutation } from "@apollo/react-hooks";
+import { loader } from 'graphql.macro';
+import { useMutation } from '@apollo/react-hooks';
+import ModalLayout from '../../../components/ModalLayout/ModalLayout';
+import Form from '../../../components/form/Form/Form';
 
 const CREATE = 'CREATE';
 const UPDATE = 'UPDATE';
@@ -14,19 +12,43 @@ const actionMap = {
   UPDATE: 'Оновити дані про посаду'
 };
 
+const UNIT = loader('../UNIT.graphql');
 const CREATE_POSITION = loader('./CREATE_POSITION.graphql');
 const UPDATE_POSITION = loader('./UPDATE_POSITION.graphql');
 
-export default function Positions({ positions, showAlert }) {
+export default function Positions({ unitID, seniorPositionID, positions, showAlert }) {
   const [isModalShown, setModalVisibility] = useState(false);
   const [actionType, setActionType] = useState('');
   const [error, setError] = useState(null);
 
-  const [id, setID] = useState('');
+  const [id, setID] = useState('');  // for UPDATE
   const [name, setName] = useState('');
   const [shortName, setShortName] = useState('');
 
   const [createPosition] = useMutation(CREATE_POSITION, {
+    update: (cache, { data: { createPosition } }) => {
+      const { unit } = cache.readQuery({
+        query: UNIT,
+        variables: {
+          id: unitID
+        }
+      });
+      cache.writeQuery({
+        query: UNIT,
+        variables: {
+          id: unitID
+        },
+        data: {
+          unit: Object.assign({}, unit, {
+            head: Object.assign({}, unit.head, {
+              position: Object.assign({}, unit.head.position, {
+                juniorPositions: unit.head.position.juniorPositions.concat([createPosition])
+              })
+            })
+          })
+        }
+      });
+    },
     onCompleted: () => {
       showAlert(true, 'Посаду додано успішно.');
       setModalVisibility(false);
@@ -64,20 +86,6 @@ export default function Positions({ positions, showAlert }) {
     setModalVisibility(true);
   };
 
-  const fieldHandler = e => {
-    const { name, value } = e.target;
-    switch (name) {
-      case 'name':
-        setName(value);
-        break;
-      case 'shortName':
-        setShortName(value);
-        break;
-      default:
-        break;
-    }
-  };
-
   const fillForm = position => {
     setName(position.name);
     setShortName(position.shortName);
@@ -88,7 +96,9 @@ export default function Positions({ positions, showAlert }) {
     setShortName('');
   };
 
-  const submitForm = () => {
+  const submitHandler = event => {
+    event.preventDefault();
+
     switch (actionType) {
       case UPDATE:
         updatePosition({
@@ -106,7 +116,8 @@ export default function Positions({ positions, showAlert }) {
           variables: {
             positionData: {
               name,
-              shortName
+              shortName,
+              seniorPosition: seniorPositionID
             }
           }
         });
@@ -114,6 +125,43 @@ export default function Positions({ positions, showAlert }) {
       default:
         break;
     }
+  };
+
+  const hideModal = () => setModalVisibility(false);
+
+  const formConfigObject = {
+    fields: [
+      {
+        type: 'text',
+        name: 'name',
+        label: 'Назва',
+        value: name,
+        handler: e => setName(e.target.value)
+      },
+      {
+        type: 'text',
+        name: 'shortName',
+        label: 'Скорочена назва',
+        value: shortName,
+        handler: e => setShortName(e.target.value)
+      }
+    ],
+    buttons: [
+      {
+        type: 'submit',
+        isDisabled: false,
+        title: 'OK'
+      },
+      {
+        isDisabled: false,
+        clickHandler: clearForm,
+        title: 'Очистити'
+      },
+      {
+        clickHandler: hideModal,
+        title: 'Відмінити'
+      }
+    ]
   };
 
   return (
@@ -130,26 +178,11 @@ export default function Positions({ positions, showAlert }) {
 
       <button onClick={() => actionHandler('CREATE')}>Додати посаду</button>
 
-      {isModalShown && <React.Fragment>
-        <Backdrop closeModal={() => setModalVisibility(false)}/>
-        <Modal>
-          <form onSubmit={e => {
-            e.preventDefault();
-            submitForm();
-          }}>
-            <h3>{actionMap[actionType]}</h3>
-            {error && <span style={{ color: 'red' }}>Щось трапилося. Спробуйте ще раз.</span>}
-            <FormInput type={'text'} name={'name'} fieldName={'Назва'} value={name} handler={fieldHandler}/>
-            <br/>
-            <FormInput type={'text'} name={'shortName'} fieldName={'Скорочена назва'} value={shortName}
-                       handler={fieldHandler}/>
-            <br/>
-            <FormButton type={'submit'} isDisabled={!(name && shortName)}>OK</FormButton>
-            <FormButton isDisabled={!(name || shortName)} clickHandler={clearForm}>Очистити</FormButton>
-            <FormButton clickHandler={() => setModalVisibility(false)}>Відмінити</FormButton>
-          </form>
-        </Modal>
-      </React.Fragment>}
+      {isModalShown &&
+      <ModalLayout hide={hideModal}>
+        <Form configObject={formConfigObject} header={actionMap[actionType]} error={error}
+              submitHandler={submitHandler}/>
+      </ModalLayout>}
     </div>
   );
 }

@@ -260,7 +260,7 @@ module.exports = {
       }
     },
     createPosition: async (_, { positionData }, req) => {
-      if (!req.isAuth()) {
+      if (!req.isAuth) {
         return new Error('Unauthorized');
       }
       try {
