@@ -279,8 +279,8 @@ module.exports = {
         return error;
       }
     },
-    updatePosition: async (_, { id, positionData }) => {
-      if (!req.isAuth()) {
+    updatePosition: async (_, { id, positionData }, req) => {
+      if (!req.isAuth) {
         return new Error('Unauthorized');
       }
       try {

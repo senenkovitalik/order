@@ -62,6 +62,33 @@ export default function Positions({ unitID, seniorPositionID, positions, showAle
   });
 
   const [updatePosition] = useMutation(UPDATE_POSITION, {
+    update: (cache, { data: { updatePosition } }) => {
+      const { unit } = cache.readQuery({
+        query: UNIT,
+        variables: {
+          id: unitID
+        }
+      });
+      cache.writeQuery({
+        query: UNIT,
+        variables: {
+          id: unitID
+        },
+        data: {
+          unit: Object.assign({}, unit, {
+            head: Object.assign({}, unit.head, {
+              position: Object.assign({}, unit.head.position, {
+                juniorPositions: unit.head.position.juniorPositions.map(juniorPosition =>
+                  juniorPosition._id === updatePosition._id
+                    ? updatePosition
+                    : juniorPosition
+                )
+              })
+            })
+          })
+        }
+      });
+    },
     onCompleted: () => {
       showAlert(true, 'Дані про посаду оновлено успішно.');
       setModalVisibility(false);
@@ -89,7 +116,7 @@ export default function Positions({ unitID, seniorPositionID, positions, showAle
           unit: Object.assign({}, unit, {
             head: Object.assign({}, unit.head, {
               position: Object.assign({}, unit.head.position, {
-                juniorPositions: unit.head.position.juniorPositions.filter(({_id}) => _id !== deletePosition._id)
+                juniorPositions: unit.head.position.juniorPositions.filter(({ _id }) => _id !== deletePosition._id)
               })
             })
           })
@@ -149,7 +176,8 @@ export default function Positions({ unitID, seniorPositionID, positions, showAle
             id,
             positionData: {
               name,
-              shortName
+              shortName,
+              seniorPosition: seniorPositionID
             }
           }
         });
