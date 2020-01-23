@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Route, Switch, withRouter } from 'react-router-dom';
+import { Redirect, Route, Switch, withRouter } from 'react-router-dom';
 import { loader } from 'graphql.macro';
 import { useApolloClient, useLazyQuery } from '@apollo/react-hooks';
 import Unit from './pages/Unit/Unit';
@@ -52,6 +52,7 @@ function App({ history }) {
     <div className="App" style={{ padding: '1rem 2rem' }}>
       {user && <Navbar user={user} logout={handleLogout}/>}
       <Switch>
+        <Redirect exact from={'/'} to={`/unit/${user.unit}`}/>
         <Route path='/login' render={() => <LoginForm getLogin={getLoginHandler}/>}/>
         <Route exact path='/unit/:unitId/posts/:postId/orderChart' component={OrderChart}/>
         <Route exact path='/unit/:unitId/posts/:postId' component={PostInfo}/>
