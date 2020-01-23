@@ -51,9 +51,10 @@ function App({ history }) {
   return (
     <div className="App" style={{ padding: '1rem 2rem' }}>
       {user && <Navbar user={user} logout={handleLogout}/>}
+      {!user && <Redirect from={'*'} to={'/login'}/>}
       <Switch>
-        <Redirect exact from={'/'} to={`/unit/${user.unit}`}/>
-        <Route path='/login' render={() => <LoginForm getLogin={getLoginHandler}/>}/>
+        {/*<Redirect exact from={'/'} to={`/unit/${user.unit}`}/>*/}
+        <Route exact path='/login' render={() => <LoginForm getLogin={getLoginHandler}/>}/>
         <Route exact path='/unit/:unitId/posts/:postId/orderChart' component={OrderChart}/>
         <Route exact path='/unit/:unitId/posts/:postId' component={PostInfo}/>
         <Route exact path='/unit/:unitId' component={Unit}/>
