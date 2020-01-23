@@ -148,6 +148,10 @@ export default function Positions({ unitID, seniorPositionID, positions, showAle
     }
 
     if (actionType === DELETE) {
+      const res = window.confirm(`Ви дійсно хочете видалити посаду '${position.name}'?`);
+      if (!res) {
+        return;
+      }
       deletePosition({
         variables: {
           id: position._id
