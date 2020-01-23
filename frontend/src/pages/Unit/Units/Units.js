@@ -2,30 +2,43 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation } from '@apollo/react-hooks';
 import { loader } from 'graphql.macro';
-import Backdrop from '../../../components/Backdrop/Backdrop';
-import Modal from '../../../components/Modal/Modal';
-import CreateUnitForm from './CreateUnitForm/CreateUnitForm';
+import ModalLayout from "../../../components/ModalLayout/ModalLayout";
+
+const CREATE = 'CREATE';
+const UPDATE = 'UPDATE';
+const DELETE = 'DELETE';
+
+const headerMap = {
+  CREATE: 'Додати підрозділ',
+  UPDATE: 'Оновити дані про підрозділ'
+};
 
 const UNIT = loader('../UNIT.graphql');
 const CREATE_UNIT = loader('./CREATE_UNIT.graphql');
 const DELETE_UNIT = loader('./DELETE_UNIT.graphql');
 
-export default function Units({ unitId, childUnits, employees, showAlert }) {
+export default function Units({ unitID, childUnits, employees, showAlert }) {
   const [isModalShown, setModalVisibility] = useState(false);
-  const [createError, setCreateError] = useState(null);
+  const [actionType, setActionType] = useState('');
+  const [error, setError] = useState(null);
 
-  const [createUnitMutation] = useMutation(CREATE_UNIT, {
+  const [id, setID] = useState(null);
+  const [name, setName] = useState('');
+  const [shortName, setShortName] = useState('');
+  const [head, setHead] = useState(!!employees.length ? employees[0]._id : null);
+
+  const [createUnit] = useMutation(CREATE_UNIT, {
     update: (cache, { data: { createUnit } }) => {
       const { unit } = cache.readQuery({
         query: UNIT,
         variables: {
-          id: unitId
+          id: unitID
         }
       });
       cache.writeQuery({
         query: UNIT,
         variables: {
-          id: unitId
+          id: unitID
         },
         data: {
           unit: Object.assign({}, unit, { childUnits: unit.childUnits.concat([createUnit]) })
@@ -36,21 +49,21 @@ export default function Units({ unitId, childUnits, employees, showAlert }) {
       setModalVisibility(false);
       showAlert(true, 'Підрозділ додано успішно.');
     },
-    onError: error => setCreateError(error)
+    onError: error => setError(error)
   });
 
-  const [deleteUnitMutation] = useMutation(DELETE_UNIT, {
+  const [deleteUnit] = useMutation(DELETE_UNIT, {
     update: (cache, { data: { deleteUnit } }) => {
       const { unit } = cache.readQuery({
         query: UNIT,
         variables: {
-          id: unitId
+          id: unitID
         }
       });
       cache.writeQuery({
         query: UNIT,
         variables: {
-          id: unitId
+          id: unitID
         },
         data: {
           unit: Object.assign({}, unit, {
@@ -63,45 +76,130 @@ export default function Units({ unitId, childUnits, employees, showAlert }) {
     onError: () => showAlert(false)
   });
 
-  const createUnit = unitData => createUnitMutation({
-    variables: {
-      parentUnitId: unitId,
-      unit: unitData
-    }
-  });
+  const showModal = () => setModalVisibility(true);
 
-  const deleteUnit = (unitId, unitName) => {
-    const result = window.confirm(`Ви дійсно хочете видалити підрозідл '${unitName}'`);
-    if (!result) {
-      return;
+  const hideModal = () => setModalVisibility(false);
+
+  const actionHandler = (actionType, unit) => {
+    setActionType(actionType);
+
+    if (actionType === CREATE) {
+      clearForm();
+      showModal();
     }
-    return deleteUnitMutation({
-      variables: {
-        id: unitId
+
+    if (actionType === UPDATE) {
+      fillForm(unit);
+      setID(unit._id);
+      showModal();
+    }
+
+    if (actionType === DELETE) {
+      const res = window.confirm(`Ви дійсно хочете видалити підрозділ '${unit.name}'?`);
+      if (!res) {
+        return;
       }
-    });
+      deleteUnit({
+        variables: {
+          id: unit._id
+        }
+      });
+    }
   };
+
+  const submitHandler = event => {
+    event.preventDefault();
+
+    switch (actionType) {
+      case DELETE:
+        const result = window.confirm(`Ви дійсно хочете видалити підрозідл '${unitID}'`);
+        if (!result) {
+          return;
+        }
+        deleteUnit({
+          variables: {
+            id
+          }
+        });
+        break;
+      case CREATE:
+        createUnit({
+          variables: {
+            parentUnitId: unitID,
+            unit: { name, shortName, head }
+          }
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
+  const fillForm = unit => {
+    setName(unit.name);
+    setShortName(unit.shortName);
+    setHead(unit.head._id);
+  };
+
+  const clearForm = () => {
+    setName('');
+    setShortName('');
+    setHead('');
+  };
+
+  console.log();
 
   return (
     <div>
       <h2>Підрозділи</h2>
       {!!childUnits.length
         ? <ul>
-          {childUnits.map(({ _id, name }) => <li key={_id}>
-            <Link to={`/unit/${_id}`}>{name}</Link>
-            <button type='button' onClick={() => deleteUnit(_id, name)}>Видалити</button>
+          {childUnits.map(unit => <li key={unit._id}>
+            <Link to={`/unit/${unit._id}`}>{unit.name}</Link>
+            {/*<button type='button' onClick={() => actionHandler(UPDATE, unit)}>Оновити</button>*/}
+            <button type='button' onClick={() => actionHandler(DELETE, unit)}>Видалити</button>
           </li>)}
         </ul>
         : <div>Нічого не знайдено</div>}
-      <button onClick={() => setModalVisibility(true)}>Додати підрозділ</button>
+      <button onClick={() => actionHandler(CREATE)}>Додати підрозділ</button>
 
-      {isModalShown && <React.Fragment>
-        <Backdrop closeModal={() => setModalVisibility(false)}/>
-        <Modal>
-          <CreateUnitForm employees={employees} createUnit={createUnit} close={() => setModalVisibility(false)}
-                          error={createError}/>
-        </Modal>
-      </React.Fragment>}
+      {isModalShown && <ModalLayout hide={hideModal}>
+        <form onSubmit={submitHandler}>
+          <h3>{headerMap[actionType]}</h3>
+
+          {error && <span style={{ color: 'red' }}>Щось трапилося. Спробуйте ще раз.</span>}
+
+          <div>
+            <label>
+              <span className='form-field'>Назва</span>
+              <input type='text' name='name' value={name} onChange={e => setName(e.target.value)}/>
+            </label>
+          </div>
+
+          <div>
+            <label>
+              <span className='form-field'>Скорочена назва</span>
+              <input type='text' name='shortName' value={shortName} onChange={e => setShortName(e.target.value)}/>
+            </label>
+          </div>
+
+          <div>
+            <label>
+              <span className='form-field'>Керівник</span>
+              <select value={head} onChange={e => setHead(e.target.value)}>
+                {/* filter already used employees */}
+                {employees.map(employee => <option key={employee._id} value={employee._id}>
+                  {employee.surname} {employee.name} {employee.patronymic}
+                </option>)}
+              </select>
+            </label>
+          </div>
+
+          <button type='submit' disabled={!(name && shortName && head)}>OK</button>
+          <button type='button' onClick={clearForm} disabled={!(name || shortName || head)}>Очистити</button>
+          <button type='button' onClick={hideModal}>Cancel</button>
+        </form>
+      </ModalLayout>}
     </div>
   );
 }

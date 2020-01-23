@@ -64,7 +64,7 @@ export default function Unit(props) {
         <Employees unitID={data.unit._id} employees={data.unit.employees} headPosition={data.unit.head.position._id}
                    showAlert={showAlert}/>
 
-        <Units unitId={data.unit._id} childUnits={data.unit.childUnits} employees={data.unit.employees}
+        <Units unitID={data.unit._id} childUnits={data.unit.childUnits} employees={data.unit.employees}
                showAlert={showAlert}/>
 
         <Posts unitId={data.unit._id} posts={data.unit.posts} pathname={props.location.pathname} showAlert={showAlert}/>
