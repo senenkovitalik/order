@@ -1,0 +1,14 @@
+mutation UpdateEmployee($employeeID: ID!, $employeeData: EmployeeInput!) {
+    updateEmployee(employeeID: $employeeID, employeeData: $employeeData) {
+        _id
+        name
+        surname
+        patronymic
+        rank {
+            _id
+        }
+        position {
+            _id
+        }
+    }
+}

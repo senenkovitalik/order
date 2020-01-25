@@ -129,6 +129,7 @@ module.exports = {
         return error;
       }
     },
+    // Post
     createPost: async (_, { unitID, postData }, req) => {
       if (!req.isAuth) {
         throw new Error('Unauthorized');
@@ -190,6 +191,7 @@ module.exports = {
         return error;
       }
     },
+    // Unit
     createUnit: async (_, { parentUnitId, unit }, req) => {
       if (!req.isAuth) {
         throw new Error('Unauthorized');
@@ -243,22 +245,7 @@ module.exports = {
         return error;
       }
     },
-    deleteEmployee: async (_, { unitID, employeeID }, req) => {
-      try {
-        // find unit for Employee
-        const unit = await Unit.findById(unitID);
-        if (!unit) {
-          return new Error(`Impossible to find a Unit ${unitID} for the Employee ${employeeID}`);
-        }
-        // delete Employee ID from Unit.employees
-        unit.employees = unit.employees.filter(id => !id.equals(mongoose.Types.ObjectId(employeeID)));
-        await unit.save();
-        // delete Employee
-        return await Employee.findByIdAndDelete(employeeID);
-      } catch (error) {
-        return error;
-      }
-    },
+    // Employee
     createEmployee: async (_, { unitID, employeeData }, req) => {
       if (!req.isAuth) {
         throw new Error('Unauthorized');
@@ -280,6 +267,33 @@ module.exports = {
         return error;
       }
     },
+    updateEmployee: async (_, { employeeID, employeeData }, req) => {
+      if (!req.isAuth) {
+        throw new Error('Unauthorized');
+      }
+      try {
+        return await Employee.findByIdAndUpdate(employeeID, employeeData, { new: true });
+      } catch (error) {
+        return error;
+      }
+    },
+    deleteEmployee: async (_, { unitID, employeeID }, req) => {
+      try {
+        // find unit for Employee
+        const unit = await Unit.findById(unitID);
+        if (!unit) {
+          return new Error(`Impossible to find a Unit ${unitID} for the Employee ${employeeID}`);
+        }
+        // delete Employee ID from Unit.employees
+        unit.employees = unit.employees.filter(id => !id.equals(mongoose.Types.ObjectId(employeeID)));
+        await unit.save();
+        // delete Employee
+        return await Employee.findByIdAndDelete(employeeID);
+      } catch (error) {
+        return error;
+      }
+    },
+    // Position
     createPosition: async (_, { positionData }, req) => {
       if (!req.isAuth) {
         return new Error('Unauthorized');

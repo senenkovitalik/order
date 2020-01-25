@@ -11,3 +11,8 @@
 .employees th, td {
     padding: 5px;
 }
+
+.form-field {
+    width: 12rem;
+    display: inline-block;
+}

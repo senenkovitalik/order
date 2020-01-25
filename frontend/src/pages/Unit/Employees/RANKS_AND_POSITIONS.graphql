@@ -1,0 +1,14 @@
+query RanksAndPositions($parentPositionID: ID!) {
+    ranks {
+        _id
+        index
+        name
+        shortName
+    }
+    position(id: $parentPositionID) {
+        juniorPositions {
+            _id
+            name
+        }
+    }
+}

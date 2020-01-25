@@ -121,13 +121,18 @@ type Query {
 
 type Mutation {
     saveDuties(postId: ID!, duties: [DutyInput!]!, year: Int!, month: Int!): Post!
+    # Post
     createPost(unitID: ID!, postData: PostInput!): Post!
     updatePost(postID: ID!, postData: PostInput!): Post!
     deletePost(unitID: ID!, postID: ID!): Post!
+    # Unit
     createUnit(parentUnitId: ID!, unit: UnitInput!): Unit!
     deleteUnit(id: ID!): Unit!
+    # Employee
     createEmployee(unitID: ID!, employeeData: EmployeeInput!): Employee!
+    updateEmployee(employeeID: ID!, employeeData: EmployeeInput!): Employee!
     deleteEmployee(unitID: ID!, employeeID: ID!): Employee!
+    # Position
     createPosition(positionData: PositionInput!): Position!
     updatePosition(id: ID!, positionData: PositionInput!): Position!
     deletePosition(id: ID!): Position!
