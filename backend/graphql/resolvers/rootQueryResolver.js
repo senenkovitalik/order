@@ -129,16 +129,21 @@ module.exports = {
         return error;
       }
     },
-    createPost: async (_, { unitId, post }, req) => {
+    createPost: async (_, { unitID, postData }, req) => {
       if (!req.isAuth) {
         throw new Error('Unauthorized');
       }
 
       try {
-        const createdPost = await Post.create(post);
+        // find unit
+        const unit = await Unit.findById(unitID);
+        if (!unit) {
+          return new Error(`Can't find Unit ${unitID}`);
+        }
+
+        const createdPost = await Post.create(postData);
 
         // add Post ID to Unit.posts
-        const unit = await Unit.findById(unitId);
         unit.posts = unit.posts.concat([createdPost._id]);
         await unit.save();
 
@@ -147,21 +152,37 @@ module.exports = {
         return error;
       }
     },
-    deletePost: async (_, { unitId, postId }, req) => {
+    updatePost: async (_, { postID, postData }, req) => {
       if (!req.isAuth) {
         throw new Error('Unauthorized');
       }
 
       try {
+        return await Post.findByIdAndUpdate(postID, postData, { new: true });
+      } catch (error) {
+        return error;
+      }
+    },
+    deletePost: async (_, { unitID, postID }, req) => {
+      if (!req.isAuth) {
+        throw new Error('Unauthorized');
+      }
+
+      try {
+        // find unit
+        const unit = await Unit.findById(unitID);
+        if (!unit) {
+          return new Error(`Can't find Unit ${unitID} for Post ${postID}`);
+        }
+
         // delete Post
-        const deletedPost = await Post.findByIdAndDelete(postId);
+        const deletedPost = await Post.findByIdAndDelete(postID);
 
         // delete all post Duties
-        await Duty.deleteMany({ post: postId });
+        await Duty.deleteMany({ post: postID });
 
         // delete Post ID from Unit.posts
-        const unit = await Unit.findById(unitId);
-        unit.posts = unit.posts.filter(id => !id.equals(mongoose.Types.ObjectId(postId)));
+        unit.posts = unit.posts.filter(id => !id.equals(mongoose.Types.ObjectId(postID)));
         await unit.save();
 
         return deletedPost;

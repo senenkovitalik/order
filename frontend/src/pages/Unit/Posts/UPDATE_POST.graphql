@@ -1,0 +1,8 @@
+mutation UpdatePost($postID: ID!, $postData: PostInput!) {
+    updatePost(postID: $postID, postData: $postData) {
+        _id
+        name
+        shortName
+        position
+    }
+}

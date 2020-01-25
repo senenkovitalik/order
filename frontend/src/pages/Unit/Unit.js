@@ -67,7 +67,7 @@ export default function Unit(props) {
         <Units unitID={data.unit._id} childUnits={data.unit.childUnits} employees={data.unit.employees}
                showAlert={showAlert}/>
 
-        <Posts unitId={data.unit._id} posts={data.unit.posts} pathname={props.location.pathname} showAlert={showAlert}/>
+        <Posts unitID={data.unit._id} posts={data.unit.posts} pathname={props.location.pathname} showAlert={showAlert}/>
 
       </React.Fragment>}
     </React.Fragment>

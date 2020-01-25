@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation } from '@apollo/react-hooks';
 import { loader } from 'graphql.macro';
-import ModalLayout from "../../../components/ModalLayout/ModalLayout";
+import ModalLayout from '../../../components/ModalLayout/ModalLayout';
 
 const CREATE = 'CREATE';
 const UPDATE = 'UPDATE';
@@ -146,8 +146,6 @@ export default function Units({ unitID, childUnits, employees, showAlert }) {
     setShortName('');
     setHead('');
   };
-
-  console.log();
 
   return (
     <div>

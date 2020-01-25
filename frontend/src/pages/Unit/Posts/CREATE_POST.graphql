@@ -1,5 +1,5 @@
-mutation CreatePost($unitId: ID!, $post: PostInput!) {
-    createPost(unitId: $unitId, post: $post) {
+mutation CreatePost($unitID: ID!, $postData: PostInput!) {
+    createPost(unitID: $unitID, postData: $postData) {
         _id
         name
         shortName
