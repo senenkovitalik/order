@@ -53,7 +53,7 @@ function App({ history }) {
       {user && <Navbar user={user} logout={handleLogout}/>}
       {!user && <Redirect from={'*'} to={'/login'}/>}
       <Switch>
-        {/*<Redirect exact from={'/'} to={`/unit/${user.unit}`}/>*/}
+        {user && <Redirect exact from={'/'} to={`/unit/${user.unit}`}/>}
         <Route exact path='/login' render={() => <LoginForm getLogin={getLoginHandler}/>}/>
         <Route exact path='/unit/:unitId/posts/:postId/orderChart' component={OrderChart}/>
         <Route exact path='/unit/:unitId/posts/:postId' component={PostInfo}/>
