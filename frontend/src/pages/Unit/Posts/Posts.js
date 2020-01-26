@@ -190,7 +190,7 @@ export default function Posts({ unitID, posts, pathname, showAlert }) {
       {!!posts.length
         ? <ul>
           {posts.map(post => <li key={post._id}>
-            <Link to={`${pathname}/posts/${post._id}`}>{post.name}</Link>
+            <Link to={`${pathname}/posts/${post._id}`}>{post.shortName} {post.name}</Link>
             <button onClick={() => actionHandler(UPDATE, post)}>Оновити</button>
             <button onClick={() => actionHandler(DELETE, post)}>Видалити</button>
           </li>)}
