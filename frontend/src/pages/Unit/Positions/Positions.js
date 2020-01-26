@@ -62,6 +62,7 @@ export default function Positions({ unitID, seniorPositionID, positions, showAle
   });
 
   const [updatePosition] = useMutation(UPDATE_POSITION, {
+    // todo: fix it
     update: (cache, { data: { updatePosition } }) => {
       const { unit } = cache.readQuery({
         query: UNIT,

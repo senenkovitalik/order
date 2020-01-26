@@ -31,6 +31,7 @@ export default function Employees({ unitID, employees, headPosition, showAlert }
   const [rank, setRank] = useState('');
   const [position, setPosition] = useState('');
 
+  // todo: set position after loading
   const [loadRanksAndPositions, { loading, data }] = useLazyQuery(RANKS_AND_POSITIONS, {
     variables: {
       parentPositionID: headPosition
