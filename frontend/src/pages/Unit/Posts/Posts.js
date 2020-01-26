@@ -153,7 +153,7 @@ export default function Posts({ unitID, posts, pathname, showAlert }) {
       deletePost({
         variables: {
           unitID,
-          postID: id
+          postID: post._id
         }
       });
     }
@@ -166,7 +166,7 @@ export default function Posts({ unitID, posts, pathname, showAlert }) {
       case CREATE:
         createPost({
           variables: {
-            parentUnitID: unitID,
+            unitID: unitID,
             postData: { name, shortName, position }
           }
         });
@@ -192,7 +192,7 @@ export default function Posts({ unitID, posts, pathname, showAlert }) {
           {posts.map(post => <li key={post._id}>
             <Link to={`${pathname}/posts/${post._id}`}>{post.name}</Link>
             <button onClick={() => actionHandler(UPDATE, post)}>Оновити</button>
-            <button onClick={() => actionHandler(DELETE)}>Видалити</button>
+            <button onClick={() => actionHandler(DELETE, post)}>Видалити</button>
           </li>)}
         </ul>
         : <div>Нічого не знайдено</div>}
