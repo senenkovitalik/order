@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { loader } from 'graphql.macro';
 import { useMutation } from '@apollo/react-hooks';
 import ModalLayout from '../../../components/ModalLayout/ModalLayout';
-import Form from '../../../components/form/Form/Form';
 import Table from '../../../components/Table/Table';
 
 const CREATE = 'CREATE';
 const UPDATE = 'UPDATE';
 const DELETE = 'DELETE';
 
-const actionMap = {
+const headerMap = {
   CREATE: 'Додати посаду',
   UPDATE: 'Оновити дані про посаду'
 };
@@ -206,41 +205,6 @@ export default function Positions({ unitID, seniorPositionID, positions, showAle
 
   const hideModal = () => setModalVisibility(false);
 
-  const formConfigObject = {
-    fields: [
-      {
-        type: 'text',
-        name: 'name',
-        label: 'Назва',
-        value: name,
-        handler: e => setName(e.target.value)
-      },
-      {
-        type: 'text',
-        name: 'shortName',
-        label: 'Скорочена назва',
-        value: shortName,
-        handler: e => setShortName(e.target.value)
-      }
-    ],
-    buttons: [
-      {
-        type: 'submit',
-        isDisabled: false,
-        title: 'OK'
-      },
-      {
-        isDisabled: false,
-        clickHandler: clearForm,
-        title: 'Очистити'
-      },
-      {
-        clickHandler: hideModal,
-        title: 'Відмінити'
-      }
-    ]
-  };
-
   return (
     <div>
       <h2>Посади</h2>
@@ -260,8 +224,31 @@ export default function Positions({ unitID, seniorPositionID, positions, showAle
 
       {isModalShown &&
       <ModalLayout hide={hideModal}>
-        <Form configObject={formConfigObject} header={actionMap[actionType]} error={error}
-              submitHandler={submitHandler}/>
+        <form onSubmit={submitHandler}>
+          <h3>{headerMap[actionType]}</h3>
+
+          {error && <span style={{ color: 'red' }}>Щось трапилося. Спробуйте ще раз.</span>}
+
+          <div>
+            <label>
+              <span className='form-field'>Назва</span>
+              <input type='text' value={name} onChange={e => setName(e.target.value)}
+                     title={'Щось типу Заступник начальника, Механік відділу, ...'}/>
+            </label>
+          </div>
+
+          <div>
+            <label>
+              <span className='form-field'>Скорочена назва</span>
+              <input type='text' value={shortName} onChange={e => setShortName(e.target.value)}
+                     title={'Щось типу ЗНВАСПД, ЗНІТВ, ...'}/>
+            </label>
+          </div>
+
+          <button type='submit' disabled={!(name && shortName)}>OK</button>
+          <button type='button' onClick={clearForm} disabled={!(name || shortName)}>Очистити</button>
+          <button type='button' onClick={hideModal}>Відмінити</button>
+        </form>
       </ModalLayout>}
     </div>
   );
