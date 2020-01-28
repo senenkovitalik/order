@@ -3,6 +3,7 @@ import './Employees.css';
 import { useLazyQuery, useMutation } from '@apollo/react-hooks';
 import { loader } from 'graphql.macro';
 import ModalLayout from '../../../components/ModalLayout/ModalLayout';
+import Table from '../../../components/Table/Table';
 
 const CREATE = 'CREATE';
 const UPDATE = 'UPDATE';
@@ -205,18 +206,7 @@ export default function Employees({ unitID, employees, headPosition, showAlert }
     <div>
       <h2>Особовий склад</h2>
       {!!employees.length
-        ? <React.Fragment>
-          <table className='employees'>
-            <thead>
-            <tr>
-              <th>#</th>
-              <th>Вій. звання</th>
-              <th>ПІБ</th>
-              <th>Посада</th>
-              <th>Дія</th>
-            </tr>
-            </thead>
-            <tbody>
+        ? <Table headers={['#', 'Вій. звання', 'ПІБ', 'Посада', 'Дія',]}>
             {employees.sort((a, b) => b.rank.index - a.rank.index)
               .map((employee, index) =>
                 <tr key={employee._id}>
@@ -230,9 +220,7 @@ export default function Employees({ unitID, employees, headPosition, showAlert }
                   </td>
                 </tr>
               )}
-            </tbody>
-          </table>
-        </React.Fragment>
+        </Table>
         : <div>Нічого не знайдено</div>}
       <button onClick={() => actionHandler(CREATE)}>Додати працівника</button>
 

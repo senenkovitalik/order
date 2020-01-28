@@ -3,6 +3,7 @@ import { loader } from 'graphql.macro';
 import { useMutation } from '@apollo/react-hooks';
 import ModalLayout from '../../../components/ModalLayout/ModalLayout';
 import Form from '../../../components/form/Form/Form';
+import Table from '../../../components/Table/Table';
 
 const CREATE = 'CREATE';
 const UPDATE = 'UPDATE';
@@ -244,14 +245,16 @@ export default function Positions({ unitID, seniorPositionID, positions, showAle
     <div>
       <h2>Посади</h2>
 
-      {positions && <ul>
-        {positions.map((position) => <li key={position._id}>
-          {position.name}
-          {' '}
-          <button onClick={() => actionHandler(UPDATE, position)}>Оновити</button>
-          <button onClick={() => actionHandler(DELETE, position)}>Видалити</button>
-        </li>)}
-      </ul>}
+      {positions && <Table headers={['#','Посада','Дія']}>
+        {positions.map((position, i) => <tr key={position._id}>
+          <td>{i+1}</td>
+          <td>{position.name}</td>
+          <td>
+            <button onClick={() => actionHandler(UPDATE, position)}>Оновити</button>
+            <button onClick={() => actionHandler(DELETE, position)}>Видалити</button>
+          </td>
+        </tr>)}
+      </Table>}
 
       <button onClick={() => actionHandler(CREATE)}>Додати посаду</button>
 
