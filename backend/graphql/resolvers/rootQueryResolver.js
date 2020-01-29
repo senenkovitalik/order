@@ -109,6 +109,7 @@ module.exports = {
         const startDate = new Date(year, month, day ? day : 1);
         const endDate = new Date(year, day ? month : month + 1, day ? day : 1);
         await Duty.deleteMany({
+          post: postId,
           date: day
             ? startDate.toISOString()
             : {
