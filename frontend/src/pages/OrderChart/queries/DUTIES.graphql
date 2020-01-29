@@ -29,6 +29,7 @@ query Duties($unitId: ID!, $postId: ID!, $year: Int!, $month: Int!) {
     post(id: $postId) {
         _id
         name
+        shortName
         position
         duties(year: $year, month: $month) {
             _id

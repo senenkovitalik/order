@@ -20,8 +20,8 @@ export default function Row({ date, employee, duties }) {
   return (
     <tr onMouseEnter={() => setCurrentEmployeeId(employee._id)}>
       <td>1</td>
-      <td className="align-left">{employee.rank.shortName}</td>
-      <td className="align-left">{empName}</td>
+      <td className="align-left" style={{whiteSpace: 'nowrap'}}>{employee.rank.shortName}</td>
+      <td className="align-left" style={{whiteSpace: 'nowrap'}}>{empName}</td>
       {cells}
     </tr>
   );
