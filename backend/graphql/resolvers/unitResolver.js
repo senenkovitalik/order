@@ -1,6 +1,7 @@
 const Employee = require('../../models/Employee');
 const Unit = require('../../models/Unit');
 const Post = require('../../models/Post');
+const Duty = require('../../models/Duty');
 
 module.exports = {
   Unit: {
@@ -14,7 +15,7 @@ module.exports = {
     },
     employees: async (parent) => {
       try {
-        return await Employee.find({_id: {$in: parent.employees}});
+        return await Employee.find({ _id: { $in: parent.employees } });
       } catch (error) {
         console.log(error);
         throw error;
@@ -22,21 +23,25 @@ module.exports = {
     },
     childUnits: async (parent) => {
       try {
-        return await Unit.find({_id: {$in: parent.childUnits}});
+        return await Unit.find({ _id: { $in: parent.childUnits } });
       } catch (error) {
         console.log(error);
         throw error;
       }
     },
-    posts: async (parent, {id}) => {
+    posts: async (parent, { id }) => {
       try {
-        const posts = await Post.find({_id: {$in: parent.posts}});
-        return id
-          ? posts.filter(post => post.id === id)
-          : posts;
+        const posts = await Post.find({ _id: { $in: id ? [id] : parent.posts } });
+        const duties = await Duty.find({ post: { $in: posts.map(({ _id }) => _id) } }, '_id post');
+
+        return posts.map(post => {
+          return Object.assign({},
+            post._doc, {
+              duties: duties.filter(duty => duty.post.equals(post._id)).map(duty => duty._id)
+            })
+        });
       } catch (error) {
-        console.log(error);
-        throw error;
+        return error;
       }
     }
   }
