@@ -3,6 +3,7 @@ import './Employees.css';
 import { useLazyQuery, useMutation } from '@apollo/react-hooks';
 import { loader } from 'graphql.macro';
 import ModalLayout from '../../../components/ModalLayout/ModalLayout';
+import Table from '../../../components/Table/Table';
 
 const CREATE = 'CREATE';
 const UPDATE = 'UPDATE';
@@ -31,11 +32,14 @@ export default function Employees({ unitID, employees, headPosition, showAlert }
   const [rank, setRank] = useState('');
   const [position, setPosition] = useState('');
 
-  // todo: set position after loading
   const [loadRanksAndPositions, { loading, data }] = useLazyQuery(RANKS_AND_POSITIONS, {
     variables: {
       parentPositionID: headPosition
     },
+    onCompleted: ({ranks, position}) => {
+      setRank(ranks.length ? ranks[0]._id : '');
+      setPosition(position.juniorPositions.length ? position.juniorPositions[0]._id : '');
+    }
   });
 
   const [createEmployee] = useMutation(CREATE_EMPLOYEE, {
@@ -138,11 +142,21 @@ export default function Employees({ unitID, employees, headPosition, showAlert }
   };
 
   const clearForm = () => {
+    const rankID = data
+      ? data.ranks.length
+        ? data.ranks[0]._id
+        : ''
+      : '';
+    const positionID = data
+      ? data.position.juniorPositions.length
+        ? data.position.juniorPositions[0]._id
+        : ''
+      : '';
     setName('');
     setSurname('');
     setPatronymic('');
-    setRank('');
-    setPosition('');
+    setRank(rankID);
+    setPosition(positionID);
   };
 
   const actionHandler = (actionType, item) => {
@@ -205,18 +219,7 @@ export default function Employees({ unitID, employees, headPosition, showAlert }
     <div>
       <h2>Особовий склад</h2>
       {!!employees.length
-        ? <React.Fragment>
-          <table className='employees'>
-            <thead>
-            <tr>
-              <th>#</th>
-              <th>Вій. звання</th>
-              <th>ПІБ</th>
-              <th>Посада</th>
-              <th>Дія</th>
-            </tr>
-            </thead>
-            <tbody>
+        ? <Table headers={['#', 'Вій. звання', 'ПІБ', 'Посада', 'Дія',]}>
             {employees.sort((a, b) => b.rank.index - a.rank.index)
               .map((employee, index) =>
                 <tr key={employee._id}>
@@ -230,9 +233,7 @@ export default function Employees({ unitID, employees, headPosition, showAlert }
                   </td>
                 </tr>
               )}
-            </tbody>
-          </table>
-        </React.Fragment>
+        </Table>
         : <div>Нічого не знайдено</div>}
       <button onClick={() => actionHandler(CREATE)}>Додати працівника</button>
 

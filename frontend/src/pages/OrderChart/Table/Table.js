@@ -11,7 +11,7 @@ export default function Table({ unit, post, duties, date }) {
   const d = new Date(date.getTime());
   const days = [...Array(currentMonth.days)].map((x, i) => {
     const backgroundColor = detectHoliday(d.setDate(i + 1)) ? 'grey' : 'white';
-    return <th key={i + 1} style={{ backgroundColor }}>{i + 1}</th>;
+    return <th key={i + 1} style={{ backgroundColor }}>{i+1 > 9 ? '' : '0'}{i + 1}</th>;
   });
 
   const rows = unit.employees
@@ -30,7 +30,7 @@ export default function Table({ unit, post, duties, date }) {
 
       <div className="row row_centered">
         <p>ГРАФІК ЧЕРГУВАННЯ</p>
-        <p>{post.name} - {post.position}</p>
+        <p>{post.shortName} - {post.name} - {post.position}</p>
         <p>на {currentMonth.name} {date.getFullYear()} року</p>
       </div>
 
@@ -39,9 +39,9 @@ export default function Table({ unit, post, duties, date }) {
       <table className="table">
         <thead>
         <tr>
-          <th rowSpan="2" style={{ width: 3 + '%' }}>#</th>
-          <th rowSpan="2" style={{ width: 7 + '%' }}>Військове звання</th>
-          <th rowSpan="2" style={{ width: 10 + '%' }}>ПІБ</th>
+          <th rowSpan="2">#</th>
+          <th rowSpan="2">Військове звання</th>
+          <th rowSpan="2">ПІБ</th>
           <th colSpan={currentMonth.days}>Дата</th>
         </tr>
         <tr>

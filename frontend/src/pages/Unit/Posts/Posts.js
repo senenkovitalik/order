@@ -5,6 +5,7 @@ import { useMutation } from '@apollo/react-hooks';
 import ModalLayout from '../../../components/ModalLayout/ModalLayout';
 
 import './Posts.css';
+import Table from '../../../components/Table/Table';
 
 const CREATE = 'CREATE';
 const UPDATE = 'UPDATE';
@@ -74,7 +75,7 @@ export default function Posts({ unitID, posts, pathname, showAlert }) {
         data: {
           unit: Object.assign({}, unit, {
             posts: unit.posts
-              .filter(({_id}) => _id !== updatePost._id)
+              .filter(({ _id }) => _id !== updatePost._id)
               .concat([updatePost])
           })
         }
@@ -188,13 +189,16 @@ export default function Posts({ unitID, posts, pathname, showAlert }) {
     <div>
       <h2>Бойові пости</h2>
       {!!posts.length
-        ? <ul>
-          {posts.map(post => <li key={post._id}>
-            <Link to={`${pathname}/posts/${post._id}`}>{post.shortName} {post.name}</Link>
-            <button onClick={() => actionHandler(UPDATE, post)}>Оновити</button>
-            <button onClick={() => actionHandler(DELETE, post)}>Видалити</button>
-          </li>)}
-        </ul>
+        ? <Table headers={['#', 'Пост', 'Дія']}>
+          {posts.map((item, i) => <tr key={item._id}>
+            <td>{i + 1}</td>
+            <td><Link to={`${pathname}/posts/${item._id}`}>{item.shortName} {item.name}</Link></td>
+            <td>
+              <button onClick={() => actionHandler(UPDATE, item)}>Оновити</button>
+              <button onClick={() => actionHandler(DELETE, item)}>Видалити</button>
+            </td>
+          </tr>)}
+        </Table>
         : <div>Нічого не знайдено</div>}
 
       <button onClick={() => actionHandler(CREATE)}>Додати пост</button>

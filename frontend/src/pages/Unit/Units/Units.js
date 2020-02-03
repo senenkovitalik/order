@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useMutation } from '@apollo/react-hooks';
 import { loader } from 'graphql.macro';
 import ModalLayout from '../../../components/ModalLayout/ModalLayout';
+import Table from '../../../components/Table/Table';
 
 const CREATE = 'CREATE';
 const UPDATE = 'UPDATE';
@@ -151,13 +152,16 @@ export default function Units({ unitID, childUnits, employees, showAlert }) {
     <div>
       <h2>Підрозділи</h2>
       {!!childUnits.length
-        ? <ul>
-          {childUnits.map(unit => <li key={unit._id}>
-            <Link to={`/unit/${unit._id}`}>{unit.name}</Link>
-            {/*<button type='button' onClick={() => actionHandler(UPDATE, unit)}>Оновити</button>*/}
-            <button type='button' onClick={() => actionHandler(DELETE, unit)}>Видалити</button>
-          </li>)}
-        </ul>
+        ? <Table headers={['#','Підрозділ','Дія']}>
+          {childUnits.map((unit, i) => <tr key={unit._id}>
+            <td>{i+1}</td>
+            <td><Link to={`/unit/${unit._id}`}>{unit.name}</Link></td>
+            <td>
+              {/*<button type='button' onClick={() => actionHandler(UPDATE, unit)}>Оновити</button>*/}
+              <button type='button' onClick={() => actionHandler(DELETE, unit)}>Видалити</button>
+            </td>
+          </tr>)}
+        </Table>
         : <div>Нічого не знайдено</div>}
       <button onClick={() => actionHandler(CREATE)}>Додати підрозділ</button>
 

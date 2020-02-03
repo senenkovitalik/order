@@ -9,6 +9,7 @@ query RanksAndPositions($parentPositionID: ID!) {
         juniorPositions {
             _id
             name
+            shortName
         }
     }
 }

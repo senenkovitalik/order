@@ -50,9 +50,8 @@ export default function OrderChart(props) {
   });
 
   const [saveDuties, {
-    error: saveDutiesError,
-    loading: saveDutiesLoading,
-    data: savedDutiesData
+    // eslint-disable-next-line
+    error: saveDutiesError, loading: saveDutiesLoading, data: savedDutiesData
   }] = useMutation(SAVE_DUTIES, {
     onCompleted: () => setAlertObject({
       display: true,

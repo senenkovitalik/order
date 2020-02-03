@@ -1,17 +1,3 @@
-.employees {
-    border: 1px solid black;
-    border-collapse: collapse;
-}
-
-.employees th {
-    background-color: grey;
-    color: white;
-}
-
-.employees th, td {
-    padding: 5px;
-}
-
 .form-field {
     width: 12rem;
     display: inline-block;

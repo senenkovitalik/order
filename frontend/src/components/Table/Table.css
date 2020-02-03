@@ -1,0 +1,14 @@
+.shared-table {
+    width: auto;
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.shared-table th {
+    background-color: grey;
+    color: white;
+}
+
+.shared-table th, td {
+    padding: 5px;
+}
