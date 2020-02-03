@@ -19,18 +19,6 @@ input PositionInput {
     seniorPosition: ID!
 }
 
-type Address {
-    _id: ID!
-    region: String
-    district: String
-    city: String
-    village: String
-    urbanVillage: String
-    street: String
-    houseNumber: String
-    apartmentNumber: String
-}
-
 type Employee {
     _id: ID!
     name: String!
@@ -121,6 +109,7 @@ type Query {
 
 type Mutation {
     saveDuties(postId: ID!, duties: [DutyInput!]!, year: Int!, month: Int!): Post!
+    unitDuties(unitID: ID!): Unit!
     # Post
     createPost(unitID: ID!, postData: PostInput!): Post!
     updatePost(postID: ID!, postData: PostInput!): Post!
